@@ -1,0 +1,30 @@
+.hero {
+  background-color: var(--mat-sys-surface-container);
+  padding: 24px;
+}
+
+.search-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+mat-form-field {
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .search-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+
+  .search-container button {
+    width: 100%;
+  }
+}

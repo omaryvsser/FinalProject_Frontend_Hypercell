@@ -1,0 +1,22 @@
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  background-color: #0b1f3a;
+  color: var(--mat-sys-inverse-on-surface);
+}
+
+.footer-brand {
+  font-weight: 500;
+}
+
+.footer-navigation {
+  display: flex;
+  gap: 8px;
+}
+
+.footer-navigation a {
+  color: var(--mat-sys-inverse-primary);
+}

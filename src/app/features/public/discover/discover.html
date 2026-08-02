@@ -1,1 +1,36 @@
-<p>discover works!</p>
+<section class="hero">
+  <p class="eyebrow">Now showing</p>
+
+  <h1>What’s showing tonight?</h1>
+
+  <p class="description">
+    Discover movies, explore showtimes, and book your cinema seats.
+  </p>
+
+  <div class="search-container">
+    <mat-form-field appearance="outline">
+      <mat-label>Search movies</mat-label>
+
+      <input
+        matInput
+        type="search"
+        placeholder="Enter a movie title"
+      >
+    </mat-form-field>
+
+    <button mat-flat-button type="button">
+      Search
+    </button>
+  </div>
+</section>
+
+<section class="movies-section" aria-labelledby="movies-heading">
+  <h2 id="movies-heading">Now showing</h2>
+
+  <app-movie-card
+    title="Interstellar"
+    genre="Science fiction"
+    showtime="Friday, 8:00 PM"
+    cinemaName="Hypercell Cinema"
+  ></app-movie-card>
+</section>

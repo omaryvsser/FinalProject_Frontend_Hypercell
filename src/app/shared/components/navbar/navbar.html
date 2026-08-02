@@ -1,1 +1,14 @@
-<p>navbar works!</p>
+<mat-toolbar class="navbar">
+  <span>Cinema Ticketing</span>
+
+  <nav class="main-navigation" aria-label="Main navigation">
+    <a mat-button routerLink="/">Browse</a>
+    <a mat-button routerLink="/my-tickets">My Tickets</a>
+  </nav>
+
+  <span class="spacer"></span>
+
+  <a mat-flat-button routerLink="/login">
+    Login
+  </a>
+</mat-toolbar>

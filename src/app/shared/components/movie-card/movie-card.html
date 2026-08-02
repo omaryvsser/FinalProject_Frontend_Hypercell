@@ -1,1 +1,19 @@
-<p>movie-card works!</p>
+<mat-card class="movie-card" appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>{{ title() }}</mat-card-title>
+    <mat-card-subtitle>{{ genre() }}</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p>
+      Showtime: {{ showtime() }}<br>
+      Cinema: {{ cinemaName() }}
+    </p>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <button matButton type="button">
+      View showtimes
+    </button>
+  </mat-card-actions>
+</mat-card>
