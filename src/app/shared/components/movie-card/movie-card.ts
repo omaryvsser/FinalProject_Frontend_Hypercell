@@ -1,16 +1,18 @@
-import { Component, input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { Movie } from '../../../features/public/discover/discover';
 
 @Component({
   selector: 'app-movie-card',
-  imports: [MatButtonModule, MatCardModule],
+  imports: [MatButtonModule, MatIconModule],
   templateUrl: './movie-card.html',
   styleUrl: './movie-card.css',
 })
-export class MovieCard {
-  readonly title = input.required<string>();
-  readonly genre = input.required<string>();
-  readonly showtime = input.required<string>();
-  readonly cinemaName = input.required<string>();
+export class MovieCardComponent {
+  @Input({ required: true })
+  movie!: Movie;
 }
+
+export { MovieCardComponent as MovieCard };
+

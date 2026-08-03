@@ -1,36 +1,34 @@
-<section class="hero">
-  <p class="eyebrow">Now showing</p>
+<div class="discover-page">
+  <!-- Hero / Header Section -->
+  <header class="hero-section">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse-dot"></span>
+        <span class="badge-text">NOW SHOWING IN CINEMAS</span>
+      </div>
+      <h1 class="hero-title">Discover Shows</h1>
+      <p class="hero-subtitle">
+        Explore the latest movies and shows currently playing in cinemas near you. Find your favorite genres, check showtimes, and book your seats with ease.
+      </p>
+    </div>
+  </header>
 
-  <h1>What’s showing tonight?</h1>
 
-  <p class="description">
-    Discover movies, explore showtimes, and book your cinema seats.
-  </p>
+  <!-- Movie Grid Section -->
+  <section class="movies-section" aria-labelledby="movies-heading">
+    <div class="grid-header">
+      <div class="grid-title-group">
+        <h2 id="movies-heading">Currently Showing</h2>
+        <span class="results-badge">{{ movies().length }} Movies Found</span>
+      </div>
+    </div>
 
-  <div class="search-container">
-    <mat-form-field appearance="outline">
-      <mat-label>Search movies</mat-label>
+    <!-- Movie Responsive CSS Grid -->
+    <div class="movie-grid">
+      @for (movie of movies(); track movie.id) {
+        <app-movie-card [movie]="movie"></app-movie-card>
+      }
+    </div>
+  </section>
 
-      <input
-        matInput
-        type="search"
-        placeholder="Enter a movie title"
-      >
-    </mat-form-field>
-
-    <button mat-flat-button type="button">
-      Search
-    </button>
-  </div>
-</section>
-
-<section class="movies-section" aria-labelledby="movies-heading">
-  <h2 id="movies-heading">Now showing</h2>
-
-  <app-movie-card
-    title="Interstellar"
-    genre="Science fiction"
-    showtime="Friday, 8:00 PM"
-    cinemaName="Hypercell Cinema"
-  ></app-movie-card>
-</section>
+</div>

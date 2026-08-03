@@ -1,19 +1,44 @@
-<mat-card class="movie-card" appearance="outlined">
-  <mat-card-header>
-    <mat-card-title>{{ title() }}</mat-card-title>
-    <mat-card-subtitle>{{ genre() }}</mat-card-subtitle>
-  </mat-card-header>
+<div class="movie-card-placeholder">
+  <!-- Poster Skeleton Area -->
+  <div class="card-poster-area">
+    <div class="poster-overlay">
+      <span class="play-glow-icon">
+        <mat-icon>play_circle_filled</mat-icon>
+      </span>
+    </div>
+    @if (movie.isPopular) {
+      <span class="badge-popular">HOT</span>
+    }
+    <span class="badge-rating">
+      <mat-icon class="star-icon">star</mat-icon>
+      {{ movie.rating }}
+    </span>
+  </div>
 
-  <mat-card-content>
-    <p>
-      Showtime: {{ showtime() }}<br>
-      Cinema: {{ cinemaName() }}
-    </p>
-  </mat-card-content>
+  <!-- Content Skeleton Area -->
+  <div class="card-content-area">
+    <div class="card-header-meta">
+      <span class="genre-pill">{{ movie.genre }}</span>
+      <span class="duration-text">{{ movie.duration }}</span>
+    </div>
 
-  <mat-card-actions>
-    <button matButton type="button">
-      View showtimes
-    </button>
-  </mat-card-actions>
-</mat-card>
+    <h3 class="card-title">{{ movie.title }}</h3>
+
+    <div class="card-info-row">
+      <mat-icon class="info-icon">location_on</mat-icon>
+      <span class="cinema-name">{{ movie.cinemaName }}</span>
+    </div>
+
+    <div class="card-info-row">
+      <mat-icon class="info-icon">schedule</mat-icon>
+      <span class="showtime-text">{{ movie.showtime }}</span>
+    </div>
+
+    <div class="card-action-bar">
+      <button mat-flat-button class="card-book-btn" type="button">
+        <span>Book Seats</span>
+        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

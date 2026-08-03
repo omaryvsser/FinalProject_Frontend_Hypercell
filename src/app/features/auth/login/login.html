@@ -1,1 +1,90 @@
-<p>login works!</p>
+<div class="auth-container">
+  <mat-card class="auth-card" appearance="outlined">
+    <mat-card-header class="auth-card-header">
+      <mat-card-title class="auth-title">Welcome Back</mat-card-title>
+      <mat-card-subtitle class="auth-subtitle">
+        Sign in to manage your tickets and explore showtimes
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content class="auth-card-content">
+      @if (loginMessage()) {
+        <div class="success-alert">
+          {{ loginMessage() }}
+        </div>
+      }
+
+      <form (ngSubmit)="onSubmit()" novalidate class="auth-form">
+        <!-- Email Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <input
+            matInput
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            (blur)="emailTouched.set(true)"
+            placeholder="hypercell@hypercell.com"
+            autocomplete="email"
+          >
+          <mat-icon matPrefix class="input-icon">email</mat-icon>
+
+          @if ((isSubmitted() || emailTouched()) && emailEmpty()) {
+            <mat-error>Email address is required</mat-error>
+          } @else if ((isSubmitted() || emailTouched()) && emailInvalid()) {
+            <mat-error>Please enter a valid email address</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Password Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            name="password"
+            [(ngModel)]="password"
+            (blur)="passwordTouched.set(true)"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          >
+          <mat-icon matPrefix class="input-icon">lock</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="hidePassword()"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+
+          @if ((isSubmitted() || passwordTouched()) && passwordEmpty()) {
+            <mat-error>Password is required</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Submit Button -->
+        <button
+          mat-raised-button
+          class="auth-submit-btn"
+          type="submit"
+          [disabled]="isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <span>Signing in...</span>
+          } @else {
+            <span>Sign In</span>
+          }
+        </button>
+
+        <!-- Centered Router Link -->
+        <div class="auth-footer-text">
+          You don't have an account?
+          <a [routerLink]="'/register'" class="auth-link">Signup</a>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

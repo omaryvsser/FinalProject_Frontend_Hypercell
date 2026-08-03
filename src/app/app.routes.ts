@@ -1,19 +1,24 @@
 import { Routes } from '@angular/router';
-import { Login } from './features/auth/login/login';
-import { Discover } from './features/public/discover/discover'
-import { MyTickets } from './features/portals/customer/my-tickets/my-tickets';
 
 export const routes: Routes = [
-    {
-        path:'',
-        component: Discover,
-    },
-    {
-        path: 'login',
-        component: Login,
-    },
-    {
-        path: 'my-tickets',
-        component: MyTickets,
-    },
+  {
+    path: '',
+    loadComponent: () => import('./features/public/discover/discover').then((m) => m.Discover),
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('./features/auth/register/register').then((m) => m.Register),},
+  {
+    path: 'my-tickets',
+    loadComponent: () => import('./features/portals/customer/my-tickets/my-tickets').then((m) => m.MyTickets),
+  },
+  {
+    path: '**',
+    redirectTo: '',
+    pathMatch: 'full' //to check that all the  url is matched and not just the prefix
+  },
 ];

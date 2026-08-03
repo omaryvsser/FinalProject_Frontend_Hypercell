@@ -1,14 +1,18 @@
-<mat-divider></mat-divider>
-
 <footer class="footer">
-  <span class="footer-brand">Cinema Ticketing</span>
+  <div class="footer-container">
+    <div class="footer-brand-section">
+      <span class="footer-brand">Cine<span class="brand-accent">Tick</span></span>
+      <p class="footer-tagline">Premium Cinema Ticketing Experience</p>
+    </div>
 
-  <nav class="footer-navigation" aria-label="Footer navigation">
-    <a mat-button routerLink="/">Home</a>
-    <a mat-button routerLink="/login">Login</a>
-  </nav>
+    <nav class="footer-navigation" aria-label="Footer navigation">
+      <a mat-button [routerLink]="'/'">Home</a>
+      <a mat-button [routerLink]="'/login'">Login</a>
+      <a mat-button [routerLink]="'/register'">Register</a>
+    </nav>
 
-  <span class="copyright">
-    &copy; 2026 Cinema Ticketing
-  </span>
+    <div class="copyright">
+      &copy; 2026 CineTick Platform. All rights reserved.
+    </div>
+  </div>
 </footer>

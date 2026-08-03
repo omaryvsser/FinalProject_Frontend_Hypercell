@@ -1,1 +1,87 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-dark: #08090d;
+  --bg-card: rgba(18, 21, 30, 0.85);
+  --bg-card-hover: rgba(24, 28, 40, 0.92);
+  --primary-accent: #38bdf8;
+  --primary-glow: rgba(56, 189, 248, 0.35);
+  --primary-hover: #7dd3fc;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(56, 189, 248, 0.6);
+  --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.1) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(14, 165, 233, 0.08) 0%, transparent 45%);
+  background-attachment: fixed;
+}
+
+/* ------------------------------------------------------------- */
+/* ANGULAR MATERIAL INPUT TEXT & FORM FIELD OVERRIDES            */
+/* ------------------------------------------------------------- */
+
+/* Enforce pure white typed text for all input elements */
+.mat-mdc-form-field .mat-mdc-input-element,
+input.mat-mdc-input-element,
+textarea.mat-mdc-input-element {
+  color: #ffffff !important;
+  caret-color: var(--primary-accent) !important;
+}
+
+/* Autofill white text background fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #12151e inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Outline borders & labels for Baby Blue theme */
+.mat-mdc-form-field {
+  width: 100%;
+  --mdc-outlined-text-field-container-shape: 12px;
+  --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.15);
+  --mdc-outlined-text-field-focus-outline-color: var(--primary-accent);
+  --mdc-outlined-text-field-label-text-color: var(--text-muted);
+  --mdc-outlined-text-field-focus-label-text-color: var(--primary-accent);
+  --mdc-outlined-text-field-input-text-color: #ffffff;
+}
+
+.mat-mdc-form-field .mat-mdc-floating-label {
+  font-family: var(--font-family);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-accent);
+}
