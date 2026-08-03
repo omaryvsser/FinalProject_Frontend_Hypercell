@@ -1,1 +1,21 @@
-<p>my-tickets works!</p>
+<section class="my-tickets-page" aria-labelledby="my-tickets-heading">
+  <h1 id="my-tickets-heading">My Tickets</h1>
+
+  <mat-card class="empty-state-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>No tickets yet</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p>
+        Browse the latest movies and book your first cinema experience.
+      </p>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <a mat-flat-button routerLink="/">
+        Browse Movies
+      </a>
+    </mat-card-actions>
+  </mat-card>
+</section>

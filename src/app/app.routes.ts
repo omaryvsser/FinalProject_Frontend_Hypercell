@@ -17,6 +17,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/portals/customer/my-tickets/my-tickets').then((m) => m.MyTickets),
   },
   {
+  path: 'seat-selection/:id',
+  loadComponent: () =>
+    import('./features/booking/seat-selection/seat-selection')
+      .then((m) => m.SeatSelection),
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full' //to check that all the  url is matched and not just the prefix

@@ -1,0 +1,22 @@
+.my-tickets-page {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 24px;
+  box-sizing: border-box;
+}
+
+.my-tickets-page h1 {
+  margin: 0 0 24px;
+  color: var(--text-main);
+}
+
+.empty-state-card {
+  max-width: 560px;
+  padding: 16px;
+  background-color: var(--bg-card);
+}
+
+.empty-state-card p {
+  color: var(--text-muted);
+}

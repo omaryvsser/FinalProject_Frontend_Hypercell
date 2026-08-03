@@ -10,7 +10,7 @@
   box-shadow: 0 12px 28px rgba(56, 189, 248, 0.25);
 }
 .card-poster-area {
-  position: relative; aspect-ratio: 2 / 3; width: 100%;
+  position: relative; aspect-ratio: 16 / 9; width: 100%;
   background: linear-gradient(180deg, rgba(30, 36, 50, 0.9), rgba(14, 17, 24, 0.95));
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
@@ -52,3 +52,4 @@
 .movie-card-placeholder:hover .card-book-btn { background-color: var(--primary-accent) !important; color: #08090d !important; box-shadow: 0 4px 16px var(--primary-glow) !important; }
 .arrow-icon { font-size: 16px !important; width: 16px !important; height: 16px !important; transition: transform 0.2s ease; }
 .movie-card-placeholder:hover .arrow-icon { transform: translateX(4px); }
+

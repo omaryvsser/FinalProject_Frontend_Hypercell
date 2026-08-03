@@ -35,10 +35,14 @@
     </div>
 
     <div class="card-action-bar">
-      <button mat-flat-button class="card-book-btn" type="button">
+      <a
+        mat-flat-button
+        class="card-book-btn"
+        [routerLink]="['/seat-selection', movie.id]"
+      >
         <span>Book Seats</span>
         <mat-icon class="arrow-icon">arrow_forward</mat-icon>
-      </button>
+      </a>
     </div>
   </div>
 </div>

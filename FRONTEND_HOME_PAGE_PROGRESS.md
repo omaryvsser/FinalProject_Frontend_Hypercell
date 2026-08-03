@@ -286,3 +286,417 @@ The backend still uses older event terminology in several files. The frontend us
 - Material theme variables
 - Shared reusable components
 
+---
+
+# Edit 2: Home Page Interaction and Navigation Enhancements
+
+## Edit 2 Overview
+
+This edit documents the second development session for the Home Page and its connected customer pages.
+
+The project was first updated with the latest changes from `main`. Those changes introduced a redesigned dark cinema theme, lazy-loaded routes, Login and Register pages, a revised movie-card design, and an updated Home Page structure. The work documented below was completed on top of that newer version.
+
+Some descriptions in the original section above refer to the first implementation before the latest `main` branch was merged. This Edit 2 section describes the current implementation and should be treated as the latest source of truth.
+
+## Work Completed in Edit 2
+
+The following improvements were completed:
+
+- Centered the main navbar navigation
+- Kept the brand on the left and authentication buttons on the right
+- Replaced the My Tickets placeholder with a useful empty state
+- Added more temporary movies to the Home Page
+- Added an Angular Material genre filter
+- Added reactive genre-filtering logic with signals
+- Updated the displayed movie count when a genre is selected
+- Connected the Book Seats control to the Seat Selection route
+- Passed each movie ID through a dynamic route parameter
+- Changed the movie poster area's aspect ratio to make cards more compact
+
+## Navbar Alignment
+
+Files:
+
+- `src/app/shared/components/navbar/navbar.html`
+- `src/app/shared/components/navbar/navbar.css`
+
+The navbar is divided into three visual areas:
+
+```text
+CineTick          Browse | My Tickets          Login | Register
+  left                   center                       right
+```
+
+The toolbar uses CSS Grid:
+
+```css
+display: grid;
+grid-template-columns: 1fr auto 1fr;
+```
+
+The three columns have separate responsibilities:
+
+- The first `1fr` column contains the CineTick brand.
+- The `auto` column contains Browse and My Tickets.
+- The final `1fr` column contains Login and Register.
+
+Equal left and right columns keep the main navigation in the actual center of the toolbar, even though the content on the two sides has different widths.
+
+Each navbar area is positioned using `justify-self`:
+
+```css
+.brand-logo {
+  justify-self: start;
+}
+
+.main-navigation {
+  justify-self: center;
+}
+
+.auth-buttons {
+  justify-self: end;
+}
+```
+
+The old flex spacer was removed because the grid now controls the alignment.
+
+All existing Material buttons, routes, colors, hover effects, and active-route styles were preserved.
+
+## My Tickets Empty State
+
+Files:
+
+- `src/app/features/portals/customer/my-tickets/my-tickets.ts`
+- `src/app/features/portals/customer/my-tickets/my-tickets.html`
+- `src/app/features/portals/customer/my-tickets/my-tickets.css`
+
+The original placeholder:
+
+```html
+<p>my-tickets works!</p>
+```
+
+was replaced by an Angular Material empty-state card.
+
+The page now contains:
+
+- A `My Tickets` heading
+- A message explaining that the customer has no tickets yet
+- A Material Browse Movies link
+- Navigation back to the Home Page
+
+The component imports:
+
+```ts
+RouterLink
+MatButtonModule
+MatCardModule
+```
+
+The Material card uses:
+
+```html
+<mat-card>
+<mat-card-header>
+<mat-card-title>
+<mat-card-content>
+<mat-card-actions>
+```
+
+The Browse Movies control uses:
+
+```html
+<a mat-flat-button routerLink="/">Browse Movies</a>
+```
+
+An anchor is used because this control navigates to another route. `RouterLink` performs the navigation without reloading the whole Angular application.
+
+The page styling limits the width of the empty-state card and reuses the existing dark-theme variables:
+
+```css
+var(--text-main)
+var(--text-muted)
+var(--bg-card)
+```
+
+This is currently an honest placeholder. Real customer tickets will be displayed after booking data and authentication are connected to the backend.
+
+## Additional Temporary Movies
+
+File:
+
+- `src/app/features/public/discover/discover.ts`
+
+The `movies` signal now contains multiple temporary movies instead of only Interstellar.
+
+Current examples include:
+
+- Interstellar
+- Dune: Part Two
+- The Sixth Sense
+
+Each movie follows the existing `Movie` interface:
+
+```ts
+export interface Movie {
+  id: number;
+  title: string;
+  genre: string;
+  duration: string;
+  rating: string;
+  showtime: string;
+  cinemaName: string;
+  isPopular?: boolean;
+}
+```
+
+Every movie needs a unique `id`. Angular's `@for` block uses that ID to track each rendered card efficiently:
+
+```html
+@for (movie of filteredMovies(); track movie.id) {
+  <app-movie-card [movie]="movie"></app-movie-card>
+}
+```
+
+The movie data remains temporary frontend data. It is not yet loaded from Spring Boot.
+
+## Compact Movie-Card Shape
+
+File:
+
+- `src/app/shared/components/movie-card/movie-card.css`
+
+The poster placeholder originally used:
+
+```css
+aspect-ratio: 2 / 3;
+```
+
+That portrait ratio created a very tall empty area because no poster images are currently available.
+
+It was changed to:
+
+```css
+aspect-ratio: 16 / 9;
+```
+
+This creates a shorter poster area and makes the complete movie card more compact. A future backend poster image can still be displayed inside the same poster area.
+
+## Material Genre Filter
+
+Files:
+
+- `src/app/features/public/discover/discover.ts`
+- `src/app/features/public/discover/discover.html`
+
+`MatChipsModule` was added to `Discover` so the Home Page can use Angular Material selectable chips:
+
+```ts
+import { MatChipsModule } from '@angular/material/chips';
+```
+
+The available genre names are stored in an array:
+
+```ts
+readonly genres = [
+  'All',
+  'Science Fiction',
+  'Action',
+  'Comedy',
+  'Drama',
+  'Horror',
+  'Romance',
+  'Cartoon',
+];
+```
+
+The filter interface uses:
+
+```html
+<mat-chip-listbox>
+<mat-chip-option>
+```
+
+Angular creates one Material chip for every genre using an `@for` block:
+
+```html
+@for (genre of genres; track genre) {
+  <mat-chip-option
+    [selected]="selectedGenre() === genre"
+    (click)="selectGenre(genre)"
+  >
+    {{ genre }}
+  </mat-chip-option>
+}
+```
+
+Material supplies the chip appearance, selected state, keyboard interaction, and accessibility behavior.
+
+## Genre Filter State
+
+The currently selected genre is stored in a signal:
+
+```ts
+readonly selectedGenre = signal<string>('All');
+```
+
+The initial value is `All`, so every movie is visible when the page first loads.
+
+When a customer selects a chip, this method updates the signal:
+
+```ts
+selectGenre(genre: string): void {
+  this.selectedGenre.set(genre);
+}
+```
+
+The displayed list is calculated with a computed signal:
+
+```ts
+readonly filteredMovies = computed(() => {
+  const selectedGenre = this.selectedGenre();
+
+  if (selectedGenre === 'All') {
+    return this.movies();
+  }
+
+  return this.movies().filter(
+    (movie) => movie.genre === selectedGenre
+  );
+});
+```
+
+`filteredMovies` automatically recalculates when either `selectedGenre` or `movies` changes.
+
+The complete filtering flow is:
+
+```text
+Customer selects a Material genre chip
+        ↓
+selectGenre updates selectedGenre
+        ↓
+filteredMovies recalculates
+        ↓
+The results count updates
+        ↓
+The @for block renders only matching cards
+```
+
+The Home Page results badge now displays:
+
+```html
+{{ filteredMovies().length }} Movies Found
+```
+
+The movie grid also uses `filteredMovies()` instead of the unfiltered `movies()` signal.
+
+Current behavior:
+
+- All displays every temporary movie.
+- Science Fiction displays Interstellar and Dune: Part Two.
+- Drama displays The Sixth Sense.
+- Genres with no matching temporary movie display zero results and an empty grid.
+
+## Book Seats Navigation
+
+Files:
+
+- `src/app/app.routes.ts`
+- `src/app/shared/components/movie-card/movie-card.ts`
+- `src/app/shared/components/movie-card/movie-card.html`
+
+A new lazy-loaded dynamic route was added:
+
+```ts
+{
+  path: 'seat-selection/:id',
+  loadComponent: () =>
+    import('./features/booking/seat-selection/seat-selection')
+      .then((m) => m.SeatSelection),
+}
+```
+
+The `:id` segment is a dynamic route parameter. It allows URLs such as:
+
+```text
+/seat-selection/1
+/seat-selection/2
+/seat-selection/3
+```
+
+`RouterLink` was added to the movie-card component imports. The Book Seats control was changed from a button into a navigation anchor:
+
+```html
+<a
+  mat-flat-button
+  class="card-book-btn"
+  [routerLink]="['/seat-selection', movie.id]"
+>
+  <span>Book Seats</span>
+  <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+</a>
+```
+
+An anchor is appropriate because Book Seats navigates to another route rather than performing an immediate action on the current page.
+
+Angular combines the route array with the movie ID:
+
+```text
+Movie ID 1 → /seat-selection/1
+Movie ID 2 → /seat-selection/2
+Movie ID 3 → /seat-selection/3
+```
+
+The navigation now works. The Seat Selection page itself still contains its original placeholder and does not read or use the route ID yet.
+
+## Current Edit 2 Route Table
+
+| URL | Component | Status |
+| --- | --- | --- |
+| `/` | `Discover` | Working Home Page with genre filtering |
+| `/login` | `Login` | UI and simulated frontend submission |
+| `/register` | `Register` | UI and simulated frontend submission |
+| `/my-tickets` | `MyTickets` | Working empty-state page |
+| `/seat-selection/:id` | `SeatSelection` | Navigation works; page remains a placeholder |
+| Any unknown URL | Redirect to `/` | Wildcard fallback |
+
+## Edit 2 Concepts Practiced
+
+- CSS Grid alignment
+- Angular Material cards
+- Angular Material chips
+- `signal()` for selected state
+- `computed()` for derived state
+- Array `.filter()`
+- Angular `@for` blocks
+- Tracking list items by a unique ID
+- Property binding with `[selected]`
+- Event binding with `(click)`
+- Dynamic route parameters
+- Lazy-loaded routes
+- `RouterLink` arrays
+- Semantic navigation anchors
+- Empty-state interface design
+- Reusing shared theme variables
+
+## Edit 2 Known Limitations and Next Steps
+
+The following work is intentionally incomplete:
+
+- Movies are still hard-coded in the frontend.
+- Genre filtering is local and does not call the backend.
+- Genres with zero results do not yet display a written empty state.
+- The Seat Selection page does not read the `id` route parameter.
+- Seats cannot be selected yet.
+- The Book Seats route currently uses the temporary movie ID.
+- Customer bookings are not loaded into My Tickets.
+- Login and Register still simulate success instead of calling Spring Boot.
+- Route protection is not connected.
+- Movie poster URLs are not available yet.
+- Final mobile and visual polishing remains future work.
+
+## Edit 2 Handoff Summary
+
+The Home Page is now more interactive. Customers can browse several temporary movies, select a Material genre chip, see the results count update, and view only matching cards. The shared navbar has a centered navigation layout, My Tickets contains a useful Material empty state, and each Book Seats control navigates to a movie-specific Seat Selection URL.
+
+The next logical functional task is to make `SeatSelection` read the dynamic `id` route parameter and display which movie or screening the customer selected. After the backend movie/showtime contract is finalized, temporary frontend data can be replaced with API responses.
