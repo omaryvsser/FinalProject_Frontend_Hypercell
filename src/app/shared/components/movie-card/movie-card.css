@@ -41,15 +41,27 @@
 .card-title { font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0 0 8px; line-height: 1.3; }
 .card-info-row { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px; }
 .info-icon { font-size: 15px !important; width: 15px !important; height: 15px !important; color: var(--primary-accent) !important; }
-.card-action-bar { margin-top: auto; padding-top: 12px; }
+.card-action-bar { margin-top: auto; padding-top: 12px; display: flex; gap: 8px; }
+.card-details-btn {
+  flex: 1 !important; height: 38px !important; border-radius: 8px !important;
+  color: #94a3b8 !important; border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  font-weight: 600 !important; display: flex !important; align-items: center !important;
+  justify-content: center !important; gap: 4px !important; font-size: 0.8rem !important;
+  transition: all 0.2s ease !important; text-decoration: none !important;
+}
+.card-details-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important; border-color: rgba(255, 255, 255, 0.3) !important;
+}
 .card-book-btn {
-  width: 100% !important; height: 38px !important; border-radius: 8px !important;
+  flex: 1.2 !important; height: 38px !important; border-radius: 8px !important;
   background-color: rgba(56, 189, 248, 0.12) !important; color: var(--primary-accent) !important;
   border: 1px solid rgba(56, 189, 248, 0.3) !important; font-weight: 600 !important;
   display: flex !important; align-items: center !important; justify-content: center !important;
-  gap: 6px !important; transition: all 0.2s ease !important;
+  gap: 4px !important; font-size: 0.8rem !important; transition: all 0.2s ease !important;
+  text-decoration: none !important;
 }
 .movie-card-placeholder:hover .card-book-btn { background-color: var(--primary-accent) !important; color: #08090d !important; box-shadow: 0 4px 16px var(--primary-glow) !important; }
 .arrow-icon { font-size: 16px !important; width: 16px !important; height: 16px !important; transition: transform 0.2s ease; }
-.movie-card-placeholder:hover .arrow-icon { transform: translateX(4px); }
+.movie-card-placeholder:hover .arrow-icon { transform: translateX(3px); }
 

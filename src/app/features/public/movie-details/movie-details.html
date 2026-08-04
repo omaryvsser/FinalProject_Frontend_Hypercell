@@ -1,1 +1,182 @@
-<p>movie-details works!</p>
+<div class="movie-details-page">
+  <!-- Hero Section -->
+  <section class="hero-section" [style.backgroundImage]="'url(' + movie().backdropUrl + ')'">
+    <div class="hero-overlay"></div>
+
+    <!-- Back Navigation Link -->
+    <a routerLink="/" class="back-nav-link">
+      <svg class="icon-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      <span>Back to Discover</span>
+    </a>
+
+    <div class="hero-content">
+      <div class="poster-container">
+        <img [src]="movie().posterUrl" [alt]="movie().title" class="poster-image" />
+        @if (movie().ageRating) {
+          <span class="age-badge">{{ movie().ageRating }}</span>
+        }
+      </div>
+
+      <div class="hero-info">
+        <div class="meta-row">
+          <span class="rating-badge">
+            <svg class="icon-star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+            {{ movie().rating }} / 10
+          </span>
+          <span class="meta-badge">
+            <svg class="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 16 14"/>
+            </svg>
+            {{ movie().runtime }}
+          </span>
+          @if (movie().releaseYear) {
+            <span class="meta-badge">{{ movie().releaseYear }}</span>
+          }
+          @if (movie().language) {
+            <span class="format-badge">{{ movie().language }}</span>
+          }
+        </div>
+
+        <h1 class="movie-title">{{ movie().title }}</h1>
+
+        <div class="genre-list">
+          @for (genre of movie().genres; track genre) {
+            <span class="genre-pill">{{ genre }}</span>
+          } @empty {
+            <span class="genre-pill">General</span>
+          }
+        </div>
+
+        <div class="hero-cta">
+          <a href="#booking-area" class="btn-book-now">
+            <svg class="icon-ticket" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22 10V6c0-1.11-.9-2-2-2H4c-1.1 0-1.99.89-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-2-1.5c-1.25.79-2 2.16-2 3.5s.75 2.71 2 3.5V18H4v-2.5c1.25-.79 2-2.16 2-3.5s-.75-2.71-2-3.5V6h16v2.5z"/>
+            </svg>
+            Book Tickets
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Layout -->
+  <main class="content-container">
+    <div class="content-layout">
+      <!-- Synopsis Area -->
+      <section class="synopsis-section">
+        <h2 class="section-heading">
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Synopsis
+        </h2>
+        <p class="synopsis-text">{{ movie().synopsis }}</p>
+
+        <div class="movie-meta-grid">
+          @if (movie().director) {
+            <div class="meta-card">
+              <span class="meta-label">Director</span>
+              <span class="meta-value">{{ movie().director }}</span>
+            </div>
+          }
+          <div class="meta-card">
+            <span class="meta-label">Duration</span>
+            <span class="meta-value">{{ movie().runtime }}</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Rating</span>
+            <span class="meta-value">IMDb {{ movie().rating }}</span>
+          </div>
+          @if (movie().ageRating) {
+            <div class="meta-card">
+              <span class="meta-label">Age Rating</span>
+              <span class="meta-value">{{ movie().ageRating }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Booking Area -->
+      <section class="booking-section" id="booking-area">
+        <h2 class="section-heading accent-heading">
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Select Date & Showtime ({{ totalShowtimesCount() }} Slots Available)
+        </h2>
+
+        <!-- Date Selector -->
+        <div class="date-selector">
+          @for (d of dates(); track d.id) {
+            <button
+              type="button"
+              class="date-card"
+              [class.active]="selectedDate() === d.id"
+              (click)="selectDate(d.id)"
+            >
+              <span class="date-day-label">{{ d.dayLabel }}</span>
+              <span class="date-number">{{ d.dateNumber }}</span>
+              <span class="date-month-label">{{ d.month }}</span>
+            </button>
+          } @empty {
+            <p class="no-dates-msg">No show dates available.</p>
+          }
+        </div>
+
+        <!-- Venues List -->
+        <div class="venues-container">
+          @for (venue of venues(); track venue.name) {
+            <div class="venue-card">
+              <div class="venue-info">
+                <div class="venue-title-row">
+                  <h3 class="venue-name">{{ venue.name }}</h3>
+                  @if (venue.screenType) {
+                    <span class="screen-badge">{{ venue.screenType }}</span>
+                  }
+                </div>
+                <p class="venue-address">
+                  <svg class="icon-location" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  {{ venue.address }}
+                </p>
+              </div>
+
+              <!-- Showtimes -->
+              <div class="showtimes-list">
+                @for (time of venue.showtimes; track time) {
+                  <button
+                    type="button"
+                    class="showtime-pill"
+                    [class.selected]="selectedShowtime()?.venueName === venue.name && selectedShowtime()?.time === time"
+                    (click)="selectShowtime(venue.name, time)"
+                  >
+                    {{ time }}
+                  </button>
+                } @empty {
+                  <p class="no-showtimes-msg">No showtimes scheduled for this venue.</p>
+                }
+              </div>
+            </div>
+          } @empty {
+            <div class="no-venues-card">
+              <p>No venues currently showing this movie.</p>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
