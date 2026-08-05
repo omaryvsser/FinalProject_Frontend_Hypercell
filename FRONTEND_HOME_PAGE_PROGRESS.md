@@ -700,3 +700,279 @@ The following work is intentionally incomplete:
 The Home Page is now more interactive. Customers can browse several temporary movies, select a Material genre chip, see the results count update, and view only matching cards. The shared navbar has a centered navigation layout, My Tickets contains a useful Material empty state, and each Book Seats control navigates to a movie-specific Seat Selection URL.
 
 The next logical functional task is to make `SeatSelection` read the dynamic `id` route parameter and display which movie or screening the customer selected. After the backend movie/showtime contract is finalized, temporary frontend data can be replaced with API responses.
+
+---
+
+# Edit 3: Organizer Portal
+
+## Edit 3 Overview
+
+This edit documents the organizer-facing part of the Cinema Ticketing Platform.
+
+An organizer can now open a dashboard, view their movies, create a movie, edit an existing movie, and inspect its bookings and attendees. The interface uses Angular standalone components and Angular Material.
+
+The organizer pages currently use temporary frontend data. This allows the complete navigation and interface flow to be tested while organizer authentication and the required backend endpoints are still being completed.
+
+## Work Completed in Edit 3
+
+The following organizer features were completed:
+
+- Added an Organizer Dashboard route
+- Added a My Movies section
+- Added organizer summary cards
+- Added Create Movie navigation and form
+- Added Edit Movie navigation and form
+- Loaded temporary movie information into the edit form
+- Added a View Bookings action for each movie
+- Added a Bookings and Attendees page
+- Added booking, ticket, and revenue totals
+- Added an Angular Material attendees table
+- Added an empty state for movies without bookings
+- Improved attendee-page text contrast
+- Added responsive layouts for smaller screens
+
+## Organizer Routes
+
+File:
+
+- `src/app/app.routes.ts`
+
+The following routes were added:
+
+| URL | Component | Purpose |
+| --- | --- | --- |
+| `/organizer` | `Dashboard` | Displays the organizer overview and movies |
+| `/organizer/movies/new` | `EventEditor` | Displays an empty form for creating a movie |
+| `/organizer/movies/:id/edit` | `EventEditor` | Loads a selected movie into the editing form |
+| `/organizer/movies/:id/attendees` | `Attendees` | Displays bookings for a selected movie |
+
+The `:id` value is a dynamic route parameter. It identifies which temporary movie should be edited or which movie's bookings should be displayed.
+
+Example routes:
+
+```text
+/organizer/movies/1/edit
+/organizer/movies/1/attendees
+```
+
+## Organizer Dashboard
+
+Files:
+
+- `src/app/features/portals/organizer/dashboard/dashboard.ts`
+- `src/app/features/portals/organizer/dashboard/dashboard.html`
+- `src/app/features/portals/organizer/dashboard/dashboard.css`
+
+The dashboard is the organizer's main page. It contains:
+
+- An Organizer Portal heading
+- A Create Movie button
+- Total Movies summary
+- Published Movies summary
+- Total Bookings summary
+- Total Attendees summary
+- A My Movies list
+- Edit and View Bookings actions for every movie
+
+The page uses Angular Material cards, buttons, and icons. Temporary movie objects are stored in a signal so they can later be replaced by data returned from an organizer service.
+
+Computed signals calculate the summary values from the current movie data:
+
+```text
+Temporary organizer movies
+        ↓
+Computed summary signals
+        ↓
+Dashboard cards and movie list
+```
+
+The movie actions use dynamic RouterLink arrays:
+
+```text
+Edit movie 1 → /organizer/movies/1/edit
+View bookings for movie 1 → /organizer/movies/1/attendees
+```
+
+## Create and Edit Movie Form
+
+Files:
+
+- `src/app/features/portals/organizer/event-editor/event-editor.ts`
+- `src/app/features/portals/organizer/event-editor/event-editor.html`
+- `src/app/features/portals/organizer/event-editor/event-editor.css`
+
+One reusable component handles both creating and editing a movie.
+
+The component reads the route parameter with `ActivatedRoute`:
+
+- If no movie ID exists, the component displays an empty Create Movie form.
+- If a movie ID exists, the component enters edit mode and loads the matching temporary movie information.
+
+This fixes the earlier problem where clicking Edit opened an empty form.
+
+The form contains:
+
+- Movie title
+- Description
+- Category
+- Start date and time
+- End date and time
+- Status
+- Venue
+
+The component uses Angular Forms with `ngModel` and Angular Material form controls. Required-field messages appear when the organizer tries to submit an incomplete form.
+
+The Save button remains disabled until the required values are present. Its label changes according to the current mode:
+
+```text
+Create mode → Create Movie
+Edit mode   → Save Changes
+```
+
+When submitted, the current form values are collected into a payload shaped for the existing backend event API. For now, the payload is logged and a temporary success message is displayed. An HTTP request has not yet been connected.
+
+## Bookings and Attendees Page
+
+Files:
+
+- `src/app/features/portals/organizer/attendees/attendees.ts`
+- `src/app/features/portals/organizer/attendees/attendees.html`
+- `src/app/features/portals/organizer/attendees/attendees.css`
+
+The attendees page reads the movie ID from the URL and loads the matching temporary booking data.
+
+It displays three summary cards:
+
+- Total bookings
+- Total tickets sold
+- Total revenue in EGP
+
+The Angular Material table displays:
+
+- Booking ID
+- Attendee name
+- Attendee email
+- Seat category
+- Number of tickets
+- Total price
+- Booking status
+- Booking date and time
+
+The totals are calculated using computed signals. For example, ticket totals add the quantity from every booking, while revenue adds every booking's total price.
+
+Movie ID `1` contains temporary attendee records so the full table can be tested. Movie ID `2` contains no attendee records so the empty state can also be tested.
+
+The page includes a Back to Dashboard button. The table is horizontally scrollable on narrow screens so its columns remain readable.
+
+The Material table's default grey text was difficult to read against the dark card background. Scoped attendee-page styles now use near-white for primary table text and a lighter grey for secondary information such as email addresses and subtitles.
+
+## Angular Material Used in Edit 3
+
+The organizer pages use the following Angular Material modules:
+
+- `MatButtonModule`
+- `MatCardModule`
+- `MatFormFieldModule`
+- `MatIconModule`
+- `MatInputModule`
+- `MatSelectModule`
+- `MatTableModule`
+
+Angular Material provides the main components and interaction behavior. Custom CSS is limited to layout, spacing, responsive behavior, theme-variable colors, and the necessary table contrast adjustment.
+
+## Temporary Organizer Data
+
+The organizer dashboard, editor, and attendees page currently use separate temporary frontend records.
+
+This data is used only to demonstrate and test the interface. It must eventually be replaced with backend requests based on the logged-in organizer.
+
+Current temporary test flow:
+
+```text
+Organizer Dashboard
+        ↓ selects a movie
+Edit Movie or View Bookings
+        ↓ route contains the movie ID
+Selected page loads matching temporary data
+```
+
+## How to Test Edit 3
+
+Start the frontend:
+
+```bash
+npm start
+```
+
+Open:
+
+```text
+http://localhost:4200/organizer
+```
+
+Test the following flow:
+
+1. Confirm the four dashboard summary cards and My Movies list are visible.
+2. Click Create Movie and confirm the form starts empty.
+3. Try submitting without the required information and confirm validation appears.
+4. Return to the dashboard and click Edit on Interstellar.
+5. Confirm Interstellar's existing temporary information appears in the form.
+6. Change a value and click Save Changes.
+7. Return to the dashboard and click View Bookings for Interstellar.
+8. Confirm the attendee table and booking totals are visible.
+9. Open View Bookings for Dune: Part Two.
+10. Confirm the No bookings yet empty state appears.
+
+Direct test URLs:
+
+```text
+http://localhost:4200/organizer/movies/new
+http://localhost:4200/organizer/movies/1/edit
+http://localhost:4200/organizer/movies/1/attendees
+http://localhost:4200/organizer/movies/2/attendees
+```
+
+## Edit 3 Concepts Practiced
+
+- Angular standalone components
+- Lazy-loaded organizer routes
+- Dynamic route parameters
+- `ActivatedRoute`
+- `RouterLink` arrays
+- Angular signals
+- Computed signals
+- Angular Forms and `ngModel`
+- Conditional create and edit modes
+- Form validation
+- Angular Material form fields
+- Angular Material cards
+- Angular Material tables
+- Currency and date pipes
+- `@if`, `@else`, `@for`, and `@empty`
+- Responsive CSS Grid
+- Horizontally scrollable tables
+- Empty-state interface design
+- Reusing global theme variables
+
+## Edit 3 Known Limitations and Next Steps
+
+The organizer frontend interface is complete for the current MVP task, but the following integration work remains:
+
+- Organizer pages are not protected by a working role guard.
+- The application does not yet identify the logged-in organizer.
+- Organizer movies are not loaded from Spring Boot.
+- Creating a movie does not yet send an HTTP POST request.
+- Editing a movie does not yet send an HTTP PUT request.
+- Saved temporary form changes do not persist after navigation or refresh.
+- Bookings and attendees are not loaded from the backend.
+- The current booking response and endpoint may need additional attendee and organizer-ownership information.
+- Dashboard totals use temporary values.
+- Backend errors and loading states have not yet been added.
+
+These items should be completed after authentication, organizer roles, and organizer-specific backend endpoints are ready.
+
+## Edit 3 Handoff Summary
+
+The organizer portal now has a complete frontend MVP flow. An organizer can view a dashboard and movie list, open a create form, open an edit form with existing data, and navigate to a bookings and attendees page. Angular Material is used throughout, the pages support smaller screens, and the attendee information is readable against the dark theme.
+
+All current organizer data is temporary. The next major development stage is connecting these pages to authentication and the Spring Boot organizer APIs without replacing the completed interface structure.

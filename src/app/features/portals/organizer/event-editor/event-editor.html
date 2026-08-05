@@ -1,1 +1,177 @@
-<p>event-editor works!</p>
+<section class="movie-editor-page">
+  <header class="editor-header">
+    <div>
+      <p class="editor-label">Organizer Portal</p>
+      <h1>
+        {{ isEditMode() ? 'Edit Movie' : 'Create Movie' }}
+      </h1>
+
+      <p class="editor-description">
+        @if (isEditMode()) {
+          Update this movie's information, cinema, and status.
+        } @else {
+          Add movie information, choose a cinema, and configure its status.
+        }
+      </p>
+    </div>
+
+    <a mat-button routerLink="/organizer">
+      <mat-icon>arrow_back</mat-icon>
+      Dashboard
+    </a>
+  </header>
+
+  <mat-card class="editor-card" appearance="outlined">
+    <mat-card-content>
+      @if (saveMessage()) {
+        <p class="save-message">
+          {{ saveMessage() }}
+        </p>
+      }
+
+      <form
+        class="movie-form"
+        (ngSubmit)="onSubmit()"
+        novalidate
+      >
+        <mat-form-field appearance="outline">
+          <mat-label>Movie Title</mat-label>
+
+          <input
+            matInput
+            type="text"
+            name="title"
+            [(ngModel)]="title"
+            maxlength="255"
+            placeholder="Enter the movie title"
+          >
+
+          @if (isSubmitted() && title().trim().length === 0) {
+            <mat-error>Movie title is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+
+          <textarea
+            matInput
+            name="description"
+            [(ngModel)]="description"
+            maxlength="2000"
+            rows="5"
+            placeholder="Enter a short movie description"
+          ></textarea>
+
+          <mat-hint align="end">
+            {{ description().length }}/2000
+          </mat-hint>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Genre</mat-label>
+
+            <mat-select
+              name="category"
+              [(ngModel)]="category"
+            >
+              @for (categoryOption of categories; track categoryOption) {
+                <mat-option [value]="categoryOption">
+                  {{ categoryOption }}
+                </mat-option>
+              }
+            </mat-select>
+
+            @if (isSubmitted() && category().length === 0) {
+              <mat-error>Genre is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+
+            <mat-select
+              name="status"
+              [(ngModel)]="status"
+            >
+              <mat-option value="DRAFT">Draft</mat-option>
+              <mat-option value="PUBLISHED">Published</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date and Time</mat-label>
+
+            <input
+              matInput
+              type="datetime-local"
+              name="startDate"
+              [(ngModel)]="startDate"
+            >
+
+            @if (isSubmitted() && startDate().length === 0) {
+              <mat-error>Start date is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>End Date and Time</mat-label>
+
+            <input
+              matInput
+              type="datetime-local"
+              name="endDate"
+              [(ngModel)]="endDate"
+            >
+
+            @if (isSubmitted() && endDate().length === 0) {
+              <mat-error>End date is required</mat-error>
+            } @else if (
+              isSubmitted() &&
+              startDate().length > 0 &&
+              endDate() <= startDate()
+            ) {
+              <mat-error>
+                End date must be later than the start date
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Cinema</mat-label>
+
+          <mat-select
+            name="venueId"
+            [(ngModel)]="venueId"
+          >
+            @for (venue of venues; track venue.id) {
+              <mat-option [value]="venue.id">
+                {{ venue.name }}
+              </mat-option>
+            }
+          </mat-select>
+
+          @if (isSubmitted() && venueId() === null) {
+            <mat-error>Cinema is required</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="form-actions">
+          <a mat-button routerLink="/organizer">
+            Cancel
+          </a>
+
+          <button mat-flat-button type="submit">
+            <mat-icon>save</mat-icon>
+
+            {{ isEditMode() ? 'Update Movie' : 'Save Movie' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</section>

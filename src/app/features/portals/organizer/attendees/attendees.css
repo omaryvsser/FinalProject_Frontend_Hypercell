@@ -1,0 +1,121 @@
+.attendees-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+.attendees-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.attendees-label {
+  margin: 0 0 8px;
+  color: var(--primary-accent);
+  font-weight: 600;
+}
+
+.attendees-header h1 {
+  margin: 0;
+  color: var(--text-main);
+}
+
+.attendees-description {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+}
+
+.booking-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.booking-summary mat-card,
+.bookings-card {
+  background-color: var(--bg-card);
+}
+
+.bookings-card mat-card-title,
+.bookings-card th,
+.bookings-card td,
+.attendee-name {
+  color: var(--text-main);
+}
+
+.bookings-card mat-card-subtitle,
+.attendees-description,
+.summary-label,
+.attendee-email {
+  color: #cbd5e1;
+}
+
+.summary-value,
+.summary-label,
+.attendee-name,
+.attendee-email {
+  display: block;
+}
+
+.summary-value {
+  color: var(--text-main);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.summary-label,
+.attendee-email {
+  margin-top: 4px;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 900px;
+  background-color: transparent;
+}
+
+.booking-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--primary-accent);
+  background-color: rgba(56, 189, 248, 0.12);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.booking-status[data-status='CANCELLED'] {
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.12);
+}
+
+.empty-bookings {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-bookings mat-icon {
+  color: var(--primary-accent);
+}
+
+.empty-bookings h2 {
+  color: var(--text-main);
+}
+
+@media (max-width: 700px) {
+  .attendees-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

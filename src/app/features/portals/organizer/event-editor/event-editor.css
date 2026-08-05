@@ -1,0 +1,74 @@
+.movie-editor-page {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.editor-label {
+  margin: 0 0 8px;
+  color: var(--primary-accent);
+  font-weight: 600;
+}
+
+.editor-header h1 {
+  margin: 0;
+  color: var(--text-main);
+}
+
+.editor-description {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+}
+
+.editor-card {
+  background-color: var(--bg-card);
+}
+
+.movie-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.save-message {
+  margin: 0 0 20px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: rgba(56, 189, 248, 0.12);
+  color: var(--primary-accent);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+@media (max-width: 700px) {
+  .editor-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

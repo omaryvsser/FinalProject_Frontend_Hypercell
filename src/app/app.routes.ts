@@ -35,6 +35,30 @@ export const routes: Routes = [
         .then((m) => m.MovieDetailsComponent),
   },
   {
+  path: 'organizer',
+  loadComponent: () =>
+    import('./features/portals/organizer/dashboard/dashboard')
+      .then((m) => m.Dashboard),
+  },
+  {
+  path: 'organizer/movies/new',
+  loadComponent: () =>
+    import('./features/portals/organizer/event-editor/event-editor')
+      .then((m) => m.EventEditor),
+  },
+  {
+  path: 'organizer/movies/:id/edit',
+  loadComponent: () =>
+    import('./features/portals/organizer/event-editor/event-editor')
+      .then((m) => m.EventEditor),
+  },
+  {
+  path: 'organizer/movies/:id/attendees',
+  loadComponent: () =>
+    import('./features/portals/organizer/attendees/attendees')
+      .then((m) => m.Attendees),
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full' //to check that all the  url is matched and not just the prefix

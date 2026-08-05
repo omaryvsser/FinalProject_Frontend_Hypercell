@@ -1,1 +1,157 @@
-<p>dashboard works!</p>
+<section class="organizer-dashboard">
+  <header class="dashboard-header">
+    <div>
+      <p class="dashboard-label">Organizer Portal</p>
+
+      <h1>Organizer Dashboard</h1>
+
+      <p class="dashboard-description">
+        Manage your movies, showtimes, bookings, and attendees.
+      </p>
+    </div>
+
+    <nav class="dashboard-actions" aria-label="Organizer actions">
+      <a mat-button href="#my-movies">
+        My Movies
+      </a>
+
+      <a mat-flat-button routerLink="/organizer/movies/new">
+        <mat-icon>add</mat-icon>
+        Create Movie
+      </a>
+    </nav>
+  </header>
+
+  <div class="summary-grid" aria-label="Organizer summary">
+    <mat-card class="summary-card" appearance="outlined">
+      <mat-card-content>
+        <mat-icon>movie</mat-icon>
+
+        <div>
+          <span class="summary-value">{{ totalMovies() }}</span>
+          <span class="summary-label">Total Movies</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card" appearance="outlined">
+      <mat-card-content>
+        <mat-icon>published_with_changes</mat-icon>
+
+        <div>
+          <span class="summary-value">{{ publishedMovies() }}</span>
+          <span class="summary-label">Published Movies</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card" appearance="outlined">
+      <mat-card-content>
+        <mat-icon>confirmation_number</mat-icon>
+
+        <div>
+          <span class="summary-value">{{ totalBookings() }}</span>
+          <span class="summary-label">Total Bookings</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card" appearance="outlined">
+      <mat-card-content>
+        <mat-icon>groups</mat-icon>
+
+        <div>
+          <span class="summary-value">{{ totalAttendees() }}</span>
+          <span class="summary-label">Total Attendees</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <section
+    id="my-movies"
+    class="my-movies-section"
+    aria-labelledby="my-movies-heading"
+  >
+    <header class="section-header">
+      <div>
+        <h2 id="my-movies-heading">My Movies</h2>
+
+        <p>
+          View and manage the movies assigned to your organizer account.
+        </p>
+      </div>
+
+      <span class="movie-count">
+        {{ totalMovies() }} Movies
+      </span>
+    </header>
+
+    <div class="organizer-movie-grid">
+      @for (movie of organizerMovies(); track movie.id) {
+        <mat-card class="organizer-movie-card" appearance="outlined">
+          <mat-card-header>
+            <mat-card-title>{{ movie.title }}</mat-card-title>
+            <mat-card-subtitle>{{ movie.category }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <span class="movie-status">
+              {{ movie.status }}
+            </span>
+
+            <div class="movie-detail">
+              <mat-icon>calendar_today</mat-icon>
+
+              <span>
+                {{ movie.startDate | date: 'medium' }}
+              </span>
+            </div>
+
+            <div class="movie-detail">
+              <mat-icon>location_on</mat-icon>
+              <span>{{ movie.venueName }}</span>
+            </div>
+
+            <div class="movie-detail">
+              <mat-icon>confirmation_number</mat-icon>
+              <span>{{ movie.bookings }} bookings</span>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <a
+              mat-button
+              [routerLink]="['/organizer/movies', movie.id, 'edit']"
+            >
+              <mat-icon>edit</mat-icon>
+              Edit
+            </a>
+
+            <a
+              mat-button
+              [routerLink]="['/organizer/movies', movie.id, 'attendees']"
+            >
+              <mat-icon>groups</mat-icon>
+              View Bookings
+            </a>
+          </mat-card-actions>
+        </mat-card>
+      } @empty {
+        <mat-card class="empty-movies-card" appearance="outlined">
+          <mat-card-content>
+            <h3>No movies yet</h3>
+
+            <p>
+              Create your first movie to start receiving bookings.
+            </p>
+
+            <a mat-flat-button routerLink="/organizer/movies/new">
+              Create Movie
+            </a>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </section>
+</section>
