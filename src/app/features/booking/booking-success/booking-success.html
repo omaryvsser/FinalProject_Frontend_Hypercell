@@ -1,0 +1,49 @@
+<div class="success-container">
+  @if (booking) {
+    <mat-card class="success-card" appearance="outlined">
+      <div class="success-icon-badge">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+
+      <h1 class="success-title">Booking Confirmed!</h1>
+      <p class="success-subtitle">Your tickets have been successfully reserved.</p>
+
+      <div class="ticket-details-box">
+        <div class="detail-row">
+          <span>Booking Code:</span>
+          <strong class="code-text">{{ booking.id }}</strong>
+        </div>
+        <div class="detail-row">
+          <span>Movie:</span>
+          <strong>{{ booking.movieTitle }}</strong>
+        </div>
+        <div class="detail-row">
+          <span>Showtime:</span>
+          <strong>{{ booking.showtime }}</strong>
+        </div>
+        <div class="detail-row">
+          <span>Tickets:</span>
+          <strong>{{ booking.ticketCount }} Ticket(s)</strong>
+        </div>
+        <div class="detail-row total">
+          <span>Total Paid:</span>
+          <strong class="price-text">{{ booking.totalPrice }} EGP</strong>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <a mat-flat-button class="btn-primary" routerLink="/my-tickets">
+          View My Tickets
+        </a>
+        <a mat-stroked-button class="btn-secondary" routerLink="/">
+          Home
+        </a>
+      </div>
+    </mat-card>
+  } @else {
+    <div class="empty-state">
+      <h2>No Active Confirmation</h2>
+      <a mat-flat-button class="btn-primary" routerLink="/">Back to Home</a>
+    </div>
+  }
+</div>
