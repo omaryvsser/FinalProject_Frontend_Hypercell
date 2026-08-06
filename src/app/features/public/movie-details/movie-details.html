@@ -5,9 +5,7 @@
 
     <!-- Back Navigation Link -->
     <a routerLink="/" class="back-nav-link">
-      <svg class="icon-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M19 12H5M12 19l-7-7 7-7"/>
-      </svg>
+      <span class="material-symbols-outlined icon-back">arrow_back</span>
       <span>Back to Discover</span>
     </a>
 
@@ -22,16 +20,11 @@
       <div class="hero-info">
         <div class="meta-row">
           <span class="rating-badge">
-            <svg class="icon-star" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-            </svg>
+            <span class="material-symbols-outlined icon-star">star</span>
             {{ movie().rating }} / 10
           </span>
           <span class="meta-badge">
-            <svg class="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 16 14"/>
-            </svg>
+            <span class="material-symbols-outlined icon-clock">schedule</span>
             {{ movie().runtime }}
           </span>
           @if (movie().releaseYear) {
@@ -54,9 +47,7 @@
 
         <div class="hero-cta">
           <a href="#booking-area" class="btn-book-now">
-            <svg class="icon-ticket" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M22 10V6c0-1.11-.9-2-2-2H4c-1.1 0-1.99.89-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-2-1.5c-1.25.79-2 2.16-2 3.5s.75 2.71 2 3.5V18H4v-2.5c1.25-.79 2-2.16 2-3.5s-.75-2.71-2-3.5V6h16v2.5z"/>
-            </svg>
+            <span class="material-symbols-outlined icon-ticket">confirmation_number</span>
             Book Tickets
           </a>
         </div>
@@ -70,12 +61,7 @@
       <!-- Synopsis Area -->
       <section class="synopsis-section">
         <h2 class="section-heading">
-          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-          </svg>
+          <span class="material-symbols-outlined section-icon">description</span>
           Synopsis
         </h2>
         <p class="synopsis-text">{{ movie().synopsis }}</p>
@@ -107,12 +93,7 @@
       <!-- Booking Area -->
       <section class="booking-section" id="booking-area">
         <h2 class="section-heading accent-heading">
-          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
+          <span class="material-symbols-outlined section-icon">calendar_today</span>
           Select Date & Showtime ({{ totalShowtimesCount() }} Slots Available)
         </h2>
 
@@ -146,10 +127,7 @@
                   }
                 </div>
                 <p class="venue-address">
-                  <svg class="icon-location" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
+                  <span class="material-symbols-outlined icon-location">location_on</span>
                   {{ venue.address }}
                 </p>
               </div>

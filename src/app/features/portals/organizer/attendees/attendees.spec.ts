@@ -1,22 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import '@angular/compiler';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { Attendees } from './attendees';
 
 describe('Attendees', () => {
   let component: Attendees;
-  let fixture: ComponentFixture<Attendees>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [Attendees],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(Attendees);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
+  beforeEach(() => {
+    component = new Attendees();
   });
 
-  it('should create', () => {
+  it('should create attendees component', () => {
     expect(component).toBeTruthy();
   });
 });

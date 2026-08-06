@@ -1,22 +1,19 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import '@angular/compiler';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { Footer } from './footer';
 
-describe('Footer', () => {
+describe('Footer Component', () => {
   let component: Footer;
-  let fixture: ComponentFixture<Footer>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [Footer],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(Footer);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
+  beforeEach(() => {
+    component = new Footer();
   });
 
-  it('should create', () => {
+  it('should create footer component', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should render current year correctly', () => {
+    expect(component.currentYear).toBe(new Date().getFullYear());
   });
 });

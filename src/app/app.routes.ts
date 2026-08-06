@@ -53,14 +53,21 @@ export const routes: Routes = [
       .then((m) => m.EventEditor),
   },
   {
-  path: 'organizer/movies/:id/attendees',
+    path: 'admin',
+    loadComponent: () =>
+      import('./features/portals/admin/admin-dashboard/admin-dashboard').then(
+        (m) => m.AdminDashboardComponent
+      ),
+  },
+  {
+    path: 'organizer/movies/:id/attendees',
   loadComponent: () =>
     import('./features/portals/organizer/attendees/attendees')
       .then((m) => m.Attendees),
   },
   {
     path: '**',
-    redirectTo: '',
-    pathMatch: 'full' //to check that all the  url is matched and not just the prefix
+    loadComponent: () =>
+      import('./features/public/not-found/not-found').then((m) => m.NotFound), // for any wrong url 
   },
 ];

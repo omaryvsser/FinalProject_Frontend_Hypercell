@@ -67,6 +67,7 @@
 }
 
 .icon-back {
+  font-size: 16px;
   width: 16px;
   height: 16px;
 }
@@ -159,9 +160,10 @@
 }
 
 .icon-star {
+  font-size: 16px;
   width: 16px;
   height: 16px;
-  fill: #f59e0b;
+  color: #f59e0b;
 }
 
 .meta-badge,
@@ -184,6 +186,7 @@
 }
 
 .icon-clock {
+  font-size: 15px;
   width: 15px;
   height: 15px;
 }
@@ -249,6 +252,7 @@
 }
 
 .icon-ticket {
+  font-size: 20px;
   width: 20px;
   height: 20px;
 }
@@ -297,6 +301,7 @@
 }
 
 .section-icon {
+  font-size: 22px;
   width: 22px;
   height: 22px;
   color: var(--accent-baby-blue);
@@ -464,6 +469,7 @@
 }
 
 .icon-location {
+  font-size: 14px;
   width: 14px;
   height: 14px;
   flex-shrink: 0;

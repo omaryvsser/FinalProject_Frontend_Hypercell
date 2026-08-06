@@ -1,9 +1,18 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: var(--bg-dark, #0f172a);
+  color: var(--text-main, #ffffff);
+  font-family: var(--font-family, 'Inter', -apple-system, sans-serif);
+}
+
 .movie-editor-page {
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
   padding: 40px 24px;
   box-sizing: border-box;
+  font-family: var(--font-family, 'Inter', -apple-system, sans-serif);
 }
 
 .editor-header {
@@ -12,32 +21,38 @@
   justify-content: space-between;
   gap: 24px;
   margin-bottom: 24px;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 1.5rem;
 }
 
 .editor-label {
   margin: 0 0 8px;
-  color: var(--primary-accent);
+  color: #38bdf8;
   font-weight: 600;
 }
 
 .editor-header h1 {
   margin: 0;
-  color: var(--text-main);
+  color: #ffffff;
+  font-size: 1.5rem;
 }
 
 .editor-description {
   margin: 12px 0 0;
-  color: var(--text-muted);
+  color: #94a3b8;
 }
 
 .editor-card {
-  background-color: var(--bg-card);
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  border-radius: 16px !important;
+  color: #ffffff !important;
 }
 
 .movie-form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .form-row {
@@ -51,14 +66,14 @@
   padding: 12px;
   border-radius: 8px;
   background-color: rgba(56, 189, 248, 0.12);
-  color: var(--primary-accent);
+  color: #38bdf8;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 16px;
 }
 
 @media (max-width: 700px) {

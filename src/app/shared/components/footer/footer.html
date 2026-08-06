@@ -1,18 +1,81 @@
-<footer class="footer">
+<footer class="site-footer">
   <div class="footer-container">
-    <div class="footer-brand-section">
-      <span class="footer-brand">Cine<span class="brand-accent">Tick</span></span>
-      <p class="footer-tagline">Premium Cinema Ticketing Experience</p>
+    <!-- Brand Section -->
+    <div class="footer-col brand-col">
+      <a class="footer-brand" [routerLink]="'/'">
+        <span class="material-symbols-outlined brand-icon">theaters</span>
+        <span class="brand-text">Cine<span class="brand-accent">Tick</span></span>
+      </a>
+      <p class="brand-description">
+        Your premier cinema ticketing platform. Discover latest blockbusters, select your favorite seats, and enjoy a seamless moviegoing experience.
+      </p>
     </div>
 
-    <nav class="footer-navigation" aria-label="Footer navigation">
-      <a mat-button [routerLink]="'/'">Home</a>
-      <a mat-button [routerLink]="'/login'">Login</a>
-      <a mat-button [routerLink]="'/register'">Register</a>
-    </nav>
+    <!-- Quick Navigation -->
+    <div class="footer-col">
+      <h3 class="col-title">Quick Links</h3>
+      <ul class="footer-links">
+        <li>
+          <a [routerLink]="'/'">
+            <span class="material-symbols-outlined link-icon">movie</span>
+            Discover Movies
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="'/my-tickets'">
+            <span class="material-symbols-outlined link-icon">local_activity</span>
+            My Tickets
+          </a>
+        </li>
+        <li>
+          <a [routerLink]="'/login'">
+            <span class="material-symbols-outlined link-icon">login</span>
+            Sign In
+          </a>
+        </li>
+      </ul>
+    </div>
 
-    <div class="copyright">
-      &copy; 2026 CineTick Platform. All rights reserved.
+    <!-- Features & Services -->
+    <div class="footer-col">
+      <h3 class="col-title">Features</h3>
+      <ul class="footer-links">
+        <li>
+          <span class="footer-static-item">
+            <span class="material-symbols-outlined link-icon">chair</span>
+            Interactive Seat Selection
+          </span>
+        </li>
+        <li>
+          <span class="footer-static-item">
+            <span class="material-symbols-outlined link-icon">qr_code_2</span>
+            Contactless Mobile Entry
+          </span>
+        </li>
+        <li>
+          <span class="footer-static-item">
+            <span class="material-symbols-outlined link-icon">lock</span>
+            Secure Instant Booking
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bottom Copyright Bar -->
+  <div class="footer-bottom">
+    <div class="bottom-container">
+      <p class="copyright-text">
+        &copy; {{ currentYear }} CineTick Platform. All rights reserved.
+      </p>
+
+      <div class="bottom-links">
+        <a [routerLink]="'/'">Privacy Policy</a>
+        <span class="dot">•</span>
+        <a [routerLink]="'/'">Terms of Service</a>
+        <span class="dot">•</span>
+        <a [routerLink]="'/'">Cookie Policy</a>
+      </div>
     </div>
   </div>
 </footer>

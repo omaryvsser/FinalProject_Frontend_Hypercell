@@ -1,0 +1,52 @@
+<div class="controls-bar">
+  <nav class="tabs-nav" aria-label="Organizer Catalog Navigation">
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="activeTab() === 'ALL'"
+      (click)="onTabSelect('ALL')"
+    >
+      <span class="material-symbols-outlined tab-icon">movie</span>
+      All Movies
+      <span class="tab-count">{{ allCount() }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="activeTab() === 'PUBLISHED'"
+      (click)="onTabSelect('PUBLISHED')"
+    >
+      <span class="material-symbols-outlined tab-icon">published_with_changes</span>
+      Published
+      <span class="tab-count">{{ publishedCount() }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="activeTab() === 'DRAFT'"
+      (click)="onTabSelect('DRAFT')"
+    >
+      <span class="material-symbols-outlined tab-icon">edit_note</span>
+      Drafts
+      <span class="tab-count">{{ draftCount() }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="activeTab() === 'COMPLETED'"
+      (click)="onTabSelect('COMPLETED')"
+    >
+      <span class="material-symbols-outlined tab-icon">task_alt</span>
+      Completed
+      <span class="tab-count">{{ completedCount() }}</span>
+    </button>
+  </nav>
+
+  <button type="button" class="btn-primary" (click)="onAdd()">
+    <span class="material-symbols-outlined btn-icon">add</span>
+    + Create Movie
+  </button>
+</div>

@@ -1,0 +1,102 @@
+<div class="drawer-wrapper" [class.open]="isOpen()">
+  <div class="drawer-backdrop" (click)="onClose()"></div>
+
+  <aside class="drawer-panel">
+    <header class="drawer-header">
+      <div>
+        <h2 class="drawer-title">
+          {{ selectedMovie() ? 'Edit Organizer Movie' : 'Add New Organizer Movie' }}
+        </h2>
+        <p class="drawer-subtitle">Configure showtime, venue, and publishing status for your movie</p>
+      </div>
+      <button type="button" class="btn-close-drawer" (click)="onClose()" aria-label="Close drawer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      <form (submit)="$event.preventDefault(); onSave()">
+        <div class="form-group">
+          <label class="form-label" for="movie-title">Movie Title</label>
+          <input
+            id="movie-title"
+            type="text"
+            class="form-input"
+            placeholder="e.g. Interstellar"
+            [ngModel]="formTitle()()"
+            (ngModelChange)="formTitle().set($event)"
+            name="movieTitle"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="movie-category">Category / Genre</label>
+          <input
+            id="movie-category"
+            type="text"
+            class="form-input"
+            placeholder="e.g. Science Fiction"
+            [ngModel]="formCategory()()"
+            (ngModelChange)="formCategory().set($event)"
+            name="movieCategory"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="movie-venue">Cinema Venue</label>
+          <input
+            id="movie-venue"
+            type="text"
+            class="form-input"
+            placeholder="e.g. Vox Cinema Mall of Egypt"
+            [ngModel]="formVenueName()()"
+            (ngModelChange)="formVenueName().set($event)"
+            name="movieVenue"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="movie-startdate">Start Date & Time</label>
+          <input
+            id="movie-startdate"
+            type="text"
+            class="form-input"
+            placeholder="e.g. 2026-08-14 20:00"
+            [ngModel]="formStartDate()()"
+            (ngModelChange)="formStartDate().set($event)"
+            name="movieStartDate"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="movie-status">Publishing Status</label>
+          <select
+            id="movie-status"
+            class="form-select"
+            [ngModel]="formStatus()()"
+            (ngModelChange)="formStatus().set($event)"
+            name="movieStatus"
+          >
+            <option value="PUBLISHED">PUBLISHED</option>
+            <option value="DRAFT">DRAFT</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="CANCELLED">CANCELLED</option>
+          </select>
+        </div>
+      </form>
+    </div>
+
+    <footer class="drawer-footer">
+      <button type="button" class="btn-cancel" (click)="onClose()">
+        Cancel
+      </button>
+      <button type="button" class="btn-save" (click)="onSave()">
+        {{ selectedMovie() ? 'Save Changes' : 'Create Movie' }}
+      </button>
+    </footer>
+  </aside>
+</div>

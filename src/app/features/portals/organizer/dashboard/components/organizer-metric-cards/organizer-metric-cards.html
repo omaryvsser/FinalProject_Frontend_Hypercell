@@ -1,0 +1,64 @@
+<section class="metrics-grid">
+  <!-- Card 1: Total Movies -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Total Movies</span>
+      <div class="metric-icon-box blue">
+        <span class="material-symbols-outlined metric-icon">movie</span>
+      </div>
+    </div>
+    <div class="metric-value">{{ totalMovies() }}</div>
+    <div class="metric-footer">
+      <span class="trend-badge positive">
+        <span class="material-symbols-outlined trend-icon">trending_up</span>
+        Active
+      </span>
+      <span class="metric-subtext">Assigned to catalog</span>
+    </div>
+  </div>
+
+  <!-- Card 2: Published Movies -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Published Movies</span>
+      <div class="metric-icon-box cyan">
+        <span class="material-symbols-outlined metric-icon">published_with_changes</span>
+      </div>
+    </div>
+    <div class="metric-value">{{ publishedMovies() }}</div>
+    <div class="metric-footer">
+      <span class="trend-badge neutral">Live & Booking</span>
+      <span class="metric-subtext">On theater screens</span>
+    </div>
+  </div>
+
+  <!-- Card 3: Total Bookings -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Total Bookings</span>
+      <div class="metric-icon-box purple">
+        <span class="material-symbols-outlined metric-icon">confirmation_number</span>
+      </div>
+    </div>
+    <div class="metric-value">{{ totalBookings() }}</div>
+    <div class="metric-footer">
+      <span class="trend-badge positive">Confirmed</span>
+      <span class="metric-subtext">Seat reservations</span>
+    </div>
+  </div>
+
+  <!-- Card 4: Total Attendees -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Total Attendees</span>
+      <div class="metric-icon-box emerald">
+        <span class="material-symbols-outlined metric-icon">groups</span>
+      </div>
+    </div>
+    <div class="metric-value">{{ totalAttendees() }}</div>
+    <div class="metric-footer">
+      <span class="trend-badge positive">Audience</span>
+      <span class="metric-subtext">Total viewers</span>
+    </div>
+  </div>
+</section>

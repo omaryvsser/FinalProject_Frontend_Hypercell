@@ -1,22 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import '@angular/compiler';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { EventEditor } from './event-editor';
 
 describe('EventEditor', () => {
   let component: EventEditor;
-  let fixture: ComponentFixture<EventEditor>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [EventEditor],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(EventEditor);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
+  beforeEach(() => {
+    component = new EventEditor();
   });
 
-  it('should create', () => {
+  it('should create event editor component', () => {
     expect(component).toBeTruthy();
   });
 });

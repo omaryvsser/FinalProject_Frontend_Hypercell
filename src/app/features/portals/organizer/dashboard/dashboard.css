@@ -1,164 +1,37 @@
-.organizer-dashboard {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 24px;
+/* ==========================================================================
+   Organizer Dashboard Component Styles (Smart Parent Component Container)
+   Theme: Deep Dark Slate (#0f172a) & Electric Baby Blue (#38bdf8) Accent
+   ========================================================================== */
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: var(--bg-dark, #0f172a);
+  color: var(--text-main, #ffffff);
+  font-family: var(--font-family, 'Inter', -apple-system, sans-serif);
   box-sizing: border-box;
 }
 
-.dashboard-header {
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+.organizer-dashboard {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem 1.5rem;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  flex-direction: column;
+  gap: 2rem;
+  font-family: var(--font-family, 'Inter', -apple-system, sans-serif);
 }
 
-.dashboard-label {
-  margin: 0 0 8px;
-  color: var(--primary-accent);
-  font-weight: 600;
-}
-
-.dashboard-header h1 {
-  margin: 0;
-  color: var(--text-main);
-}
-
-.dashboard-description {
-  margin: 12px 0 0;
-  color: var(--text-muted);
-}
-
-.dashboard-actions {
+.workspace-panel {
+  background-color: var(--bg-card, #1e293b);
+  border: 1px solid var(--border-subtle, #334155);
+  border-radius: 16px;
+  padding: 1.5rem;
   display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-top: 32px;
-}
-
-.summary-card {
-  background-color: var(--bg-card);
-}
-
-.summary-card mat-card-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.summary-card mat-icon {
-  color: var(--primary-accent);
-}
-
-.summary-value,
-.summary-label {
-  display: block;
-}
-
-.summary-value {
-  color: var(--text-main);
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.summary-label {
-  margin-top: 4px;
-  color: var(--text-muted);
-}
-
-.my-movies-section {
-  margin-top: 48px;
-  scroll-margin-top: 80px;
-}
-
-.section-header {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 20px;
-}
-
-.section-header h2 {
-  margin: 0;
-  color: var(--text-main);
-}
-
-.section-header p {
-  margin: 8px 0 0;
-  color: var(--text-muted);
-}
-
-.movie-count {
-  color: var(--primary-accent);
-  font-weight: 600;
-}
-
-.organizer-movie-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-}
-
-.organizer-movie-card,
-.empty-movies-card {
-  background-color: var(--bg-card);
-}
-
-.organizer-movie-card mat-card-content {
-  padding-top: 16px;
-}
-
-.movie-status {
-  display: inline-block;
-  margin-bottom: 16px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background-color: rgba(56, 189, 248, 0.12);
-  color: var(--primary-accent);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.movie-detail {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  color: var(--text-muted);
-}
-
-.movie-detail mat-icon {
-  color: var(--primary-accent);
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-}
-
-.organizer-movie-card mat-card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.empty-movies-card {
-  grid-column: 1 / -1;
-}
-
-@media (max-width: 700px) {
-  .dashboard-header,
-  .section-header {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .dashboard-actions {
-    flex-wrap: wrap;
-  }
+  flex-direction: column;
+  gap: 1.5rem;
 }

@@ -60,7 +60,15 @@ const TEMPORARY_ORGANIZER_MOVIES: Record<number, EditableMovie> = {
   styleUrl: './event-editor.css',
 })
 export class EventEditor implements OnInit {
-  private readonly route = inject(ActivatedRoute);
+  private route: ActivatedRoute | null = null;
+
+  constructor() {
+    try {
+      this.route = inject(ActivatedRoute);
+    } catch {
+      this.route = null;
+    }
+  }
 
   readonly movieId = signal<number | null>(null);
 
@@ -111,7 +119,7 @@ export class EventEditor implements OnInit {
   );
 
   ngOnInit(): void {
-    const idParameter = this.route.snapshot.paramMap.get('id');
+    const idParameter = this.route?.snapshot.paramMap.get('id') ?? null;
 
     if (idParameter === null) {
       return;

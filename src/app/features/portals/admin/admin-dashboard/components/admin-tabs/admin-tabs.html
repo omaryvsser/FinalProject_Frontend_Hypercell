@@ -1,0 +1,52 @@
+<div class="controls-bar">
+  <nav class="tabs-nav" aria-label="Management Navigation">
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="activeTab() === 'USERS'"
+      (click)="onTabSelect('USERS')"
+    >
+      <span class="material-symbols-outlined tab-icon">group</span>
+      Users
+      <span class="tab-count">{{ usersCount() }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="activeTab() === 'ORGANIZERS'"
+      (click)="onTabSelect('ORGANIZERS')"
+    >
+      <span class="material-symbols-outlined tab-icon">badge</span>
+      Organizers
+      <span class="tab-count">{{ organizersCount() }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="activeTab() === 'VENUES'"
+      (click)="onTabSelect('VENUES')"
+    >
+      <span class="material-symbols-outlined tab-icon">domain</span>
+      Venues
+      <span class="tab-count">{{ venuesCount() }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="activeTab() === 'MOVIES'"
+      (click)="onTabSelect('MOVIES')"
+    >
+      <span class="material-symbols-outlined tab-icon">movie</span>
+      Movies
+      <span class="tab-count">{{ moviesCount() }}</span>
+    </button>
+  </nav>
+
+  <button type="button" class="btn-primary" (click)="onAdd()">
+    <span class="material-symbols-outlined btn-icon">add</span>
+    + Add {{ singularTabLabel() }}
+  </button>
+</div>

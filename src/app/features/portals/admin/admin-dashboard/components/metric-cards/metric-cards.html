@@ -1,0 +1,64 @@
+<section class="metrics-grid">
+  <!-- Card 1: Total Users -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Total Users</span>
+      <div class="metric-icon-box blue">
+        <span class="material-symbols-outlined metric-icon">group</span>
+      </div>
+    </div>
+    <div class="metric-value">{{ totalUsersCount() }}</div>
+    <div class="metric-footer">
+      <span class="trend-badge positive">
+        <span class="material-symbols-outlined trend-icon">trending_up</span>
+        +12%
+      </span>
+      <span class="metric-subtext">vs last month</span>
+    </div>
+  </div>
+
+  <!-- Card 2: Active Organizers -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Active Organizers</span>
+      <div class="metric-icon-box cyan">
+        <span class="material-symbols-outlined metric-icon">person</span>
+      </div>
+    </div>
+    <div class="metric-value">{{ activeOrganizersCount() }}</div>
+    <div class="metric-footer">
+      <span class="trend-badge neutral">Active Partners</span>
+      <span class="metric-subtext">Verified accounts</span>
+    </div>
+  </div>
+
+  <!-- Card 3: Registered Venues -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Registered Venues</span>
+      <div class="metric-icon-box purple">
+        <span class="material-symbols-outlined metric-icon">domain</span>
+      </div>
+    </div>
+    <div class="metric-value">{{ registeredVenuesCount() }}</div>
+    <div class="metric-footer">
+      <span class="trend-badge positive">All Active</span>
+      <span class="metric-subtext">Cinemas & Halls</span>
+    </div>
+  </div>
+
+  <!-- Card 4: Total Movies -->
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Total Movies</span>
+      <div class="metric-icon-box emerald">
+        <span class="material-symbols-outlined metric-icon">movie</span>
+      </div>
+    </div>
+    <div class="metric-value">{{ totalMoviesCount() }}</div>
+    <div class="metric-footer">
+      <span class="trend-badge positive">Now Showing</span>
+      <span class="metric-subtext">In Cinema Halls</span>
+    </div>
+  </div>
+</section>

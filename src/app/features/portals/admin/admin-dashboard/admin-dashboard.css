@@ -1,0 +1,36 @@
+/* ==========================================================================
+   Admin Dashboard Component Styles (Smart Parent Component Container)
+   Theme: Deep Dark Slate (#0f172a) & Electric Baby Blue (#38bdf8) Accent
+   ========================================================================== */
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #0f172a;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+.admin-dashboard {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.workspace-panel {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}

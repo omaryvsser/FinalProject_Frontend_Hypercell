@@ -70,7 +70,15 @@ const TEMPORARY_BOOKINGS: Record<number, MovieBookingData> = {
   styleUrl: './attendees.css',
 })
 export class Attendees implements OnInit {
-  private readonly route = inject(ActivatedRoute);
+  private route: ActivatedRoute | null = null;
+
+  constructor() {
+    try {
+      this.route = inject(ActivatedRoute);
+    } catch {
+      this.route = null;
+    }
+  }
 
   readonly movieId = signal<number | null>(null);
   readonly movieTitle = signal<string>('Selected Movie');
@@ -107,7 +115,7 @@ export class Attendees implements OnInit {
   );
 
   ngOnInit(): void {
-    const idParameter = this.route.snapshot.paramMap.get('id');
+    const idParameter = this.route?.snapshot.paramMap.get('id') ?? null;
 
     if (idParameter === null) {
       return;

@@ -1,0 +1,68 @@
+<div class="admin-dashboard">
+  <!-- Top Navigation & Branding Header -->
+  <app-admin-header [currentUserEmail]="currentUserEmail()"></app-admin-header>
+
+  <!-- Metric Overview Cards Grid -->
+  <app-metric-cards
+    [totalUsersCount]="totalUsersCount()"
+    [activeOrganizersCount]="activeOrganizersCount()"
+    [registeredVenuesCount]="registeredVenuesCount()"
+    [totalMoviesCount]="totalMoviesCount()"
+  ></app-metric-cards>
+
+  <!-- Content Workspace Panel -->
+  <section class="workspace-panel">
+    <!-- Controls Row: Tabs & Action Button -->
+    <app-admin-tabs
+      [activeTab]="activeTab()"
+      [usersCount]="users().length"
+      [organizersCount]="organizers().length"
+      [venuesCount]="venues().length"
+      [moviesCount]="movies().length"
+      [singularTabLabel]="singularTabLabel()"
+      (tabChange)="setActiveTab($event)"
+      (addClick)="openAddDrawer()"
+    ></app-admin-tabs>
+
+    <!-- Data Table Container & Pagination -->
+    <app-dynamic-table
+      [activeTab]="activeTab()"
+      [users]="paginatedUsers()"
+      [organizers]="paginatedOrganizers()"
+      [venues]="paginatedVenues()"
+      [movies]="paginatedMovies()"
+      [currentUserEmail]="currentUserEmail()"
+      [totalItems]="totalItems()"
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      [pagesArray]="pagesArray()"
+      (editItem)="openEditDrawer($event)"
+      (deleteItem)="deleteItem($event)"
+      (roleChange)="updateUserRole($event.user, $event.newRole)"
+      (pageChange)="goToPage($event)"
+    ></app-dynamic-table>
+  </section>
+
+  <!-- Slide-Over Right Drawer Component -->
+  <app-slide-over-drawer
+    [isOpen]="isDrawerOpen()"
+    [activeTab]="activeTab()"
+    [selectedItem]="selectedItem()"
+    [singularTabLabel]="singularTabLabel()"
+    [currentUserEmail]="currentUserEmail()"
+    [formName]="formName"
+    [formEmail]="formEmail"
+    [formRole]="formRole"
+    [formCompany]="formCompany"
+    [formVenueName]="formVenueName"
+    [formAddress]="formAddress"
+    [formCapacity]="formCapacity"
+    [formTitle]="formTitle"
+    [formGenre]="formGenre"
+    [formDuration]="formDuration"
+    [formRating]="formRating"
+    [formReleaseDate]="formReleaseDate"
+    (closeDrawer)="closeDrawer()"
+    (saveItem)="saveDrawerItem()"
+  ></app-slide-over-drawer>
+</div>

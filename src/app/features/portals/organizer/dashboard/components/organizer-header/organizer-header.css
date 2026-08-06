@@ -1,0 +1,97 @@
+:host {
+  display: block;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #334155;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-family: var(--font-family, 'Inter', -apple-system, sans-serif);
+}
+
+.header-branding {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(56, 189, 248, 0.05));
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+}
+
+.brand-icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+}
+
+.dashboard-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-subtitle {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin: 0.25rem 0 0 0;
+}
+
+.organizer-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  background-color: #1e293b;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid #334155;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.profile-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.profile-email {
+  font-size: 0.75rem;
+  color: #38bdf8;
+}
+
+.profile-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}

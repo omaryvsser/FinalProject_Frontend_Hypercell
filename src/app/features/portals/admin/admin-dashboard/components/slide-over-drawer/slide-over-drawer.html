@@ -1,0 +1,243 @@
+<div class="drawer-wrapper" [class.open]="isOpen()">
+  <div class="drawer-backdrop" (click)="onClose()"></div>
+
+  <aside class="drawer-panel">
+    <header class="drawer-header">
+      <div>
+        <h2 class="drawer-title">
+          {{ selectedItem() ? 'Edit ' + singularTabLabel() : 'Add New ' + singularTabLabel() }}
+        </h2>
+        <p class="drawer-subtitle">Configure details for this {{ singularTabLabel().toLowerCase() }}</p>
+      </div>
+      <button type="button" class="btn-close-drawer" (click)="onClose()" aria-label="Close drawer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      <form (submit)="$event.preventDefault(); onSave()">
+        @switch (activeTab()) {
+          @case ('USERS') {
+            <div class="form-group">
+              <label class="form-label" for="user-name">Full Name</label>
+              <input
+                id="user-name"
+                type="text"
+                class="form-input"
+                placeholder="e.g. Ahmed El-Sayed"
+                [ngModel]="formName()()"
+                (ngModelChange)="formName().set($event)"
+                name="userName"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="user-email">Email Address</label>
+              <input
+                id="user-email"
+                type="email"
+                class="form-input"
+                placeholder="e.g. ahmed@cinema.eg"
+                [ngModel]="formEmail()()"
+                (ngModelChange)="formEmail().set($event)"
+                name="userEmail"
+                [disabled]="selectedItem() && isCurrentUser(selectedItem().email)"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="user-role">User Role</label>
+              <select
+                id="user-role"
+                class="form-select"
+                [ngModel]="formRole()()"
+                (ngModelChange)="formRole().set($event)"
+                name="userRole"
+                [disabled]="selectedItem() && isCurrentUser(selectedItem().email)"
+              >
+                <option value="ADMIN">ADMIN</option>
+                <option value="ORGANIZER">ORGANIZER</option>
+                <option value="CUSTOMER">CUSTOMER</option>
+              </select>
+            </div>
+          }
+
+          @case ('ORGANIZERS') {
+            <div class="form-group">
+              <label class="form-label" for="org-name">Organizer Contact Name</label>
+              <input
+                id="org-name"
+                type="text"
+                class="form-input"
+                placeholder="e.g. Mohamed Hassan"
+                [ngModel]="formName()()"
+                (ngModelChange)="formName().set($event)"
+                name="orgName"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="org-email">Contact Email</label>
+              <input
+                id="org-email"
+                type="email"
+                class="form-input"
+                placeholder="e.g. contact@ciff.eg"
+                [ngModel]="formEmail()()"
+                (ngModelChange)="formEmail().set($event)"
+                name="orgEmail"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="org-company">Company / Organization</label>
+              <input
+                id="org-company"
+                type="text"
+                class="form-input"
+                placeholder="e.g. CIFF Foundation"
+                [ngModel]="formCompany()()"
+                (ngModelChange)="formCompany().set($event)"
+                name="orgCompany"
+                required
+              />
+            </div>
+          }
+
+          @case ('VENUES') {
+            <div class="form-group">
+              <label class="form-label" for="venue-name">Venue Name</label>
+              <input
+                id="venue-name"
+                type="text"
+                class="form-input"
+                placeholder="e.g. Vox Cinema Mall of Egypt"
+                [ngModel]="formVenueName()()"
+                (ngModelChange)="formVenueName().set($event)"
+                name="venueName"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="venue-address">Street Address</label>
+              <input
+                id="venue-address"
+                type="text"
+                class="form-input"
+                placeholder="e.g. Wahhat Rd, 6th of October City, Giza"
+                [ngModel]="formAddress()()"
+                (ngModelChange)="formAddress().set($event)"
+                name="venueAddress"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="venue-capacity">Total Seat Capacity</label>
+              <input
+                id="venue-capacity"
+                type="number"
+                class="form-input"
+                placeholder="e.g. 450"
+                [ngModel]="formCapacity()()"
+                (ngModelChange)="formCapacity().set($event)"
+                name="venueCapacity"
+                min="10"
+                required
+              />
+            </div>
+          }
+
+          @case ('MOVIES') {
+            <div class="form-group">
+              <label class="form-label" for="movie-title">Movie Title</label>
+              <input
+                id="movie-title"
+                type="text"
+                class="form-input"
+                placeholder="e.g. Kira & El Gin"
+                [ngModel]="formTitle()()"
+                (ngModelChange)="formTitle().set($event)"
+                name="movieTitle"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="movie-genre">Genre</label>
+              <input
+                id="movie-genre"
+                type="text"
+                class="form-input"
+                placeholder="e.g. Action / Drama"
+                [ngModel]="formGenre()()"
+                (ngModelChange)="formGenre().set($event)"
+                name="movieGenre"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="movie-duration">Duration</label>
+              <input
+                id="movie-duration"
+                type="text"
+                class="form-input"
+                placeholder="e.g. 175 min"
+                [ngModel]="formDuration()()"
+                (ngModelChange)="formDuration().set($event)"
+                name="movieDuration"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="movie-rating">Age Rating</label>
+              <select
+                id="movie-rating"
+                class="form-select"
+                [ngModel]="formRating()()"
+                (ngModelChange)="formRating().set($event)"
+                name="movieRating"
+              >
+                <option value="G">G (General)</option>
+                <option value="PG">PG (Parental Guidance)</option>
+                <option value="PG-13">PG-13</option>
+                <option value="12+">12+</option>
+                <option value="15+">15+</option>
+                <option value="18+">18+ (Adults Only)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="movie-release">Release Date</label>
+              <input
+                id="movie-release"
+                type="date"
+                class="form-input"
+                [ngModel]="formReleaseDate()()"
+                (ngModelChange)="formReleaseDate().set($event)"
+                name="movieReleaseDate"
+                required
+              />
+            </div>
+          }
+        }
+      </form>
+    </div>
+
+    <footer class="drawer-footer">
+      <button type="button" class="btn-cancel" (click)="onClose()">
+        Cancel
+      </button>
+      <button type="button" class="btn-save" (click)="onSave()">
+        {{ selectedItem() ? 'Save Changes' : 'Create ' + singularTabLabel() }}
+      </button>
+    </footer>
+  </aside>
+</div>

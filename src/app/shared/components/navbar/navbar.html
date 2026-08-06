@@ -1,19 +1,80 @@
-<mat-toolbar class="navbar">
-  <a class="brand-logo" [routerLink]="'/'">
-    <span class="brand-text">Cine<span class="brand-accent">Tick</span></span>
-  </a>
+<header class="navbar-header">
+  <div class="navbar-container">
+    <!-- Left Navigation: Logo & Discover Link -->
+    <div class="navbar-left">
+      <a class="brand-logo" [routerLink]="'/'">
+        <span class="material-symbols-outlined brand-icon">theaters</span>
+        <span class="brand-text">Cine<span class="brand-accent">Tick</span></span>
+      </a>
 
-  <nav class="main-navigation" aria-label="Main navigation">
-    <a mat-button [routerLink]="'/'" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">Browse</a>
-    <a mat-button [routerLink]="'/my-tickets'" routerLinkActive="active-link">My Tickets</a>
-  </nav>
+      <nav class="left-nav" aria-label="Main Navigation">
+        <a
+          class="nav-link"
+          [routerLink]="'/'"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <span class="material-symbols-outlined nav-icon">movie</span>
+          Discover
+        </a>
+      </nav>
+    </div>
 
-  <div class="auth-buttons">
-    <a mat-stroked-button class="nav-login-btn" [routerLink]="'/login'">
-      Login
-    </a>
-    <a mat-flat-button class="nav-register-btn" [routerLink]="'/register'">
-      Register
-    </a>
+    <!-- Right Navigation: Role-Based Controls -->
+    <div class="navbar-right">
+      <nav class="role-nav" aria-label="User Portal Navigation">
+        @switch (currentUserRole()) {
+          @case ('GUEST') {
+            <a class="btn-guest-login" [routerLink]="'/login'">Login</a>
+            <a class="btn-guest-register" [routerLink]="'/register'">Register</a>
+          }
+
+          @case ('CUSTOMER') {
+            <a class="nav-link" [routerLink]="'/my-tickets'" routerLinkActive="active">
+              <span class="material-symbols-outlined nav-icon">local_activity</span>
+              My Tickets
+            </a>
+            <a class="nav-link" [routerLink]="'/'" routerLinkActive="active">
+              <span class="material-symbols-outlined nav-icon">person</span>
+              Profile
+            </a>
+            <button type="button" class="btn-nav-action logout" (click)="logout()">
+              <span class="material-symbols-outlined nav-icon">logout</span>
+              Logout
+            </button>
+          }
+
+          @case ('ORGANIZER') {
+            <a class="nav-link" [routerLink]="'/organizer'" routerLinkActive="active">
+              <span class="material-symbols-outlined nav-icon">dashboard</span>
+              Organizer Portal
+            </a>
+            <a class="nav-link" [routerLink]="'/'" routerLinkActive="active">
+              <span class="material-symbols-outlined nav-icon">person</span>
+              Profile
+            </a>
+            <button type="button" class="btn-nav-action logout" (click)="logout()">
+              <span class="material-symbols-outlined nav-icon">logout</span>
+              Logout
+            </button>
+          }
+
+          @case ('ADMIN') {
+            <a class="nav-link" [routerLink]="'/admin'" routerLinkActive="active">
+              <span class="material-symbols-outlined nav-icon">admin_panel_settings</span>
+              Admin Dashboard
+            </a>
+            <a class="nav-link" [routerLink]="'/'" routerLinkActive="active">
+              <span class="material-symbols-outlined nav-icon">person</span>
+              Profile
+            </a>
+            <button type="button" class="btn-nav-action logout" (click)="logout()">
+              <span class="material-symbols-outlined nav-icon">logout</span>
+              Logout
+            </button>
+          }
+        }
+      </nav>
+    </div>
   </div>
-</mat-toolbar>
+</header>
