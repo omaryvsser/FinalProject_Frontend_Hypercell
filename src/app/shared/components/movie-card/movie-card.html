@@ -1,0 +1,41 @@
+<div class="movie-card">
+  <div class="card-media">
+    <img 
+      [src]="movieImage" 
+      [alt]="movie.title" 
+      class="poster-image"
+      (error)="$any($event.target).src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600'"
+    />
+    <div class="rating-badge">
+      <mat-icon class="star-icon">star</mat-icon>
+      <span>{{ movie.rating }}</span>
+    </div>
+  </div>
+
+  <div class="card-content">
+    <h3 class="movie-title">{{ movie.title }}</h3>
+    <p class="genre-text">{{ movie.genre }}</p>
+
+    <div class="meta-info">
+      <div class="info-item">
+        <mat-icon class="meta-icon">location_on</mat-icon>
+        <span>{{ movie.cinemaName }}</span>
+      </div>
+      <div class="info-item">
+        <mat-icon class="meta-icon">schedule</mat-icon>
+        <span>{{ movie.showtime }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-action-bar">
+    <button
+      mat-flat-button
+      class="card-book-btn"
+      (click)="onBookSeats()"
+    >
+      <span>Book Seats</span>
+      <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+    </button>
+  </div>
+</div>

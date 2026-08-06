@@ -1,0 +1,57 @@
+<section class="my-tickets-page" aria-labelledby="my-tickets-heading">
+  <h1 id="my-tickets-heading">My Tickets</h1>
+
+  @if (myBookings().length > 0) {
+    <div class="tickets-grid">
+      @for (ticket of myBookings(); track ticket.id) {
+        <mat-card class="ticket-card" appearance="outlined">
+          <div class="ticket-header">
+            <span class="ticket-code">#{{ ticket.id }}</span>
+            <span class="status-badge">CONFIRMED</span>
+          </div>
+
+          <div class="ticket-body">
+            <h2 class="movie-title">{{ ticket.movieTitle }}</h2>
+            
+            <div class="ticket-info-group">
+              <div class="info-item">
+                <mat-icon class="icon">schedule</mat-icon>
+                <span>{{ ticket.showtime }}</span>
+              </div>
+              <div class="info-item">
+                <mat-icon class="icon">confirmation_number</mat-icon>
+                <span>{{ ticket.ticketCount }} Ticket(s)</span>
+              </div>
+              <div class="info-item">
+                <mat-icon class="icon">location_on</mat-icon>
+                <span>{{ ticket.cinemaName }}</span>
+              </div>
+            </div>
+
+            <div class="ticket-footer">
+              <span class="holder-name">Passenger: {{ ticket.customerName }}</span>
+              <span class="total-price">{{ ticket.totalPrice }} EGP</span>
+            </div>
+          </div>
+        </mat-card>
+      }
+    </div>
+  } @else {
+    <!-- الحالة الفارغة عندما لا توجد تذاكر -->
+    <mat-card class="empty-state-card" appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>No tickets yet</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p>Browse the latest movies and book your first cinema experience.</p>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <a mat-flat-button class="browse-btn" routerLink="/">
+          Browse Movies
+        </a>
+      </mat-card-actions>
+    </mat-card>
+  }
+</section>

@@ -1,0 +1,19 @@
+<mat-toolbar class="navbar">
+  <a class="brand-logo" [routerLink]="'/'">
+    <span class="brand-text">Cine<span class="brand-accent">Tick</span></span>
+  </a>
+
+  <nav class="main-navigation" aria-label="Main navigation">
+    <a mat-button [routerLink]="'/'" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">Browse</a>
+    <a mat-button [routerLink]="'/my-tickets'" routerLinkActive="active-link">My Tickets</a>
+  </nav>
+
+  <div class="auth-buttons">
+    <a mat-stroked-button class="nav-login-btn" [routerLink]="'/login'">
+      Login
+    </a>
+    <a mat-flat-button class="nav-register-btn" [routerLink]="'/register'">
+      Register
+    </a>
+  </div>
+</mat-toolbar>

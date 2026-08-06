@@ -1,0 +1,47 @@
+<div class="discover-page">
+  <!-- Hero / Header Section -->
+  <header class="hero-section">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse-dot"></span>
+        <span class="badge-text">NOW SHOWING IN CINEMAS</span>
+      </div>
+      <h1 class="hero-title">Discover Shows</h1>
+      <p class="hero-subtitle">
+        Explore the latest movies and shows currently playing in cinemas near you. Find your favorite genres, check showtimes, and book your seats with ease.
+      </p>
+    </div>
+  </header>
+
+
+  <!-- Movie Grid Section -->
+  <section class="movies-section" aria-labelledby="movies-heading">
+    <mat-chip-listbox
+  class="genre-filter"
+  aria-label="Filter movies by genre"
+>
+  @for (genre of genres; track genre) {
+    <mat-chip-option
+      [selected]="selectedGenre() === genre"
+      (click)="selectGenre(genre)"
+    >
+      {{ genre }}
+    </mat-chip-option>
+  }
+</mat-chip-listbox>
+    <div class="grid-header">
+      <div class="grid-title-group">
+        <h2 id="movies-heading">Currently Showing</h2>
+        <span class="results-badge">{{ filteredMovies().length }} Movies Found</span>
+      </div>
+    </div>
+
+    <!-- Movie Responsive CSS Grid -->
+    <div class="movie-grid">
+      @for (movie of filteredMovies(); track movie.id) {
+        <app-movie-card [movie]="movie"></app-movie-card>
+      }
+    </div>
+  </section>
+
+</div>
