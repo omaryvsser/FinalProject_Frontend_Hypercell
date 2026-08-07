@@ -32,7 +32,7 @@ html, body {
 }
 
 /* ------------------------------------------------------------- */
-/* ANGULAR MATERIAL INPUT TEXT & FORM FIELD OVERRIDES            */
+/* GLOBAL ANGULAR MATERIAL FORM FIELD & FLOATING LABEL FIX       */
 /* ------------------------------------------------------------- */
 
 /* Enforce pure white typed text for all input elements */
@@ -41,6 +41,23 @@ input.mat-mdc-input-element,
 textarea.mat-mdc-input-element {
   color: #ffffff !important;
   caret-color: var(--primary-accent) !important;
+}
+
+/* Floating label elevated styling */
+.mat-mdc-form-field .mat-mdc-floating-label,
+.mat-mdc-form-field mat-label {
+  color: #38bdf8 !important;
+  font-weight: 600 !important;
+  font-family: var(--font-family);
+}
+
+/* Placeholder Styling - White Placeholders */
+::placeholder,
+input::placeholder,
+textarea::placeholder,
+.mat-mdc-select-placeholder {
+  color: rgba(255, 255, 255, 0.75) !important;
+  opacity: 1 !important;
 }
 
 /* Autofill white text background fix */
@@ -57,15 +74,59 @@ input:-webkit-autofill:active {
 .mat-mdc-form-field {
   width: 100%;
   --mdc-outlined-text-field-container-shape: 12px;
-  --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.15);
+  --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.18);
   --mdc-outlined-text-field-focus-outline-color: var(--primary-accent);
-  --mdc-outlined-text-field-label-text-color: var(--text-muted);
+  --mdc-outlined-text-field-label-text-color: #38bdf8;
   --mdc-outlined-text-field-focus-label-text-color: var(--primary-accent);
   --mdc-outlined-text-field-input-text-color: #ffffff;
 }
 
-.mat-mdc-form-field .mat-mdc-floating-label {
+/* ------------------------------------------------------------- */
+/* ANGULAR MATERIAL DROPDOWN (MAT-SELECT) STYLING OVERRIDES      */
+/* ------------------------------------------------------------- */
+
+/* Select Trigger Value & Placeholder in White */
+.mat-mdc-select-value,
+.mat-mdc-select-placeholder,
+.mat-mdc-select-trigger,
+.mat-mdc-select-min-line {
+  color: #ffffff !important;
+}
+
+.mat-mdc-select-arrow {
+  color: #38bdf8 !important;
+}
+
+/* Select Dropdown Overlay Panel */
+.cdk-overlay-pane .mat-mdc-select-panel {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6) !important;
+  padding: 6px 0 !important;
+}
+
+/* Select Options */
+.cdk-overlay-pane .mat-mdc-option {
+  color: #ffffff !important;
   font-family: var(--font-family);
+  font-size: 0.95rem;
+}
+
+.cdk-overlay-pane .mat-mdc-option:hover,
+.cdk-overlay-pane .mat-mdc-option.cdk-program-focused,
+.cdk-overlay-pane .mat-mdc-option.mdc-list-item--activated {
+  background-color: rgba(56, 189, 248, 0.15) !important;
+}
+
+.cdk-overlay-pane .mat-mdc-option.mdc-list-item--selected {
+  color: #38bdf8 !important;
+  font-weight: 700;
+  background-color: rgba(56, 189, 248, 0.2) !important;
+}
+
+.cdk-overlay-pane .mat-mdc-option .mdc-list-item__primary-text {
+  color: inherit !important;
 }
 
 /* Custom Scrollbar */

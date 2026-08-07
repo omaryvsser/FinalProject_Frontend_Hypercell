@@ -23,6 +23,18 @@ export const routes: Routes = [
         .then((m) => m.SeatSelection),
   },
   {
+    path: 'booking/:id',
+    loadComponent: () =>
+      import('./features/booking/booking-page/booking-page')
+        .then((m) => m.BookingPage),
+  },
+  {
+    path: 'booking-success',
+    loadComponent: () =>
+      import('./features/booking/booking-success/booking-success')
+        .then((m) => m.BookingSuccess),
+  },
+  {
     path: 'movie-details',
     loadComponent: () =>
       import('./features/public/movie-details/movie-details')

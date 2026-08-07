@@ -6,29 +6,52 @@
         <span class="pulse-dot"></span>
         <span class="badge-text">NOW SHOWING IN CINEMAS</span>
       </div>
-      <h1 class="hero-title">Discover Shows</h1>
+      <h1 class="hero-title">Explore Cinema Blockbusters</h1>
       <p class="hero-subtitle">
-        Explore the latest movies and shows currently playing in cinemas near you. Find your favorite genres, check showtimes, and book your seats with ease.
+        Find top-rated movies playing in premier theaters near you. Filter by genre or search by movie title and cinema venue.
       </p>
+
+      <!-- Integrated Search Input Field -->
+      <div class="search-box-wrapper">
+        <mat-form-field appearance="outline" floatLabel="always" class="search-form-field">
+          <mat-label>Search Movies or Cinemas</mat-label>
+          <input
+            matInput
+            type="text"
+            [value]="searchQuery()"
+            (input)="searchQuery.set($any($event.target).value)"
+            placeholder="e.g. Interstellar, Dune, Vox Cinema..."
+          />
+          <mat-icon matPrefix class="search-icon">search</mat-icon>
+          @if (searchQuery()) {
+            <button mat-icon-button matSuffix (click)="clearSearch()" type="button" aria-label="Clear search">
+              <mat-icon class="clear-icon">close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
+      </div>
     </div>
   </header>
 
-
-  <!-- Movie Grid Section -->
+  <!-- Filter & Catalog Section -->
   <section class="movies-section" aria-labelledby="movies-heading">
-    <mat-chip-listbox
-  class="genre-filter"
-  aria-label="Filter movies by genre"
->
-  @for (genre of genres; track genre) {
-    <mat-chip-option
-      [selected]="selectedGenre() === genre"
-      (click)="selectGenre(genre)"
-    >
-      {{ genre }}
-    </mat-chip-option>
-  }
-</mat-chip-listbox>
+    <!-- Genre Filter Chips Bar -->
+    <div class="filter-bar">
+      <span class="filter-label">Categories:</span>
+      <mat-chip-listbox class="genre-filter" aria-label="Filter movies by genre">
+        @for (genre of genres; track genre) {
+          <mat-chip-option
+            [selected]="selectedGenre() === genre"
+            (click)="selectGenre(genre)"
+            class="custom-genre-chip"
+          >
+            {{ genre }}
+          </mat-chip-option>
+        }
+      </mat-chip-listbox>
+    </div>
+
+    <!-- Catalog Header -->
     <div class="grid-header">
       <div class="grid-title-group">
         <h2 id="movies-heading">Currently Showing</h2>
@@ -36,12 +59,23 @@
       </div>
     </div>
 
-    <!-- Movie Responsive CSS Grid -->
-    <div class="movie-grid">
-      @for (movie of filteredMovies(); track movie.id) {
-        <app-movie-card [movie]="movie"></app-movie-card>
-      }
-    </div>
+    <!-- Movie Grid -->
+    @if (filteredMovies().length > 0) {
+      <div class="movie-grid">
+        @for (movie of filteredMovies(); track movie.id) {
+          <app-movie-card [movie]="movie"></app-movie-card>
+        }
+      </div>
+    } @else {
+      <!-- Empty Filter State -->
+      <div class="empty-catalog-state">
+        <mat-icon class="empty-state-icon">local_activity</mat-icon>
+        <h3>No Movies Found</h3>
+        <p>No titles match your current genre filter or search query.</p>
+        <button mat-stroked-button class="reset-filter-btn" (click)="selectGenre('All'); clearSearch();">
+          Reset Filters
+        </button>
+      </div>
+    }
   </section>
-
 </div>

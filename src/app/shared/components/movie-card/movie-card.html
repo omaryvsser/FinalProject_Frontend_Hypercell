@@ -1,11 +1,27 @@
 <div class="movie-card-placeholder" [routerLink]="['/movie-details', movie.id]">
-  <!-- Poster Skeleton Area -->
+  <!-- Poster Image Area -->
   <div class="card-poster-area">
+    @if (!hasImageError() && (movie.imageUrl || movie.posterUrl)) {
+      <img
+        class="poster-image"
+        [src]="movie.imageUrl || movie.posterUrl"
+        [alt]="movie.title + ' poster'"
+        (error)="onImageError()"
+      />
+    } @else {
+      <div class="poster-fallback">
+        <mat-icon class="fallback-icon">movie</mat-icon>
+      </div>
+    }
+
+    <!-- Hover Play Overlay -->
     <div class="poster-overlay">
       <span class="play-glow-icon">
         <mat-icon>play_circle_filled</mat-icon>
       </span>
     </div>
+
+    <!-- Badges -->
     @if (movie.isPopular) {
       <span class="badge-popular">HOT</span>
     }
@@ -15,7 +31,7 @@
     </span>
   </div>
 
-  <!-- Content Skeleton Area -->
+  <!-- Card Content Area -->
   <div class="card-content-area">
     <div class="card-header-meta">
       <span class="genre-pill">{{ movie.genre }}</span>
@@ -48,7 +64,7 @@
       <a
         mat-flat-button
         class="card-book-btn"
-        [routerLink]="['/seat-selection', movie.id]"
+        [routerLink]="['/booking', movie.id]"
         (click)="$event.stopPropagation()"
       >
         <span>Book Seats</span>

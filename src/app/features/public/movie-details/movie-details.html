@@ -46,7 +46,7 @@
         </div>
 
         <div class="hero-cta">
-          <a href="#booking-area" class="btn-book-now">
+          <a [routerLink]="['/booking', movie().id || 1]" class="btn-book-now">
             <span class="material-symbols-outlined icon-ticket">confirmation_number</span>
             Book Tickets
           </a>

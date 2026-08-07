@@ -1,21 +1,88 @@
 <section class="my-tickets-page" aria-labelledby="my-tickets-heading">
-  <h1 id="my-tickets-heading">My Tickets</h1>
+  <div class="tickets-header">
+    <div class="header-title-group">
+      <span class="material-symbols-outlined header-icon">local_activity</span>
+      <div>
+        <h1 id="my-tickets-heading">My Movie Tickets</h1>
+        <p class="header-subtitle">View and manage your upcoming cinema passes and booking codes</p>
+      </div>
+    </div>
+    <span class="ticket-count-badge">{{ tickets().length }} Active Pass{{ tickets().length === 1 ? '' : 'es' }}</span>
+  </div>
 
-  <mat-card class="empty-state-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>No tickets yet</mat-card-title>
-    </mat-card-header>
+  <!-- Ticket Grid List -->
+  <div class="tickets-list">
+    @for (ticket of tickets(); track ticket.id) {
+      <div class="ticket-card">
+        <!-- Left: Movie Poster Image -->
+        <div class="ticket-poster-box">
+          @if (ticket.posterUrl) {
+            <img [src]="ticket.posterUrl" [alt]="ticket.movieTitle + ' poster'" class="ticket-poster-img" />
+          } @else {
+            <div class="poster-fallback-box">
+              <span class="material-symbols-outlined fallback-icon">movie</span>
+            </div>
+          }
+        </div>
 
-    <mat-card-content>
-      <p>
-        Browse the latest movies and book your first cinema experience.
-      </p>
-    </mat-card-content>
+        <!-- Center: Ticket Information & Metadata -->
+        <div class="ticket-info-box">
+          <div class="ticket-meta-top">
+            <span class="seat-category-pill">{{ ticket.seatCategory }}</span>
+            <span class="status-badge" [class.upcoming]="ticket.status === 'UPCOMING'">
+              <span class="status-dot"></span>
+              {{ ticket.status }}
+            </span>
+          </div>
 
-    <mat-card-actions>
-      <a mat-flat-button routerLink="/">
-        Browse Movies
-      </a>
-    </mat-card-actions>
-  </mat-card>
+          <h2 class="ticket-movie-title">{{ ticket.movieTitle }}</h2>
+
+          <div class="ticket-details-grid">
+            <div class="detail-item">
+              <span class="material-symbols-outlined detail-icon">location_on</span>
+              <span>{{ ticket.cinemaName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="material-symbols-outlined detail-icon">event_seat</span>
+              <span>{{ ticket.seatNumber }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="material-symbols-outlined detail-icon">schedule</span>
+              <span>{{ ticket.showtime }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="material-symbols-outlined detail-icon">confirmation_number</span>
+              <span class="ticket-id-code">{{ ticket.id }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Cinema Pass Ticket Stub with Price & Confirmation Tag -->
+        <div class="ticket-stub-side">
+          <div class="stub-notch top"></div>
+          <div class="stub-notch bottom"></div>
+
+          <span class="material-symbols-outlined stub-icon">payments</span>
+          <span class="price-caption">TOTAL PAID</span>
+          <span class="price-value">{{ ticket.price }} <span class="currency">EGP</span></span>
+
+          <span class="payment-status-tag">
+            <span class="material-symbols-outlined check-icon">check_circle</span>
+            CONFIRMED
+          </span>
+        </div>
+      </div>
+    } @empty {
+      <!-- Empty Tickets Fallback -->
+      <div class="empty-tickets-card">
+        <span class="material-symbols-outlined empty-icon">confirmation_number</span>
+        <h2>You Have No Upcoming Tickets</h2>
+        <p>You haven't booked any cinema passes yet. Discover blockbusters playing near you and reserve your seats!</p>
+        <a mat-flat-button class="btn-browse-movies" routerLink="/">
+          <span class="material-symbols-outlined">movie</span>
+          Browse Movies
+        </a>
+      </div>
+    }
+  </div>
 </section>

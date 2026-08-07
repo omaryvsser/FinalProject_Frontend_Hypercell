@@ -1,6 +1,6 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
 
 import { MatCardModule } from '@angular/material/card';
@@ -26,9 +26,24 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './booking-page.html',
   styleUrl: './booking-page.css',
 })
-export class BookingPage {
+export class BookingPage implements OnInit {
   private readonly bookingService = inject(BookingService);
-  private readonly router = inject(Router);
+  private router: Router | null = null;
+  private route: ActivatedRoute | null = null;
+
+  constructor() {
+    try {
+      this.router = inject(Router);
+    } catch {
+      this.router = null;
+    }
+
+    try {
+      this.route = inject(ActivatedRoute);
+    } catch {
+      this.route = null;
+    }
+  }
 
   readonly ticketCount = signal<number>(1);
   readonly showtime = signal<string>('Friday, 8:00 PM');
@@ -40,7 +55,17 @@ export class BookingPage {
   readonly emailTouched = signal<boolean>(false);
   readonly phoneTouched = signal<boolean>(false);
 
-  readonly bookingData = this.bookingService.currentBooking;
+  readonly bookingData = computed(() => {
+    const current = this.bookingService.currentBooking();
+    if (current) return current;
+    return {
+      movieId: 1,
+      movieTitle: 'Interstellar: Beyond Time',
+      cinemaName: 'Hypercell IMAX Cinema',
+      ticketPrice: 150,
+      selectedSeats: []
+    };
+  });
 
   readonly ticketPrice = computed(() => this.bookingData()?.ticketPrice || 150);
   readonly totalPrice = computed(() => this.ticketCount() * this.ticketPrice());
@@ -64,6 +89,24 @@ export class BookingPage {
     'Saturday, 9:00 PM'
   ];
 
+  ngOnInit(): void {
+    if (this.route) {
+      const idParam = this.route.snapshot.paramMap.get('id');
+      if (idParam) {
+        const movieId = Number(idParam);
+        if (!this.bookingService.currentBooking()) {
+          this.bookingService.initiateBooking({
+            id: movieId,
+            title: movieId === 2 ? 'Dune: Part Two' : movieId === 3 ? 'The Sixth Sense' : 'Interstellar: Beyond Time',
+            showtime: 'Friday, 8:00 PM',
+            cinemaName: 'Hypercell IMAX Cinema',
+            price: 150
+          });
+        }
+      }
+    }
+  }
+
   incrementTickets(): void {
     if (this.ticketCount() < 10) {
       this.ticketCount.update(count => count + 1);
@@ -76,25 +119,29 @@ export class BookingPage {
     }
   }
 
-  onSubmitBooking(): void {
-  this.nameTouched.set(true);
-  this.emailTouched.set(true);
-  this.phoneTouched.set(true);
-
-  if (!this.isFormValid()) return;
-
-  const confirmed = this.bookingService.confirmBooking({
-    customerName: this.customerName().trim(),
-    customerEmail: this.customerEmail().trim(),
-    customerPhone: this.customerPhone().trim(),
-    showtime: this.showtime(),
-    ticketCount: this.ticketCount()
-  });
-
-  if (confirmed) {
-    // التوجيه المباشر لصفحة التذاكر بعد تأكيد الحجز
-    this.router.navigate(['/my-tickets']).then(() => {
-      this.bookingService.clearCurrentBooking();
-    });
+  confirmBooking(): void {
+    this.onSubmitBooking();
   }
-  }}
+
+  onSubmitBooking(): void {
+    this.nameTouched.set(true);
+    this.emailTouched.set(true);
+    this.phoneTouched.set(true);
+
+    if (!this.isFormValid()) return;
+
+    const confirmed = this.bookingService.confirmBooking({
+      customerName: this.customerName().trim(),
+      customerEmail: this.customerEmail().trim(),
+      customerPhone: this.customerPhone().trim(),
+      showtime: this.showtime(),
+      ticketCount: this.ticketCount()
+    });
+
+    if (confirmed && this.router) {
+      this.router.navigate(['/booking-success']).then(() => {
+        this.bookingService.clearCurrentBooking();
+      });
+    }
+  }
+}
