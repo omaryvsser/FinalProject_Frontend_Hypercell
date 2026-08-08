@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -7,6 +7,8 @@ import { OrganizerMetricCardsComponent } from './components/organizer-metric-car
 import { OrganizerTabsComponent, OrganizerTabType } from './components/organizer-tabs/organizer-tabs';
 import { OrganizerTableComponent, OrganizerMovie } from './components/organizer-table/organizer-table';
 import { OrganizerSlideOverDrawerComponent } from './components/organizer-slide-over-drawer/organizer-slide-over-drawer';
+import { EventService, EventPayload } from '../../../../core/services/event.service';
+import { VenueService, Venue } from '../../../../core/services/venue.service'; // 🟢 IMPORTED VENUE SERVICE
 
 @Component({
   selector: 'app-dashboard',
@@ -22,16 +24,10 @@ import { OrganizerSlideOverDrawerComponent } from './components/organizer-slide-
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class Dashboard {
-  private router: Router | null = null;
-
-  constructor() {
-    try {
-      this.router = inject(Router);
-    } catch {
-      this.router = null;
-    }
-  }
+export class Dashboard implements OnInit {
+  private router = inject(Router);
+  private eventService = inject(EventService);
+  private venueService = inject(VenueService); // 🟢 INJECTED
 
   // --- Core State Signals ---
   activeTab = signal<OrganizerTabType>('ALL');
@@ -41,77 +37,154 @@ export class Dashboard {
   selectedMovie = signal<OrganizerMovie | null>(null);
 
   organizerEmail = signal<string>('organizer@cinema.eg');
+  organizerMovies = signal<OrganizerMovie[]>([]);
 
-  // --- Mock Organizer Movies Signal ---
-  organizerMovies = signal<OrganizerMovie[]>([
-    {
-      id: 1,
-      title: 'Interstellar',
-      category: 'Science Fiction',
-      startDate: '2026-08-14T20:00:00',
-      status: 'PUBLISHED',
-      venueName: 'Vox Cinema Mall of Egypt',
-      bookings: 32,
-      attendees: 58,
-    },
-    {
-      id: 2,
-      title: 'Dune: Part Two',
-      category: 'Science Fiction',
-      startDate: '2026-08-20T19:30:00',
-      status: 'DRAFT',
-      venueName: 'Sea Cinema El Gouna',
-      bookings: 0,
-      attendees: 0,
-    },
-    {
-      id: 3,
-      title: 'Kira & El Gin',
-      category: 'Action / Drama',
-      startDate: '2026-08-10T19:30:00',
-      status: 'PUBLISHED',
-      venueName: 'Cairo Opera House Main Hall',
-      bookings: 145,
-      attendees: 210,
-    },
-    {
-      id: 4,
-      title: 'The Blue Elephant 2',
-      category: 'Horror / Mystery',
-      startDate: '2026-07-25T21:00:00',
-      status: 'COMPLETED',
-      venueName: 'Zawya Cinema Downtown',
-      bookings: 220,
-      attendees: 220,
-    },
-    {
-      id: 5,
-      title: 'Voy! Voy! Voy!',
-      category: 'Comedy / Drama',
-      startDate: '2026-08-01T18:00:00',
-      status: 'COMPLETED',
-      venueName: 'San Stefano Grand Cinema',
-      bookings: 180,
-      attendees: 180,
-    },
-    {
-      id: 6,
-      title: 'Welad Rizk 3: El Qadia',
-      category: 'Action / Crime',
-      startDate: '2026-08-25T20:00:00',
-      status: 'PUBLISHED',
-      venueName: 'Galaxy Cinema El Manial',
-      bookings: 89,
-      attendees: 110,
-    },
-  ]);
+  // --- Venue Signals ---
+  venues = signal<Venue[]>([]); // 🟢 ADDED: List of fetched venues
 
   // --- Drawer Form Signals ---
   formTitle = signal<string>('');
+  formImageUrl = signal<string>('');
   formCategory = signal<string>('');
-  formVenueName = signal<string>('');
+  formVenueId = signal<number | null>(null); // 🟢 REPLACED formVenueName WITH formVenueId
   formStartDate = signal<string>('');
   formStatus = signal<'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED'>('DRAFT');
+
+  ngOnInit(): void {
+    this.loadEventsFromBackend();
+    this.loadVenues(); // 🟢 FETCH VENUES ON COMPONENT INIT
+  }
+
+  // --- Backend API Integration ---
+
+  /**
+   * Fetches all registered venues from Spring Boot (/api/v1/venues)
+   */
+  loadVenues(): void {
+    this.venueService.getVenues().subscribe({
+      next: (venueList) => {
+        this.venues.set(venueList);
+        if (venueList.length > 0) {
+          this.formVenueId.set(venueList[0].id); // Default to first venue
+        }
+      },
+      error: (err) => {
+        console.error('❌ Failed to load venues:', err);
+      }
+    });
+  }
+
+  /**
+   * Fetches events from Spring Boot (/api/public/events or /api/v1/events)
+   */
+  loadEventsFromBackend(): void {
+    this.eventService.getOrganizerEvents(0, 100).subscribe({
+      next: (response: any) => {
+        const eventsList = response?.content || response || [];
+
+        // Map backend events into OrganizerMovie shape
+        const mappedMovies: OrganizerMovie[] = eventsList.map((event: any) => ({
+          id: event.id,
+          title: event.title,
+          imageUrl: event.imageUrl,
+          category: event.category || 'General',
+          startDate: event.startDate,
+          status: event.status || 'DRAFT',
+          venueId: event.venue?.id || event.venueId,
+          venueName: event.venueName || event.venue?.name || 'Cinema Venue',
+          bookings: event.bookingsCount || 0,
+          attendees: event.attendeesCount || 0,
+        }));
+
+        this.organizerMovies.set(mappedMovies);
+      },
+      error: (err) => {
+        console.error('❌ Failed to load organizer events:', err);
+      }
+    });
+  }
+
+  /**
+   * Sends POST request to Spring Boot to create/save the movie
+   */
+  saveDrawerMovie(): void {
+    console.log('🚀 saveDrawerMovie() triggered!');
+
+    const title = this.formTitle().trim();
+
+    // 1. Title Validation Guard
+    if (!title) {
+      alert('Please enter a Movie Title before saving!');
+      return;
+    }
+
+    // 2. Format date string (YYYY-MM-DDTHH:mm:ss)
+    let rawDate = (this.formStartDate() || '').trim();
+    if (rawDate && !rawDate.includes('T')) {
+      rawDate = rawDate.replace(' ', 'T');
+    }
+    if (rawDate && rawDate.length === 16) {
+      rawDate += ':00';
+    }
+
+    // 3. Status Clamp
+    const currentStatus = this.formStatus();
+    const validStatus: 'DRAFT' | 'PUBLISHED' =
+      currentStatus === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT';
+
+    // 4. Venue Guard
+    const selectedVenueId = this.formVenueId();
+    if (!selectedVenueId) {
+      alert('Please select a cinema venue');
+      return;
+    }
+
+    // 5. Image URL Guard (Fall back to a standard placeholder if Base64 or empty)
+    let finalImageUrl = this.formImageUrl().trim();
+    if (!finalImageUrl) {
+      // Standard placeholder image if uploaded file / empty
+      finalImageUrl = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba';
+    }
+
+    // 6. Construct Payload
+    const payload: EventPayload = {
+      title: title,
+      description: `Movie screening for ${title}`,
+      category: this.formCategory().trim() || 'General',
+      startDate: rawDate,
+      endDate: rawDate,
+      status: validStatus,
+      venueId: selectedVenueId,
+      imageUrl: finalImageUrl
+    };
+
+    console.log('📤 Sending payload to Spring Boot:', payload);
+
+    const currentSelected = this.selectedMovie();
+
+    if (currentSelected && currentSelected.id) {
+      this.eventService.updateEvent(currentSelected.id, payload).subscribe({
+        next: (updatedMovie) => {
+          console.log('✅ Movie updated successfully:', updatedMovie);
+          this.loadEventsFromBackend();
+          this.closeDrawer();
+        },
+        error: (err) => console.error('❌ Failed to update movie:', err)
+      });
+    } else {
+      this.eventService.createEvent(payload).subscribe({
+        next: (createdMovie) => {
+          console.log('✅ Movie created successfully:', createdMovie);
+          this.loadEventsFromBackend();
+          this.closeDrawer();
+        },
+        error: (err) => {
+          console.error('❌ Failed to create movie in Spring Boot:', err);
+          alert('Validation failed on server: ' + JSON.stringify(err.error?.errors || err.error?.message));
+        }
+      });
+    }
+  }
 
   // --- Computed Metrics ---
   totalMovies = computed(() => this.organizerMovies().length);
@@ -119,8 +192,8 @@ export class Dashboard {
   draftMovies = computed(() => this.organizerMovies().filter((m) => m.status === 'DRAFT').length);
   completedMovies = computed(() => this.organizerMovies().filter((m) => m.status === 'COMPLETED').length);
 
-  totalBookings = computed(() => this.organizerMovies().reduce((total, m) => total + m.bookings, 0));
-  totalAttendees = computed(() => this.organizerMovies().reduce((total, m) => total + m.attendees, 0));
+  totalBookings = computed(() => this.organizerMovies().reduce((total, m) => total + (m.bookings || 0), 0));
+  totalAttendees = computed(() => this.organizerMovies().reduce((total, m) => total + (m.attendees || 0), 0));
 
   // --- Computed Filtered & Paginated Movies ---
   filteredMovies = computed(() => {
@@ -143,95 +216,79 @@ export class Dashboard {
 
   // --- Actions ---
 
-  setActiveTab(tab: OrganizerTabType) {
+  setActiveTab(tab: OrganizerTabType): void {
     this.activeTab.set(tab);
     this.currentPage.set(1);
   }
 
-  goToPage(page: number) {
+  goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
     }
   }
 
-  openAddDrawer() {
+  openAddDrawer(): void {
     this.selectedMovie.set(null);
     this.resetFormFields();
     this.isDrawerOpen.set(true);
   }
 
-  openEditDrawer(movie: OrganizerMovie) {
+  openEditDrawer(movie: OrganizerMovie): void {
     this.selectedMovie.set(movie);
     this.populateFormFields(movie);
     this.isDrawerOpen.set(true);
   }
 
-  closeDrawer() {
+  closeDrawer(): void {
     this.isDrawerOpen.set(false);
     this.selectedMovie.set(null);
   }
 
-  resetFormFields() {
+  resetFormFields(): void {
     this.formTitle.set('');
+    this.formImageUrl.set('');
     this.formCategory.set('Science Fiction');
-    this.formVenueName.set('Vox Cinema Mall of Egypt');
-    this.formStartDate.set('2026-08-20 20:00');
+    this.formVenueId.set(this.venues().length > 0 ? this.venues()[0].id : null); // 🟢 RESET TO FIRST VENUE ID
+    this.formStartDate.set('2026-08-20T20:00:00');
     this.formStatus.set('DRAFT');
   }
 
-  populateFormFields(movie: OrganizerMovie) {
+  populateFormFields(movie: any): void {
     this.formTitle.set(movie.title || '');
+    this.formImageUrl.set(movie.imageUrl || '');
     this.formCategory.set(movie.category || '');
-    this.formVenueName.set(movie.venueName || '');
+    this.formVenueId.set(movie.venueId || (this.venues().length > 0 ? this.venues()[0].id : null)); // 🟢 POPULATE VENUE ID
     this.formStartDate.set(movie.startDate || '');
     this.formStatus.set(movie.status || 'DRAFT');
   }
 
-  saveDrawerMovie() {
-    const selected = this.selectedMovie();
-
-    if (selected) {
-      this.organizerMovies.update((list) =>
-        list.map((m) =>
-          m.id === selected.id
-            ? {
-                ...m,
-                title: this.formTitle(),
-                category: this.formCategory(),
-                venueName: this.formVenueName(),
-                startDate: this.formStartDate(),
-                status: this.formStatus(),
-              }
-            : m
-        )
-      );
-    } else {
-      const newMov: OrganizerMovie = {
-        id: Date.now(),
-        title: this.formTitle() || 'New Organizer Movie',
-        category: this.formCategory() || 'Drama',
-        venueName: this.formVenueName() || 'Vox Cinema Mall of Egypt',
-        startDate: this.formStartDate() || '2026-09-01 20:00',
-        status: this.formStatus(),
-        bookings: 0,
-        attendees: 0,
-      };
-      this.organizerMovies.update((list) => [newMov, ...list]);
-    }
-
-    this.closeDrawer();
-  }
-
-  deleteMovie(movie: OrganizerMovie) {
-    this.organizerMovies.update((list) => list.filter((m) => m.id !== movie.id));
-    if (this.currentPage() > this.totalPages()) {
-      this.currentPage.set(this.totalPages());
-    }
-  }
-
-  viewAttendees(movie: OrganizerMovie) {
+  viewAttendees(movie: OrganizerMovie): void {
     if (this.router) {
       this.router.navigate(['/organizer/movies', movie.id, 'attendees']);
     }
+  }
+
+  deleteMovie(movie: OrganizerMovie): void {
+    if (!movie.id) return;
+
+    if (!confirm(`Are you sure you want to delete "${movie.title}"?`)) {
+      return;
+    }
+
+    this.eventService.deleteEvent(movie.id).subscribe({
+      next: () => {
+        console.log(`✅ Movie with ID ${movie.id} deleted successfully from database.`);
+
+        this.organizerMovies.update((list) => list.filter((m) => m.id !== movie.id));
+
+        if (this.currentPage() > this.totalPages()) {
+          this.currentPage.set(this.totalPages());
+        }
+      },
+      error: (err) => {
+        console.error('❌ Failed to delete event in Spring Boot:', err);
+        alert('Failed to delete movie. Please try again.');
+      }
+    });
   }
 }

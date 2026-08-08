@@ -55,27 +55,50 @@
     <div class="grid-header">
       <div class="grid-title-group">
         <h2 id="movies-heading">Currently Showing</h2>
-        <span class="results-badge">{{ filteredMovies().length }} Movies Found</span>
-      </div>
-    </div>
-
-    <!-- Movie Grid -->
-    @if (filteredMovies().length > 0) {
-      <div class="movie-grid">
-        @for (movie of filteredMovies(); track movie.id) {
-          <app-movie-card [movie]="movie"></app-movie-card>
+        @if (!isLoading()) {
+          <span class="results-badge">{{ filteredMovies().length }} Movies Found</span>
         }
       </div>
-    } @else {
-      <!-- Empty Filter State -->
-      <div class="empty-catalog-state">
-        <mat-icon class="empty-state-icon">local_activity</mat-icon>
-        <h3>No Movies Found</h3>
-        <p>No titles match your current genre filter or search query.</p>
-        <button mat-stroked-button class="reset-filter-btn" (click)="selectGenre('All'); clearSearch();">
-          Reset Filters
-        </button>
+      @if (isLoading()) {
+        <span class="loading-badge">Fetching showtimes...</span>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <div class="empty-catalog-state" role="status" aria-live="polite">
+        <mat-icon class="empty-state-icon">warning_amber</mat-icon>
+        <h3>Live data is unavailable</h3>
+        <p>{{ errorMessage() }}</p>
       </div>
+    }
+
+    <!-- Loading Spinner -->
+    @if (isLoading()) {
+      <div class="loading-state" aria-live="polite" aria-label="Loading movies">
+        <mat-spinner diameter="48" class="movies-spinner"></mat-spinner>
+        <p class="loading-text">Loading movies from CineTick...</p>
+      </div>
+    }
+
+    <!-- Movie Grid -->
+    @if (!isLoading()) {
+      @if (filteredMovies().length > 0) {
+        <div class="movie-grid">
+          @for (movie of filteredMovies(); track movie.id) {
+            <app-movie-card [movie]="movie"></app-movie-card>
+          }
+        </div>
+      } @else {
+        <!-- Empty Filter State -->
+        <div class="empty-catalog-state">
+          <mat-icon class="empty-state-icon">local_activity</mat-icon>
+          <h3>No Movies Found</h3>
+          <p>No titles match your current genre filter or search query.</p>
+          <button mat-stroked-button class="reset-filter-btn" (click)="selectGenre('All'); clearSearch();">
+            Reset Filters
+          </button>
+        </div>
+      }
     }
   </section>
 </div>

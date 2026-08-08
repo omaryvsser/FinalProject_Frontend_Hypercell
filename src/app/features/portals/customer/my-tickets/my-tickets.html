@@ -7,73 +7,166 @@
         <p class="header-subtitle">View and manage your upcoming cinema passes and booking codes</p>
       </div>
     </div>
-    <span class="ticket-count-badge">{{ tickets().length }} Active Pass{{ tickets().length === 1 ? '' : 'es' }}</span>
+    @if (!isLoading()) {
+      <span class="ticket-count-badge">
+        {{ activeTickets().length }} Active Pass{{ activeTickets().length === 1 ? '' : 'es' }}
+      </span>
+    }
   </div>
 
-  <!-- Ticket Grid List -->
-  <div class="tickets-list">
-    @for (ticket of tickets(); track ticket.id) {
-      <div class="ticket-card">
-        <!-- Left: Movie Poster Image -->
-        <div class="ticket-poster-box">
-          @if (ticket.posterUrl) {
-            <img [src]="ticket.posterUrl" [alt]="ticket.movieTitle + ' poster'" class="ticket-poster-img" />
-          } @else {
-            <div class="poster-fallback-box">
-              <span class="material-symbols-outlined fallback-icon">movie</span>
-            </div>
-          }
-        </div>
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state" aria-live="polite" aria-label="Loading your tickets">
+      <mat-spinner diameter="48" class="tickets-spinner"></mat-spinner>
+      <p class="loading-text">Fetching your cinema passes...</p>
+    </div>
+  }
 
-        <!-- Center: Ticket Information & Metadata -->
-        <div class="ticket-info-box">
-          <div class="ticket-meta-top">
-            <span class="seat-category-pill">{{ ticket.seatCategory }}</span>
-            <span class="status-badge" [class.upcoming]="ticket.status === 'UPCOMING'">
-              <span class="status-dot"></span>
-              {{ ticket.status }}
-            </span>
+  @if (!isLoading()) {
+
+    <!-- ── Active / Upcoming Tickets ─────────────────────────────────────── -->
+    @if (activeTickets().length > 0) {
+      <div class="tickets-section-label">Upcoming</div>
+      <div class="tickets-list">
+        @for (ticket of activeTickets(); track ticket.id) {
+          <div class="ticket-card">
+            <!-- Left: Movie Poster Image -->
+            <div class="ticket-poster-box">
+              @if (ticket.posterUrl) {
+                <img [src]="ticket.posterUrl" [alt]="ticket.movieTitle + ' poster'" class="ticket-poster-img" />
+              } @else {
+                <div class="poster-fallback-box">
+                  <span class="material-symbols-outlined fallback-icon">movie</span>
+                </div>
+              }
+            </div>
+
+            <!-- Center: Ticket Information & Metadata -->
+            <div class="ticket-info-box">
+              <div class="ticket-meta-top">
+                <span class="seat-category-pill">{{ ticket.seatCategory }}</span>
+                <span class="status-badge upcoming">
+                  <span class="status-dot"></span>
+                  UPCOMING
+                </span>
+              </div>
+
+              <h2 class="ticket-movie-title">{{ ticket.movieTitle }}</h2>
+
+              <div class="ticket-details-grid">
+                @if (ticket.cinemaName) {
+                  <div class="detail-item">
+                    <span class="material-symbols-outlined detail-icon">location_on</span>
+                    <span>{{ ticket.cinemaName }}</span>
+                  </div>
+                }
+                <div class="detail-item">
+                  <span class="material-symbols-outlined detail-icon">event_seat</span>
+                  <span>{{ ticket.seatNumber }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="material-symbols-outlined detail-icon">schedule</span>
+                  <span>{{ ticket.showtime }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="material-symbols-outlined detail-icon">confirmation_number</span>
+                  <span class="ticket-id-code">{{ ticket.id }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side: Ticket Stub -->
+            <div class="ticket-stub-side">
+              <div class="stub-notch top"></div>
+              <div class="stub-notch bottom"></div>
+
+              <span class="material-symbols-outlined stub-icon">payments</span>
+              @if (ticket.price > 0) {
+                <span class="price-caption">TOTAL PAID</span>
+                <span class="price-value">{{ ticket.price }} <span class="currency">EGP</span></span>
+              }
+
+              <span class="payment-status-tag">
+                <span class="material-symbols-outlined check-icon">check_circle</span>
+                CONFIRMED
+              </span>
+            </div>
           </div>
-
-          <h2 class="ticket-movie-title">{{ ticket.movieTitle }}</h2>
-
-          <div class="ticket-details-grid">
-            <div class="detail-item">
-              <span class="material-symbols-outlined detail-icon">location_on</span>
-              <span>{{ ticket.cinemaName }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="material-symbols-outlined detail-icon">event_seat</span>
-              <span>{{ ticket.seatNumber }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="material-symbols-outlined detail-icon">schedule</span>
-              <span>{{ ticket.showtime }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="material-symbols-outlined detail-icon">confirmation_number</span>
-              <span class="ticket-id-code">{{ ticket.id }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Side: Cinema Pass Ticket Stub with Price & Confirmation Tag -->
-        <div class="ticket-stub-side">
-          <div class="stub-notch top"></div>
-          <div class="stub-notch bottom"></div>
-
-          <span class="material-symbols-outlined stub-icon">payments</span>
-          <span class="price-caption">TOTAL PAID</span>
-          <span class="price-value">{{ ticket.price }} <span class="currency">EGP</span></span>
-
-          <span class="payment-status-tag">
-            <span class="material-symbols-outlined check-icon">check_circle</span>
-            CONFIRMED
-          </span>
-        </div>
+        }
       </div>
-    } @empty {
-      <!-- Empty Tickets Fallback -->
+    }
+
+    <!-- ── Past / Completed Tickets ──────────────────────────────────────── -->
+    @if (pastTickets().length > 0) {
+      <div class="tickets-section-label past-label">Past</div>
+      <div class="tickets-list past-tickets">
+        @for (ticket of pastTickets(); track ticket.id) {
+          <div class="ticket-card past">
+            <div class="ticket-poster-box">
+              @if (ticket.posterUrl) {
+                <img [src]="ticket.posterUrl" [alt]="ticket.movieTitle + ' poster'" class="ticket-poster-img" />
+              } @else {
+                <div class="poster-fallback-box">
+                  <span class="material-symbols-outlined fallback-icon">movie</span>
+                </div>
+              }
+            </div>
+
+            <div class="ticket-info-box">
+              <div class="ticket-meta-top">
+                <span class="seat-category-pill">{{ ticket.seatCategory }}</span>
+                <span class="status-badge" [class.cancelled]="ticket.status === 'CANCELLED'">
+                  <span class="status-dot"></span>
+                  {{ ticket.status }}
+                </span>
+              </div>
+
+              <h2 class="ticket-movie-title">{{ ticket.movieTitle }}</h2>
+
+              <div class="ticket-details-grid">
+                @if (ticket.cinemaName) {
+                  <div class="detail-item">
+                    <span class="material-symbols-outlined detail-icon">location_on</span>
+                    <span>{{ ticket.cinemaName }}</span>
+                  </div>
+                }
+                <div class="detail-item">
+                  <span class="material-symbols-outlined detail-icon">event_seat</span>
+                  <span>{{ ticket.seatNumber }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="material-symbols-outlined detail-icon">schedule</span>
+                  <span>{{ ticket.showtime }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="material-symbols-outlined detail-icon">confirmation_number</span>
+                  <span class="ticket-id-code">{{ ticket.id }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ticket-stub-side">
+              <div class="stub-notch top"></div>
+              <div class="stub-notch bottom"></div>
+
+              <span class="material-symbols-outlined stub-icon">payments</span>
+              @if (ticket.price > 0) {
+                <span class="price-caption">TOTAL PAID</span>
+                <span class="price-value">{{ ticket.price }} <span class="currency">EGP</span></span>
+              }
+
+              <span class="payment-status-tag expired">
+                <span class="material-symbols-outlined check-icon">history</span>
+                {{ ticket.status }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── Empty State ────────────────────────────────────────────────────── -->
+    @if (activeTickets().length === 0 && pastTickets().length === 0) {
       <div class="empty-tickets-card">
         <span class="material-symbols-outlined empty-icon">confirmation_number</span>
         <h2>You Have No Upcoming Tickets</h2>
@@ -84,5 +177,6 @@
         </a>
       </div>
     }
-  </div>
+
+  }
 </section>

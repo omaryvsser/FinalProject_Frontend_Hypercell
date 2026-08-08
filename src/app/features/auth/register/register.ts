@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -22,16 +23,17 @@ import { MatInputModule } from '@angular/material/input';
   styleUrl: './register.css',
 })
 export class Register {
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   // Form Field Signals
-  readonly fullName = signal<string>('');
+  readonly name = signal<string>('');
   readonly email = signal<string>('');
   readonly password = signal<string>('');
   readonly confirmPassword = signal<string>('');
 
   // Field Touch & Form Submission Signals
-  readonly fullNameTouched = signal<boolean>(false);
+  readonly nameTouched = signal<boolean>(false);
   readonly emailTouched = signal<boolean>(false);
   readonly passwordTouched = signal<boolean>(false);
   readonly confirmPasswordTouched = signal<boolean>(false);
@@ -42,9 +44,10 @@ export class Register {
   readonly hideConfirmPassword = signal<boolean>(true);
   readonly isSubmitting = signal<boolean>(false);
   readonly registerMessage = signal<string | null>(null);
+  readonly errorMessage = signal<string | null>(null);
 
   // Computed Validation Signals
-  readonly fullNameEmpty = computed(() => this.fullName().trim().length === 0);
+  readonly nameEmpty = computed(() => this.name().trim().length === 0);
 
   readonly emailEmpty = computed(() => this.email().trim().length === 0);
   readonly emailInvalid = computed(() => {
@@ -67,7 +70,7 @@ export class Register {
   // Form Validity Signal
   readonly isFormValid = computed(
     () =>
-      !this.fullNameEmpty() &&
+      !this.nameEmpty() &&
       !this.emailEmpty() &&
       !this.emailInvalid() &&
       !this.passwordEmpty() &&
@@ -93,23 +96,27 @@ export class Register {
 
     this.isSubmitting.set(true);
     this.registerMessage.set(null);
+    this.errorMessage.set(null);
 
-    // Automatically append default role: 'CUSTOMER'
+    // Java RegisterRequest uses 'name' (not 'fullName') — aligned here
     const payload = {
-      fullName: this.fullName().trim(),
+      name: this.name().trim(),
       email: this.email().trim(),
       password: this.password(),
-      role: 'CUSTOMER',
     };
 
-    console.log('Registration payload submitted with default role via Signal Form:', payload);
-
-    setTimeout(() => {
-      this.isSubmitting.set(false);
-      this.registerMessage.set('Account created successfully! Redirecting to login...');
-      setTimeout(() => {
+    this.authService.register(payload).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
         this.router.navigate(['/login']);
-      }, 1200);
-    }, 1000);
+      },
+      error: (err) => {
+        console.error('Registration error:', err);
+        this.isSubmitting.set(false);
+        this.errorMessage.set(
+          err?.error?.message ?? 'Registration failed. Please try again.'
+        );
+      },
+    });
   }
 }

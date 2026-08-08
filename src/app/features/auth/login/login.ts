@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -22,6 +23,7 @@ import { MatInputModule } from '@angular/material/input';
   styleUrl: './login.css',
 })
 export class Login {
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   // Form Field Signals
@@ -37,6 +39,7 @@ export class Login {
   readonly hidePassword = signal<boolean>(true);
   readonly isSubmitting = signal<boolean>(false);
   readonly loginMessage = signal<string | null>(null);
+  readonly errorMessage = signal<string | null>(null);
 
   // Computed Validation Signals
   readonly emailEmpty = computed(() => this.email().trim().length === 0);
@@ -64,17 +67,26 @@ export class Login {
 
     this.isSubmitting.set(true);
     this.loginMessage.set(null);
+    this.errorMessage.set(null);
 
     const payload = {
       email: this.email().trim(),
       password: this.password(),
     };
 
-    console.log('Login payload submitted via Signal Form:', payload);
-
-    setTimeout(() => {
-      this.isSubmitting.set(false);
-      this.loginMessage.set('Logged in successfully!');
-    }, 1000);
+    this.authService.login(payload).subscribe({
+      next: (res) => {
+        this.authService.storeToken(res.token);
+        this.isSubmitting.set(false);
+        this.router.navigate(['/discover']);
+      },
+      error: (err) => {
+        console.error('Login error:', err);
+        this.isSubmitting.set(false);
+        this.errorMessage.set(
+          err?.error?.message ?? 'Login failed. Please check your credentials and try again.'
+        );
+      },
+    });
   }
 }

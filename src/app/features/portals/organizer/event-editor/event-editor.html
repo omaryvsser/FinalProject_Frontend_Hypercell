@@ -29,11 +29,18 @@
         </p>
       }
 
+      @if (errorMessage()) {
+        <p class="error-message" style="color: red;">
+          {{ errorMessage() }}
+        </p>
+      }
+
       <form
         class="movie-form"
         (ngSubmit)="onSubmit()"
         novalidate
       >
+        <!-- Movie Title -->
         <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Movie Title</mat-label>
 
@@ -41,7 +48,8 @@
             matInput
             type="text"
             name="title"
-            [(ngModel)]="title"
+            [ngModel]="title()"
+            (ngModelChange)="title.set($event)"
             maxlength="255"
             placeholder="Enter the movie title"
           >
@@ -51,13 +59,15 @@
           }
         </mat-form-field>
 
+        <!-- Description -->
         <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Description</mat-label>
 
           <textarea
             matInput
             name="description"
-            [(ngModel)]="description"
+            [ngModel]="description()"
+            (ngModelChange)="description.set($event)"
             maxlength="2000"
             rows="5"
             placeholder="Enter a short movie description"
@@ -69,12 +79,14 @@
         </mat-form-field>
 
         <div class="form-row">
+          <!-- Genre -->
           <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Genre</mat-label>
 
             <mat-select
               name="category"
-              [(ngModel)]="category"
+              [ngModel]="category()"
+              (ngModelChange)="category.set($event)"
             >
               @for (categoryOption of categories; track categoryOption) {
                 <mat-option [value]="categoryOption">
@@ -88,12 +100,14 @@
             }
           </mat-form-field>
 
+          <!-- Status -->
           <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Status</mat-label>
 
             <mat-select
               name="status"
-              [(ngModel)]="status"
+              [ngModel]="status()"
+              (ngModelChange)="status.set($event)"
             >
               <mat-option value="DRAFT">Draft</mat-option>
               <mat-option value="PUBLISHED">Published</mat-option>
@@ -102,6 +116,7 @@
         </div>
 
         <div class="form-row">
+          <!-- Start Date -->
           <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Start Date and Time</mat-label>
 
@@ -109,7 +124,8 @@
               matInput
               type="datetime-local"
               name="startDate"
-              [(ngModel)]="startDate"
+              [ngModel]="startDate()"
+              (ngModelChange)="startDate.set($event)"
             >
 
             @if (isSubmitted() && startDate().length === 0) {
@@ -117,6 +133,7 @@
             }
           </mat-form-field>
 
+          <!-- End Date -->
           <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>End Date and Time</mat-label>
 
@@ -124,7 +141,8 @@
               matInput
               type="datetime-local"
               name="endDate"
-              [(ngModel)]="endDate"
+              [ngModel]="endDate()"
+              (ngModelChange)="endDate.set($event)"
             >
 
             @if (isSubmitted() && endDate().length === 0) {
@@ -133,7 +151,7 @@
               isSubmitted() &&
               startDate().length > 0 &&
               endDate() <= startDate()
-            ) {
+              ) {
               <mat-error>
                 End date must be later than the start date
               </mat-error>
@@ -141,12 +159,14 @@
           </mat-form-field>
         </div>
 
+        <!-- Cinema -->
         <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Cinema</mat-label>
 
           <mat-select
             name="venueId"
-            [(ngModel)]="venueId"
+            [ngModel]="venueId()"
+            (ngModelChange)="venueId.set($event)"
           >
             @for (venue of venues; track venue.id) {
               <mat-option [value]="venue.id">
@@ -165,9 +185,13 @@
             Cancel
           </a>
 
-          <button mat-flat-button type="submit">
-            <mat-icon>save</mat-icon>
 
+          <button
+            mat-flat-button
+            type="submit"
+            [disabled]="isSaving()"
+          >
+            <mat-icon>save</mat-icon>
             {{ isEditMode() ? 'Update Movie' : 'Save Movie' }}
           </button>
         </div>

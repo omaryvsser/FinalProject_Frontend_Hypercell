@@ -1,160 +1,175 @@
-<div class="movie-details-page">
-  <!-- Hero Section -->
-  <section class="hero-section" [style.backgroundImage]="'url(' + movie().backdropUrl + ')'">
-    <div class="hero-overlay"></div>
+@if (isLoading()) {
+  <div class="state-container loading-state">
+    <span class="material-symbols-outlined spinner-icon">progress_activity</span>
+    <p>Loading movie details...</p>
+  </div>
+} @else if (errorMessage()) {
+  <div class="state-container error-state">
+    <span class="material-symbols-outlined error-icon">error</span>
+    <p>{{ errorMessage() }}</p>
+    <a routerLink="/discover" class="btn-back">Back to Discover</a>
+  </div>
+} @else {
+  @if (movie(); as m) {
+    <div class="movie-details-page">
+      <!-- Hero Section -->
+      <section class="hero-section" [style.backgroundImage]="'url(' + m.backdropUrl + ')'">
+        <div class="hero-overlay"></div>
 
-    <!-- Back Navigation Link -->
-    <a routerLink="/" class="back-nav-link">
-      <span class="material-symbols-outlined icon-back">arrow_back</span>
-      <span>Back to Discover</span>
-    </a>
+        <!-- Back Navigation Link -->
+        <a routerLink="/discover" class="back-nav-link">
+          <span class="material-symbols-outlined icon-back">arrow_back</span>
+          <span>Back to Discover</span>
+        </a>
 
-    <div class="hero-content">
-      <div class="poster-container">
-        <img [src]="movie().posterUrl" [alt]="movie().title" class="poster-image" />
-        @if (movie().ageRating) {
-          <span class="age-badge">{{ movie().ageRating }}</span>
-        }
-      </div>
-
-      <div class="hero-info">
-        <div class="meta-row">
-          <span class="rating-badge">
-            <span class="material-symbols-outlined icon-star">star</span>
-            {{ movie().rating }} / 10
-          </span>
-          <span class="meta-badge">
-            <span class="material-symbols-outlined icon-clock">schedule</span>
-            {{ movie().runtime }}
-          </span>
-          @if (movie().releaseYear) {
-            <span class="meta-badge">{{ movie().releaseYear }}</span>
-          }
-          @if (movie().language) {
-            <span class="format-badge">{{ movie().language }}</span>
-          }
-        </div>
-
-        <h1 class="movie-title">{{ movie().title }}</h1>
-
-        <div class="genre-list">
-          @for (genre of movie().genres; track genre) {
-            <span class="genre-pill">{{ genre }}</span>
-          } @empty {
-            <span class="genre-pill">General</span>
-          }
-        </div>
-
-        <div class="hero-cta">
-          <a [routerLink]="['/booking', movie().id || 1]" class="btn-book-now">
-            <span class="material-symbols-outlined icon-ticket">confirmation_number</span>
-            Book Tickets
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Main Content Layout -->
-  <main class="content-container">
-    <div class="content-layout">
-      <!-- Synopsis Area -->
-      <section class="synopsis-section">
-        <h2 class="section-heading">
-          <span class="material-symbols-outlined section-icon">description</span>
-          Synopsis
-        </h2>
-        <p class="synopsis-text">{{ movie().synopsis }}</p>
-
-        <div class="movie-meta-grid">
-          @if (movie().director) {
-            <div class="meta-card">
-              <span class="meta-label">Director</span>
-              <span class="meta-value">{{ movie().director }}</span>
-            </div>
-          }
-          <div class="meta-card">
-            <span class="meta-label">Duration</span>
-            <span class="meta-value">{{ movie().runtime }}</span>
+        <div class="hero-content">
+          <div class="poster-container">
+            <img [src]="m.posterUrl" [alt]="m.title" class="poster-image" />
+            @if (m.ageRating) {
+              <span class="age-badge">{{ m.ageRating }}</span>
+            }
           </div>
-          <div class="meta-card">
-            <span class="meta-label">Rating</span>
-            <span class="meta-value">IMDb {{ movie().rating }}</span>
-          </div>
-          @if (movie().ageRating) {
-            <div class="meta-card">
-              <span class="meta-label">Age Rating</span>
-              <span class="meta-value">{{ movie().ageRating }}</span>
+
+          <div class="hero-info">
+            <div class="meta-row">
+              <span class="rating-badge">
+                <span class="material-symbols-outlined icon-star">star</span>
+                {{ m.rating }} / 10
+              </span>
+              <span class="meta-badge">
+                <span class="material-symbols-outlined icon-clock">schedule</span>
+                {{ m.runtime }}
+              </span>
+              @if (m.releaseYear) {
+                <span class="meta-badge">{{ m.releaseYear }}</span>
+              }
+              @if (m.language) {
+                <span class="format-badge">{{ m.language }}</span>
+              }
             </div>
-          }
+
+            <h1 class="movie-title">{{ m.title }}</h1>
+
+            <div class="genre-list">
+              @for (genre of m.genres; track genre) {
+                <span class="genre-pill">{{ genre }}</span>
+              } @empty {
+                <span class="genre-pill">General</span>
+              }
+            </div>
+
+            <div class="hero-cta">
+              <a [routerLink]="['/booking', m.id || 1]" class="btn-book-now">
+                <span class="material-symbols-outlined icon-ticket">confirmation_number</span>
+                Book Tickets
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- Booking Area -->
-      <section class="booking-section" id="booking-area">
-        <h2 class="section-heading accent-heading">
-          <span class="material-symbols-outlined section-icon">calendar_today</span>
-          Select Date & Showtime ({{ totalShowtimesCount() }} Slots Available)
-        </h2>
+      <!-- Main Content Layout -->
+      <main class="content-container">
+        <div class="content-layout">
+          <!-- Synopsis Area -->
+          <section class="synopsis-section">
+            <h2 class="section-heading">
+              <span class="material-symbols-outlined section-icon">description</span>
+              Synopsis
+            </h2>
+            <p class="synopsis-text">{{ m.synopsis }}</p>
 
-        <!-- Date Selector -->
-        <div class="date-selector">
-          @for (d of dates(); track d.id) {
-            <button
-              type="button"
-              class="date-card"
-              [class.active]="selectedDate() === d.id"
-              (click)="selectDate(d.id)"
-            >
-              <span class="date-day-label">{{ d.dayLabel }}</span>
-              <span class="date-number">{{ d.dateNumber }}</span>
-              <span class="date-month-label">{{ d.month }}</span>
-            </button>
-          } @empty {
-            <p class="no-dates-msg">No show dates available.</p>
-          }
-        </div>
-
-        <!-- Venues List -->
-        <div class="venues-container">
-          @for (venue of venues(); track venue.name) {
-            <div class="venue-card">
-              <div class="venue-info">
-                <div class="venue-title-row">
-                  <h3 class="venue-name">{{ venue.name }}</h3>
-                  @if (venue.screenType) {
-                    <span class="screen-badge">{{ venue.screenType }}</span>
-                  }
+            <div class="movie-meta-grid">
+              @if (m.director) {
+                <div class="meta-card">
+                  <span class="meta-label">Director</span>
+                  <span class="meta-value">{{ m.director }}</span>
                 </div>
-                <p class="venue-address">
-                  <span class="material-symbols-outlined icon-location">location_on</span>
-                  {{ venue.address }}
-                </p>
+              }
+              <div class="meta-card">
+                <span class="meta-label">Duration</span>
+                <span class="meta-value">{{ m.runtime }}</span>
               </div>
+              <div class="meta-card">
+                <span class="meta-label">Rating</span>
+                <span class="meta-value">IMDb {{ m.rating }}</span>
+              </div>
+              @if (m.ageRating) {
+                <div class="meta-card">
+                  <span class="meta-label">Age Rating</span>
+                  <span class="meta-value">{{ m.ageRating }}</span>
+                </div>
+              }
+            </div>
+          </section>
 
-              <!-- Showtimes -->
-              <div class="showtimes-list">
-                @for (time of venue.showtimes; track time) {
-                  <button
-                    type="button"
-                    class="showtime-pill"
-                    [class.selected]="selectedShowtime()?.venueName === venue.name && selectedShowtime()?.time === time"
-                    (click)="selectShowtime(venue.name, time)"
-                  >
-                    {{ time }}
-                  </button>
-                } @empty {
-                  <p class="no-showtimes-msg">No showtimes scheduled for this venue.</p>
-                }
-              </div>
+          <!-- Booking Area -->
+          <section class="booking-section" id="booking-area">
+            <h2 class="section-heading accent-heading">
+              <span class="material-symbols-outlined section-icon">calendar_today</span>
+              Select Date & Showtime ({{ totalShowtimesCount() }} Slots Available)
+            </h2>
+
+            <!-- Date Selector -->
+            <div class="date-selector">
+              @for (d of dates(); track d.id) {
+                <button
+                  type="button"
+                  class="date-card"
+                  [class.active]="selectedDate() === d.id"
+                  (click)="selectDate(d.id)"
+                >
+                  <span class="date-day-label">{{ d.dayLabel }}</span>
+                  <span class="date-number">{{ d.dateNumber }}</span>
+                  <span class="date-month-label">{{ d.month }}</span>
+                </button>
+              } @empty {
+                <p class="no-dates-msg">No show dates available.</p>
+              }
             </div>
-          } @empty {
-            <div class="no-venues-card">
-              <p>No venues currently showing this movie.</p>
+
+            <!-- Venues List -->
+            <div class="venues-container">
+              @for (venue of venues(); track venue.name) {
+                <div class="venue-card">
+                  <div class="venue-info">
+                    <div class="venue-title-row">
+                      <h3 class="venue-name">{{ venue.name }}</h3>
+                      @if (venue.screenType) {
+                        <span class="screen-badge">{{ venue.screenType }}</span>
+                      }
+                    </div>
+                    <p class="venue-address">
+                      <span class="material-symbols-outlined icon-location">location_on</span>
+                      {{ venue.address }}
+                    </p>
+                  </div>
+
+                  <!-- Showtimes -->
+                  <div class="showtimes-list">
+                    @for (time of venue.showtimes; track time) {
+                      <button
+                        type="button"
+                        class="showtime-pill"
+                        [class.selected]="selectedShowtime()?.venueName === venue.name && selectedShowtime()?.time === time"
+                        (click)="selectShowtime(venue.name, time)"
+                      >
+                        {{ time }}
+                      </button>
+                    } @empty {
+                      <p class="no-showtimes-msg">No showtimes scheduled for this venue.</p>
+                    }
+                  </div>
+                </div>
+              } @empty {
+                <div class="no-venues-card">
+                  <p>No venues currently showing this movie.</p>
+                </div>
+              }
             </div>
-          }
+          </section>
         </div>
-      </section>
+      </main>
     </div>
-  </main>
-</div>
+  }
+}

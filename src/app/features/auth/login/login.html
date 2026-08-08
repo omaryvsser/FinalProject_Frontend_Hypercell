@@ -13,6 +13,11 @@
           {{ loginMessage() }}
         </div>
       }
+      @if (errorMessage()) {
+        <div class="error-alert">
+          {{ errorMessage() }}
+        </div>
+      }
 
       <form (ngSubmit)="onSubmit()" novalidate class="auth-form">
         <!-- Email Field -->

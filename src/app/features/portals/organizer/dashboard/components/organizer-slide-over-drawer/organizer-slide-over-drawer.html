@@ -1,102 +1,149 @@
-<div class="drawer-wrapper" [class.open]="isOpen()">
-  <div class="drawer-backdrop" (click)="onClose()"></div>
+<!-- Drawer Backdrop Overlay -->
+<div
+  class="drawer-overlay"
+  [class.open]="isOpen()"
+  (click)="onClose()">
+</div>
 
-  <aside class="drawer-panel">
-    <header class="drawer-header">
-      <div>
-        <h2 class="drawer-title">
-          {{ selectedMovie() ? 'Edit Organizer Movie' : 'Add New Organizer Movie' }}
-        </h2>
-        <p class="drawer-subtitle">Configure showtime, venue, and publishing status for your movie</p>
-      </div>
-      <button type="button" class="btn-close-drawer" (click)="onClose()" aria-label="Close drawer">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </header>
+<!-- Slide-Over Container -->
+<aside class="drawer-container" [class.open]="isOpen()">
+  <!-- Header -->
+  <div class="drawer-header">
+    <div>
+      <h2 class="drawer-title">
+        {{ selectedMovie() ? 'Edit Organizer Movie' : 'Add New Organizer Movie' }}
+      </h2>
+      <p class="drawer-subtitle">
+        Configure showtime, venue, poster, and publishing status
+      </p>
+    </div>
+    <button type="button" class="close-btn" (click)="onClose()" aria-label="Close drawer">
+      &times;
+    </button>
+  </div>
 
-    <div class="drawer-body">
-      <form (submit)="$event.preventDefault(); onSave()">
-        <div class="form-group">
-          <label class="form-label" for="movie-title">Movie Title</label>
-          <input
-            id="movie-title"
-            type="text"
-            class="form-input"
-            placeholder="e.g. Interstellar"
-            [ngModel]="formTitle()()"
-            (ngModelChange)="formTitle().set($event)"
-            name="movieTitle"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="movie-category">Category / Genre</label>
-          <input
-            id="movie-category"
-            type="text"
-            class="form-input"
-            placeholder="e.g. Science Fiction"
-            [ngModel]="formCategory()()"
-            (ngModelChange)="formCategory().set($event)"
-            name="movieCategory"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="movie-venue">Cinema Venue</label>
-          <input
-            id="movie-venue"
-            type="text"
-            class="form-input"
-            placeholder="e.g. Vox Cinema Mall of Egypt"
-            [ngModel]="formVenueName()()"
-            (ngModelChange)="formVenueName().set($event)"
-            name="movieVenue"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="movie-startdate">Start Date & Time</label>
-          <input
-            id="movie-startdate"
-            type="text"
-            class="form-input"
-            placeholder="e.g. 2026-08-14 20:00"
-            [ngModel]="formStartDate()()"
-            (ngModelChange)="formStartDate().set($event)"
-            name="movieStartDate"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="movie-status">Publishing Status</label>
-          <select
-            id="movie-status"
-            class="form-select"
-            [ngModel]="formStatus()()"
-            (ngModelChange)="formStatus().set($event)"
-            name="movieStatus"
-          >
-            <option value="PUBLISHED">PUBLISHED</option>
-            <option value="DRAFT">DRAFT</option>
-            <option value="COMPLETED">COMPLETED</option>
-            <option value="CANCELLED">CANCELLED</option>
-          </select>
-        </div>
-      </form>
+  <!-- Drawer Form Body -->
+  <form (ngSubmit)="onSubmit()" class="drawer-form">
+    <!-- Movie Title -->
+    <div class="form-group">
+      <label class="form-label" for="movie-title">Movie Title</label>
+      <input
+        id="movie-title"
+        type="text"
+        class="form-control"
+        [(ngModel)]="formTitle"
+        name="title"
+        placeholder="e.g. The Godfather"
+        required
+      />
     </div>
 
-    <footer class="drawer-footer">
-      <button type="button" class="btn-cancel" (click)="onClose()">
+    <!-- 🟢 Image Poster (File Upload + URL Link) -->
+    <div class="form-group">
+      <label class="form-label">Poster Image</label>
+
+      <!-- File Selector -->
+      <input
+        type="file"
+        accept="image/*"
+        class="form-control file-input"
+        (change)="onFileSelected($event)"
+      />
+
+      <div class="or-divider">— OR —</div>
+
+      <!-- Image URL Text Field -->
+      <input
+        id="movie-image-url"
+        type="text"
+        class="form-control"
+        [(ngModel)]="formImageUrl"
+        name="imageUrl"
+        placeholder="https://images.example.com/poster.jpg"
+      />
+    </div>
+
+    <!-- Poster Image Preview -->
+    @if (formImageUrl()) {
+      <div class="form-group preview-group">
+        <label class="form-label">Poster Preview</label>
+        <div class="poster-preview-wrapper">
+          <img [src]="formImageUrl()" alt="Poster preview" class="poster-preview-img" />
+        </div>
+      </div>
+    }
+
+    <!-- Category / Genre -->
+    <div class="form-group">
+      <label class="form-label" for="movie-category">Category / Genre</label>
+      <input
+        id="movie-category"
+        type="text"
+        class="form-control"
+        [(ngModel)]="formCategory"
+        name="category"
+        placeholder="e.g. Drama, Action, Sci-Fi"
+        required
+      />
+    </div>
+
+    <!-- Cinema Venue Dropdown -->
+    <div class="form-group">
+      <label class="form-label" for="movie-venue">Cinema Venue</label>
+      <select
+        id="movie-venue"
+        class="form-control form-select"
+        [(ngModel)]="formVenueId"
+        name="venueId"
+        required
+      >
+        <option [ngValue]="null" disabled>Select a cinema venue...</option>
+        @for (venue of venues(); track venue.id) {
+          <option [ngValue]="venue.id">
+            {{ venue.name }} {{ venue.capacity ? '(Capacity: ' + venue.capacity + ')' : '' }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <!-- Start Date & Time -->
+    <div class="form-group">
+      <label class="form-label" for="movie-start-date">Start Date & Time</label>
+      <input
+        id="movie-start-date"
+        type="datetime-local"
+        class="form-control"
+        [(ngModel)]="formStartDate"
+        name="startDate"
+        required
+      />
+    </div>
+
+    <!-- Publishing Status -->
+    <div class="form-group">
+      <label class="form-label" for="movie-status">Publishing Status</label>
+      <select
+        id="movie-status"
+        class="form-control form-select"
+        [(ngModel)]="formStatus"
+        name="status"
+        required
+      >
+        <option value="DRAFT">DRAFT</option>
+        <option value="PUBLISHED">PUBLISHED</option>
+        <option value="COMPLETED">COMPLETED</option>
+        <option value="CANCELLED">CANCELLED</option>
+      </select>
+    </div>
+
+    <!-- Footer Action Buttons -->
+    <div class="drawer-footer">
+      <button type="button" class="btn btn-secondary" (click)="onClose()">
         Cancel
       </button>
-      <button type="button" class="btn-save" (click)="onSave()">
+      <button type="submit" class="btn btn-primary">
         {{ selectedMovie() ? 'Save Changes' : 'Create Movie' }}
       </button>
-    </footer>
-  </aside>
-</div>
+    </div>
+  </form>
+</aside>

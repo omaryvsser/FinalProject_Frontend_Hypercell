@@ -41,12 +41,15 @@
   <app-organizer-slide-over-drawer
     [isOpen]="isDrawerOpen()"
     [selectedMovie]="selectedMovie()"
-    [formTitle]="formTitle"
-    [formCategory]="formCategory"
-    [formVenueName]="formVenueName"
-    [formStartDate]="formStartDate"
-    [formStatus]="formStatus"
+    [venues]="venues()"
+    [(formTitle)]="formTitle"
+    [(formImageUrl)]="formImageUrl"
+    [(formCategory)]="formCategory"
+    [(formVenueId)]="formVenueId"
+    [(formStartDate)]="formStartDate"
+    [(formStatus)]="formStatus"
     (closeDrawer)="closeDrawer()"
     (saveMovie)="saveDrawerMovie()"
-  ></app-organizer-slide-over-drawer>
+  >
+  </app-organizer-slide-over-drawer>
 </div>

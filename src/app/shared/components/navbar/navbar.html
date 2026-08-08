@@ -41,7 +41,7 @@
           @case ('CUSTOMER') {
             <a class="nav-link" [routerLink]="'/'" routerLinkActive="active">
               <span class="material-symbols-outlined nav-icon">person</span>
-              Profile
+              Hi, {{ currentUser()?.name || 'User' }}
             </a>
             <button type="button" class="btn-nav-action logout" (click)="logout()">
               <span class="material-symbols-outlined nav-icon">logout</span>
@@ -56,7 +56,7 @@
             </a>
             <a class="nav-link" [routerLink]="'/'" routerLinkActive="active">
               <span class="material-symbols-outlined nav-icon">person</span>
-              Profile
+              Hi, {{ currentUser()?.name || 'User' }}
             </a>
             <button type="button" class="btn-nav-action logout" (click)="logout()">
               <span class="material-symbols-outlined nav-icon">logout</span>
@@ -71,7 +71,7 @@
             </a>
             <a class="nav-link" [routerLink]="'/'" routerLinkActive="active">
               <span class="material-symbols-outlined nav-icon">person</span>
-              Profile
+              Hi, {{ currentUser()?.name || 'User' }}
             </a>
             <button type="button" class="btn-nav-action logout" (click)="logout()">
               <span class="material-symbols-outlined nav-icon">logout</span>

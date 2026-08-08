@@ -1,0 +1,158 @@
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { email } from '@angular/forms/signals';
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  token: string;
+}
+
+export type UserRole = 'CUSTOMER' | 'ORGANIZER' | 'ADMIN';
+
+export interface JwtPayload {
+  sub: string;
+  id?: number | string;
+  name?: string;
+  userId?: number | string;
+  role?: UserRole;
+  roles?: string[] | string;
+  exp?: number;
+}
+
+export interface UserSession {
+  id: number | null;
+  email: string;
+  name: string;
+  role: UserRole | null;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly TOKEN_KEY = 'jwt';
+
+  // 1. Reactive state trigger for JWT token changes
+  private readonly tokenSignal = signal<string | null>(this.getToken());
+
+  // 2. Public currentUser computed signal accessed by Navbar & Guards
+  readonly currentUser = computed<UserSession | null>(() => {
+    const token = this.tokenSignal();
+    if (!token) return null;
+
+    const payload = this.decodeTokenString(token);
+    if (!payload) return null;
+    const email = payload.sub || '';
+    const name = payload.name || (email.includes('@') ? email.split('@')[0] : email) || 'User';
+
+    return {
+      id: this.getUserIdFromPayload(payload),
+      email: payload.sub,
+      role: this.getRoleFromPayload(payload),
+      name: name,
+    };
+  });
+
+  /** POST /api/v1/auth/login */
+  login(credentials: LoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      `${environment.apiUrl}/v1/auth/login`,
+      credentials
+    ).pipe(
+      tap(res => {
+        if (res?.token) this.storeToken(res.token);
+      })
+    );
+  }
+
+  /** POST /api/v1/auth/register */
+  register(payload: RegisterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      `${environment.apiUrl}/v1/auth/register`,
+      payload
+    ).pipe(
+      tap(res => {
+        if (res?.token) this.storeToken(res.token);
+      })
+    );
+  }
+
+  /** Persist JWT to localStorage & trigger state update */
+  storeToken(token: string): void {
+    localStorage.setItem(this.TOKEN_KEY, token);
+    this.tokenSignal.set(token);
+  }
+
+  /** Retrieve raw JWT string */
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  /** Clear session data & update state */
+  logout(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    this.tokenSignal.set(null);
+  }
+
+  /** Returns true when a valid JWT is present */
+  isLoggedIn(): boolean {
+    return !!this.currentUser();
+  }
+
+  /** Decode raw JWT string without external libraries */
+  decodeToken(): JwtPayload | null {
+    const token = this.getToken();
+    return token ? this.decodeTokenString(token) : null;
+  }
+
+  private decodeTokenString(token: string): JwtPayload | null {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload) as JwtPayload;
+    } catch {
+      return null;
+    }
+  }
+
+  getUserIdFromToken(): number | null {
+    const payload = this.decodeToken();
+    return payload ? this.getUserIdFromPayload(payload) : null;
+  }
+
+  private getUserIdFromPayload(payload: JwtPayload): number | null {
+    const rawId = payload.id ?? payload.userId;
+    if (rawId === undefined || rawId === null || rawId === '') return null;
+    const userId = Number(rawId);
+    return Number.isFinite(userId) ? userId : null;
+  }
+
+  getRoleFromToken(): UserRole | null {
+    const payload = this.decodeToken();
+    return payload ? this.getRoleFromPayload(payload) : null;
+  }
+
+  private getRoleFromPayload(payload: JwtPayload): UserRole | null {
+    const rawRole = payload.role ?? (Array.isArray(payload.roles) ? payload.roles[0] : payload.roles);
+    if (!rawRole) return null;
+    const role = String(rawRole).replace(/^ROLE_/, '') as UserRole;
+    return ['CUSTOMER', 'ORGANIZER', 'ADMIN'].includes(role) ? role : null;
+  }
+}

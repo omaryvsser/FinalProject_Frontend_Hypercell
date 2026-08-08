@@ -13,6 +13,11 @@
           {{ registerMessage() }}
         </div>
       }
+      @if (errorMessage()) {
+        <div class="error-alert">
+          {{ errorMessage() }}
+        </div>
+      }
 
       <form (ngSubmit)="onSubmit()" novalidate class="auth-form">
         <!-- Full Name Field -->
@@ -21,14 +26,14 @@
           <input
             matInput
             type="text"
-            name="fullName"
-            [(ngModel)]="fullName"
-            (blur)="fullNameTouched.set(true)"
+            name="name"
+            [(ngModel)]="name"
+            (blur)="nameTouched.set(true)"
             placeholder="Your Name"
           >
           <mat-icon matPrefix class="input-icon">person</mat-icon>
 
-          @if ((isSubmitted() || fullNameTouched()) && fullNameEmpty()) {
+          @if ((isSubmitted() || nameTouched()) && nameEmpty()) {
             <mat-error>Full name is required</mat-error>
           }
         </mat-form-field>
