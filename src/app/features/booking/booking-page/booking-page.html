@@ -1,116 +1,158 @@
 <div class="booking-container">
-  @if (bookingData(); as movie) {
-    <mat-card class="booking-card" appearance="outlined">
-      <mat-card-header class="booking-card-header">
-        <mat-card-title class="booking-title">Book Tickets</mat-card-title>
-        <mat-card-subtitle class="booking-subtitle">
-          {{ movie.movieTitle }} - {{ movie.cinemaName }}
-        </mat-card-subtitle>
-      </mat-card-header>
+  <mat-card class="booking-card" appearance="outlined">
+    <mat-card-header class="booking-card-header">
+      <mat-card-title class="booking-title">Book Tickets</mat-card-title>
+      <mat-card-subtitle class="booking-subtitle">
+        {{ movieTitle() }} &bull; {{ cinemaName() }}
+      </mat-card-subtitle>
+    </mat-card-header>
 
-      <mat-card-content class="booking-card-content">
-        <!-- Summary Pricing Banner -->
+    <mat-card-content class="booking-card-content">
+      @if (bookingError()) {
+        <div class="error-banner">
+          <mat-icon class="error-icon">error</mat-icon>
+          <span>{{ bookingError() }}</span>
+        </div>
+      }
+
+      <!-- 1. Seat Category Cards Selection -->
+      <div class="section-container">
+        <label class="section-label">Select Seat Category</label>
+        <div class="categories-grid">
+          @for (cat of seatCategories(); track cat.id) {
+            <div
+              class="category-card"
+              [class.selected]="selectedCategory()?.id === cat.id"
+              (click)="selectCategory(cat)"
+            >
+              <div class="card-header-row">
+                <span class="category-name">{{ cat.categoryName }}</span>
+                <span class="selection-indicator">
+                  <mat-icon class="indicator-icon">
+                    {{ selectedCategory()?.id === cat.id ? 'check_circle' : 'radio_button_unchecked' }}
+                  </mat-icon>
+                </span>
+              </div>
+              <div class="card-body-row">
+                <div class="category-price">{{ cat.price }} EGP</div>
+                <div class="available-badge" [class.low-stock]="cat.availableSeats < 10">
+                  {{ cat.availableSeats }} available
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- 2. Ticket Quantity Counter -->
+      <div class="ticket-counter-box">
+        <div class="counter-label-group">
+          <span class="counter-label">Quantity:</span>
+          @if (selectedCategory()) {
+            <span class="counter-sublabel">(Max {{ selectedCategory()?.availableSeats }} seats)</span>
+          }
+        </div>
+        <div class="counter-actions">
+          <button
+            mat-icon-button
+            type="button"
+            class="counter-btn"
+            (click)="decrementQuantity()"
+            [disabled]="quantity() <= 1 || isSubmitting()"
+          >
+            <mat-icon>remove</mat-icon>
+          </button>
+          <span class="counter-number">{{ quantity() }}</span>
+          <button
+            mat-icon-button
+            type="button"
+            class="counter-btn"
+            (click)="incrementQuantity()"
+            [disabled]="!selectedCategory() || quantity() >= (selectedCategory()?.availableSeats || 10) || isSubmitting()"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Customer Input Form -->
+      <form class="booking-form" (ngSubmit)="onSubmitBooking()" novalidate>
+        <mat-form-field appearance="outline" floatLabel="always" class="full-width">
+          <mat-label>Full Name</mat-label>
+          <input
+            matInput
+            type="text"
+            [value]="customerName()"
+            (input)="customerName.set($any($event.target).value)"
+            (blur)="nameTouched.set(true)"
+            placeholder="Your Full Name"
+          >
+          <mat-icon matPrefix class="input-icon">person</mat-icon>
+          @if (nameTouched() && nameEmpty()) {
+            <mat-error>Name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <input
+            matInput
+            type="email"
+            [value]="customerEmail()"
+            (input)="customerEmail.set($any($event.target).value)"
+            (blur)="emailTouched.set(true)"
+            placeholder="name@example.com"
+          >
+          <mat-icon matPrefix class="input-icon">email</mat-icon>
+          @if (emailTouched() && emailInvalid()) {
+            <mat-error>Please enter a valid email</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always" class="full-width">
+          <mat-label>Phone Number</mat-label>
+          <input
+            matInput
+            type="tel"
+            [value]="customerPhone()"
+            (input)="customerPhone.set($any($event.target).value)"
+            (blur)="phoneTouched.set(true)"
+            placeholder="01xxxxxxxxx"
+          >
+          <mat-icon matPrefix class="input-icon">phone</mat-icon>
+          @if (phoneTouched() && phoneInvalid()) {
+            <mat-error>Enter a valid phone number</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- 4. Summary Banner -->
         <div class="summary-banner">
-          <div class="price-info">
-            <span class="info-label">Ticket Price</span>
-            <span class="info-value">{{ ticketPrice() }} EGP</span>
+          <div class="summary-breakdown">
+            <span class="info-label">Category: {{ selectedCategory()?.categoryName || 'None' }}</span>
+            <span class="info-label-sub">{{ quantity() }} ticket(s) &times; {{ selectedCategory()?.price || 0 }} EGP</span>
           </div>
           <div class="price-info highlight">
-            <span class="info-label">Total Amount</span>
+            <span class="info-label">Total Price</span>
             <span class="info-value price-total">{{ totalPrice() }} EGP</span>
           </div>
         </div>
 
-        <!-- Ticket Counter -->
-        <div class="ticket-counter-box">
-          <span class="counter-label">Number of Tickets:</span>
-          <div class="counter-actions">
-            <button mat-icon-button type="button" class="counter-btn" (click)="decrementTickets()" [disabled]="ticketCount() <= 1">
-              <mat-icon>remove</mat-icon>
-            </button>
-            <span class="counter-number">{{ ticketCount() }}</span>
-            <button mat-icon-button type="button" class="counter-btn" (click)="incrementTickets()" [disabled]="ticketCount() >= 10">
-              <mat-icon>add</mat-icon>
-            </button>
-          </div>
-        </div>
-
-        <!-- Signal Form Inputs -->
-        <form class="booking-form" (ngSubmit)="onSubmitBooking()" novalidate>
-          <!-- Showtime Field -->
-          <mat-form-field appearance="outline" floatLabel="always" class="full-width">
-            <mat-label>Select Showtime</mat-label>
-            <mat-select [value]="showtime()" (selectionChange)="showtime.set($event.value)">
-              @for (time of availableShowtimes; track time) {
-                <mat-option [value]="time">{{ time }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <!-- Customer Name -->
-          <mat-form-field appearance="outline" floatLabel="always" class="full-width">
-            <mat-label>Full Name</mat-label>
-            <input
-              matInput
-              type="text"
-              [value]="customerName()"
-              (input)="customerName.set($any($event.target).value)"
-              (blur)="nameTouched.set(true)"
-              placeholder="Your Full Name"
-            >
-            <mat-icon matPrefix class="input-icon">person</mat-icon>
-            @if (nameTouched() && nameEmpty()) {
-              <mat-error>Name is required</mat-error>
-            }
-          </mat-form-field>
-
-          <!-- Customer Email -->
-          <mat-form-field appearance="outline" floatLabel="always" class="full-width">
-            <mat-label>Email Address</mat-label>
-            <input
-              matInput
-              type="email"
-              [value]="customerEmail()"
-              (input)="customerEmail.set($any($event.target).value)"
-              (blur)="emailTouched.set(true)"
-              placeholder="name@example.com"
-            >
-            <mat-icon matPrefix class="input-icon">email</mat-icon>
-            @if (emailTouched() && emailInvalid()) {
-              <mat-error>Please enter a valid email</mat-error>
-            }
-          </mat-form-field>
-
-          <!-- Customer Phone -->
-          <mat-form-field appearance="outline" floatLabel="always" class="full-width">
-            <mat-label>Phone Number</mat-label>
-            <input
-              matInput
-              type="tel"
-              [value]="customerPhone()"
-              (input)="customerPhone.set($any($event.target).value)"
-              (blur)="phoneTouched.set(true)"
-              placeholder="01xxxxxxxxx"
-            >
-            <mat-icon matPrefix class="input-icon">phone</mat-icon>
-            @if (phoneTouched() && phoneInvalid()) {
-              <mat-error>Enter a valid phone number</mat-error>
-            }
-          </mat-form-field>
-
-          <!-- Submit Button -->
-          <button mat-raised-button class="submit-booking-btn" type="submit" [disabled]="!isFormValid()" (click)="confirmBooking()">
-            Confirm Reservation ({{ totalPrice() }} EGP)
-          </button>
-        </form>
-      </mat-card-content>
-    </mat-card>
-  } @else {
-    <!-- Empty Fallback if accessed directly -->
-    <div class="empty-booking-state">
-      <h2>No Movie Selected</h2>
-      <p>Please select a movie from the home page first to proceed with booking.</p>
-      <a mat-flat-button class="browse-btn" routerLink="/">Browse Movies</a>
-    </div>
-  }
+        <!-- Submit Button -->
+        <button
+          mat-raised-button
+          class="submit-booking-btn"
+          type="submit"
+          [disabled]="!selectedCategory() || !isFormValid() || isSubmitting()"
+          (click)="confirmBooking()"
+        >
+          @if (isSubmitting()) {
+            <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+            <span>Processing...</span>
+          } @else {
+            <span>Confirm Booking ({{ totalPrice() }} EGP)</span>
+          }
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
 </div>

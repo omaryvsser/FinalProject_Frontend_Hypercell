@@ -9,7 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EventService } from '../../../../core/services/event.service';
 
-type MovieStatus = 'DRAFT' | 'PUBLISHED';
+type MovieStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
 
 @Component({
   selector: 'app-event-editor',

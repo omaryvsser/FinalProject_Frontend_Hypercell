@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,6 +25,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   // Form Field Signals
   readonly email = signal<string>('');
@@ -78,7 +79,8 @@ export class Login {
       next: (res) => {
         this.authService.storeToken(res.token);
         this.isSubmitting.set(false);
-        this.router.navigate(['/discover']);
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/discover';
+        this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {
         console.error('Login error:', err);

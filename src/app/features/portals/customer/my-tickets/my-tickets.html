@@ -14,6 +14,16 @@
     }
   </div>
 
+  @if (showSuccessBanner()) {
+    <div class="success-confirmation-banner">
+      <span class="material-symbols-outlined success-icon">check_circle</span>
+      <div class="banner-text">
+        <strong>Booking Confirmed!</strong>
+        <p>Your ticket reservation has been successfully confirmed and added below.</p>
+      </div>
+    </div>
+  }
+
   <!-- Loading State -->
   @if (isLoading()) {
     <div class="loading-state" aria-live="polite" aria-label="Loading your tickets">

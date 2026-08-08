@@ -9,20 +9,23 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.getToken();
 
-  // 1. Clone request and attach Bearer token if present
-  const authReq = token
+  // 1. Skip attaching token for public API endpoints (e.g. public Discover page catalog)
+  const isPublicEndpoint = req.url.includes('/public/');
+
+  // 2. Clone request and attach Bearer token if present and not a public endpoint
+  const authReq = (token && !isPublicEndpoint)
     ? req.clone({ headers: req.headers.set('Authorization', `Bearer ${token}`) })
     : req;
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // 2. Check if the failed request was a login/register attempt
+      // 3. Check if the failed request was an authentication API call
       const isAuthApi = req.url.includes('/v1/auth/');
 
-      // 3. Only handle expired/unauthorized sessions for protected resources
+      // 4. Handle expired/unauthorized sessions for protected resources
       if (!isAuthApi && (error.status === 401 || error.status === 403)) {
         authService.logout(); // Updates tokenSignal & clears localStorage
-        router.navigate(['/auth/login']);
+        router.navigate(['/login']);
       }
 
       return throwError(() => error);

@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,7 +29,7 @@ function ticketDtoToUi(dto: TicketDto): Ticket {
     id: dto.ticketNumber ?? String(dto.id),
     movieTitle: dto.eventName,
     posterUrl: undefined,
-    cinemaName: '',                    // not in backend TicketDto — left blank
+    cinemaName: 'Hypercell Cinema',
     seatCategory: dto.seatCategoryName,
     seatNumber: dto.ticketNumber,
     bookingDate: dto.bookingDate
@@ -46,38 +46,10 @@ function ticketDtoToUi(dto: TicketDto): Ticket {
           minute: '2-digit',
         })
       : '—',
-    price: 0,                          // price not in TicketDto — use 0 as placeholder
+    price: 0,
     status: dto.isBooked ? 'UPCOMING' : 'COMPLETED',
   };
 }
-
-/** Fallback mock tickets shown when API is unavailable */
-const MOCK_TICKETS: Ticket[] = [
-  {
-    id: 'TICK-A1B2C3D4',
-    movieTitle: 'Interstellar: Beyond Time',
-    posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop',
-    cinemaName: 'Vox Cinema Mall of Egypt',
-    seatCategory: 'IMAX 3D',
-    seatNumber: 'Seat A1, A2',
-    bookingDate: 'Aug 07, 2026',
-    showtime: 'Friday, 8:00 PM',
-    price: 300,
-    status: 'UPCOMING',
-  },
-  {
-    id: 'TICK-X9Y8Z7W6',
-    movieTitle: 'Dune: Part Two',
-    posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop',
-    cinemaName: 'Sea Cinema El Gouna',
-    seatCategory: 'VIP Suite',
-    seatNumber: 'Seat C4, C5',
-    bookingDate: 'Aug 14, 2026',
-    showtime: 'Saturday, 7:30 PM',
-    price: 400,
-    status: 'UPCOMING',
-  },
-];
 
 @Component({
   selector: 'app-my-tickets',
@@ -96,11 +68,13 @@ const MOCK_TICKETS: Ticket[] = [
 export class MyTickets implements OnInit {
   private readonly ticketService = inject(TicketService);
   private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
 
-  // Data & UI state
+  // Data & UI state signals
   readonly tickets = signal<Ticket[]>([]);
   readonly isLoading = signal<boolean>(true);
   readonly errorMessage = signal<string | null>(null);
+  readonly showSuccessBanner = signal<boolean>(false);
 
   // Computed sub-lists for active vs past tickets
   readonly activeTickets = computed(() =>
@@ -111,9 +85,16 @@ export class MyTickets implements OnInit {
   );
 
   ngOnInit(): void {
+    const isConfirmed = this.route.snapshot.queryParamMap.get('confirmed') === 'true';
+    if (isConfirmed) {
+      this.showSuccessBanner.set(true);
+    }
     this.loadTickets();
   }
 
+  /**
+   * Fetch user tickets from GET /api/tickets/user/{userId}
+   */
   loadTickets(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -121,22 +102,22 @@ export class MyTickets implements OnInit {
     const userId = this.authService.getUserIdFromToken();
 
     if (userId === null) {
-      // Not authenticated or token has no id claim — show mock data
-      this.tickets.set(MOCK_TICKETS);
+      this.errorMessage.set('User authentication required to view tickets.');
       this.isLoading.set(false);
       return;
     }
 
     this.ticketService.getUserTickets(userId).subscribe({
       next: (dtos: TicketDto[]) => {
-        const mapped = dtos.map(ticketDtoToUi);
-        this.tickets.set(mapped.length > 0 ? mapped : MOCK_TICKETS);
+        const mapped = (dtos || []).map(ticketDtoToUi);
+        this.tickets.set(mapped);
         this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Failed to load tickets:', err);
-        // Graceful fallback — show mock data rather than an empty/broken page
-        this.tickets.set(MOCK_TICKETS);
+        this.errorMessage.set(
+          err?.error?.message ?? 'Unable to load tickets. Please try again later.'
+        );
         this.isLoading.set(false);
       },
     });

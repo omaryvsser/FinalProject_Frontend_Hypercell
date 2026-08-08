@@ -175,6 +175,23 @@ export class Dashboard implements OnInit {
       this.eventService.createEvent(payload).subscribe({
         next: (createdMovie) => {
           console.log('✅ Movie created successfully:', createdMovie);
+
+          // 🟢 Optimistically add the new movie into the Signal array immediately
+          const selectedVenue = this.venues().find((v) => v.id === payload.venueId);
+          const newMappedMovie: OrganizerMovie = {
+            id: createdMovie.id,
+            title: createdMovie.title,
+            category: createdMovie.category || payload.category || 'General',
+            startDate: createdMovie.startDate || payload.startDate || '',
+            status: (createdMovie.status || payload.status || 'DRAFT') as any,
+            venueName: createdMovie.venueName || selectedVenue?.name || 'Cinema Venue',
+            bookings: 0,
+            attendees: 0,
+          };
+
+          this.organizerMovies.update((current) => [newMappedMovie, ...current]);
+
+          // Re-fetch from backend to guarantee full persistence sync
           this.loadEventsFromBackend();
           this.closeDrawer();
         },

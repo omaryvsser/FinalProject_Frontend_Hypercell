@@ -2,13 +2,23 @@ import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { BookingService } from '../../../core/services/booking.service';
+import { EventService } from '../../../core/services/event.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { SeatCategoryResponse } from '../../../core/models/event.model';
+import { BookingCreateRequest } from '../../../core/models/booking.model';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+const DEFAULT_CATEGORIES: SeatCategoryResponse[] = [
+  { id: 1, categoryName: 'STANDARD', price: 120, availableSeats: 50 },
+  { id: 2, categoryName: 'VIP', price: 200, availableSeats: 25 },
+  { id: 3, categoryName: 'IMAX', price: 280, availableSeats: 15 },
+];
 
 @Component({
   selector: 'app-booking-page',
@@ -19,34 +29,33 @@ import { MatIconModule } from '@angular/material/icon';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './booking-page.html',
   styleUrl: './booking-page.css',
 })
 export class BookingPage implements OnInit {
   private readonly bookingService = inject(BookingService);
-  private router: Router | null = null;
-  private route: ActivatedRoute | null = null;
+  private readonly eventService = inject(EventService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  constructor() {
-    try {
-      this.router = inject(Router);
-    } catch {
-      this.router = null;
-    }
+  // --- Event Details Signals ---
+  readonly eventId = signal<number>(1);
+  readonly movieTitle = signal<string>('Cinema Event');
+  readonly cinemaName = signal<string>('Hypercell Cinema');
+  readonly isLoadingDetails = signal<boolean>(false);
 
-    try {
-      this.route = inject(ActivatedRoute);
-    } catch {
-      this.route = null;
-    }
-  }
+  // --- Task 1: Seat Categories & Selection Signals ---
+  readonly seatCategories = signal<SeatCategoryResponse[]>([]);
+  readonly selectedCategory = signal<SeatCategoryResponse | null>(null);
+  readonly quantity = signal<number>(1);
+  readonly totalPrice = computed(() => (this.selectedCategory()?.price || 0) * this.quantity());
 
-  readonly ticketCount = signal<number>(1);
-  readonly showtime = signal<string>('Friday, 8:00 PM');
+  // --- Customer Form Signals ---
   readonly customerName = signal<string>('');
   readonly customerEmail = signal<string>('');
   readonly customerPhone = signal<string>('');
@@ -55,21 +64,10 @@ export class BookingPage implements OnInit {
   readonly emailTouched = signal<boolean>(false);
   readonly phoneTouched = signal<boolean>(false);
 
-  readonly bookingData = computed(() => {
-    const current = this.bookingService.currentBooking();
-    if (current) return current;
-    return {
-      movieId: 1,
-      movieTitle: 'Interstellar: Beyond Time',
-      cinemaName: 'Hypercell IMAX Cinema',
-      ticketPrice: 150,
-      selectedSeats: []
-    };
-  });
+  readonly isSubmitting = signal<boolean>(false);
+  readonly bookingError = signal<string | null>(null);
 
-  readonly ticketPrice = computed(() => this.bookingData()?.ticketPrice || 150);
-  readonly totalPrice = computed(() => this.ticketCount() * this.ticketPrice());
-
+  // --- Form Validation Signals ---
   readonly nameEmpty = computed(() => this.customerName().trim().length === 0);
   readonly emailInvalid = computed(() => {
     const email = this.customerEmail().trim();
@@ -79,43 +77,74 @@ export class BookingPage implements OnInit {
   readonly phoneInvalid = computed(() => this.customerPhone().trim().length < 8);
 
   readonly isFormValid = computed(() => {
-    return !this.nameEmpty() && !this.emailInvalid() && !this.phoneInvalid() && this.ticketCount() > 0;
+    return (
+      this.selectedCategory() !== null &&
+      !this.nameEmpty() &&
+      !this.emailInvalid() &&
+      !this.phoneInvalid() &&
+      this.quantity() > 0
+    );
   });
 
-  readonly availableShowtimes = [
-    'Friday, 5:00 PM',
-    'Friday, 8:00 PM',
-    'Saturday, 6:00 PM',
-    'Saturday, 9:00 PM'
-  ];
-
   ngOnInit(): void {
-    if (this.route) {
-      const idParam = this.route.snapshot.paramMap.get('id');
-      if (idParam) {
-        const movieId = Number(idParam);
-        if (!this.bookingService.currentBooking()) {
-          this.bookingService.initiateBooking({
-            id: movieId,
-            title: movieId === 2 ? 'Dune: Part Two' : movieId === 3 ? 'The Sixth Sense' : 'Interstellar: Beyond Time',
-            showtime: 'Friday, 8:00 PM',
-            cinemaName: 'Hypercell IMAX Cinema',
-            price: 150
-          });
+    const user = this.authService.currentUser();
+    if (user) {
+      if (user.name) this.customerName.set(user.name);
+      if (user.email) this.customerEmail.set(user.email);
+    }
+
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const parsedId = idParam ? Number(idParam) : 1;
+    this.eventId.set(parsedId);
+
+    this.loadEventDetails(parsedId);
+  }
+
+  private loadEventDetails(id: number): void {
+    this.isLoadingDetails.set(true);
+    this.eventService.getEventDetails(id).subscribe({
+      next: (details) => {
+        this.isLoadingDetails.set(false);
+        if (details) {
+          this.movieTitle.set(details.title || 'Cinema Event');
+          this.cinemaName.set(details.venueName || 'Hypercell Cinema');
+
+          const categories = details.seatCategories && details.seatCategories.length > 0
+            ? details.seatCategories
+            : DEFAULT_CATEGORIES;
+
+          this.seatCategories.set(categories);
+          if (categories.length > 0) {
+            this.selectedCategory.set(categories[0]);
+          }
         }
+      },
+      error: () => {
+        this.isLoadingDetails.set(false);
+        // Fallback categories for display resilience
+        this.seatCategories.set(DEFAULT_CATEGORIES);
+        this.selectedCategory.set(DEFAULT_CATEGORIES[0]);
       }
+    });
+  }
+
+  selectCategory(category: SeatCategoryResponse): void {
+    this.selectedCategory.set(category);
+    if (this.quantity() > category.availableSeats) {
+      this.quantity.set(Math.max(1, category.availableSeats));
     }
   }
 
-  incrementTickets(): void {
-    if (this.ticketCount() < 10) {
-      this.ticketCount.update(count => count + 1);
+  incrementQuantity(): void {
+    const maxAvailable = this.selectedCategory()?.availableSeats ?? 10;
+    if (this.quantity() < maxAvailable) {
+      this.quantity.update((count) => count + 1);
     }
   }
 
-  decrementTickets(): void {
-    if (this.ticketCount() > 1) {
-      this.ticketCount.update(count => count - 1);
+  decrementQuantity(): void {
+    if (this.quantity() > 1) {
+      this.quantity.update((count) => count - 1);
     }
   }
 
@@ -130,18 +159,59 @@ export class BookingPage implements OnInit {
 
     if (!this.isFormValid()) return;
 
-    const confirmed = this.bookingService.confirmBooking({
-      customerName: this.customerName().trim(),
-      customerEmail: this.customerEmail().trim(),
-      customerPhone: this.customerPhone().trim(),
-      showtime: this.showtime(),
-      ticketCount: this.ticketCount()
-    });
+    const selectedCat = this.selectedCategory();
+    if (!selectedCat) return;
 
-    if (confirmed && this.router) {
-      this.router.navigate(['/booking-success']).then(() => {
-        this.bookingService.clearCurrentBooking();
-      });
-    }
+    const userId = this.authService.getUserIdFromToken() || 1;
+
+    const payload: BookingCreateRequest = {
+      eventId: this.eventId(),
+      userId,
+      seatCategoryId: selectedCat.id,
+      quantity: this.quantity()
+    };
+
+    this.isSubmitting.set(true);
+    this.bookingError.set(null);
+
+    this.bookingService.createBooking(payload).subscribe({
+      next: (res) => {
+        this.isSubmitting.set(false);
+
+        // 🎯 1. Optimistic UI Update (Instant Feedback)
+        const bookedQty = this.quantity();
+        const targetCatId = selectedCat.id;
+
+        this.seatCategories.update((categories) =>
+          categories.map((cat) =>
+            cat.id === targetCatId
+              ? { ...cat, availableSeats: Math.max(0, cat.availableSeats - bookedQty) }
+              : cat
+          )
+        );
+
+        if (this.selectedCategory()?.id === targetCatId) {
+          this.selectedCategory.update((cat) =>
+            cat ? { ...cat, availableSeats: Math.max(0, cat.availableSeats - bookedQty) } : null
+          );
+        }
+
+        // 🎯 2. Absolute Truth Re-fetch (Concurrency & DB Sync)
+        this.loadEventDetails(this.eventId());
+
+        // 🎯 3. Form Reset
+        this.quantity.set(1);
+
+        // 🎯 4. Clean Navigation to My Tickets page
+        this.router.navigate(['/my-tickets'], {
+          queryParams: { confirmed: 'true', bookingId: res?.bookingId }
+        });
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        const msg = err?.error?.message || (typeof err?.error === 'string' ? err.error : 'Booking failed. Please try again.');
+        this.bookingError.set(msg);
+      }
+    });
   }
 }

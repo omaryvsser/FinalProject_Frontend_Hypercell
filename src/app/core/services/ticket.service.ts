@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, forkJoin, of, tap, map, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TicketDto } from '../models/ticket.model';
 import { BookingCreateRequest, BookingResponse } from '../models/booking.model';
@@ -10,12 +10,66 @@ export class TicketService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
+  private readonly userTicketsSignal = signal<TicketDto[]>([]);
+  readonly userTickets = this.userTicketsSignal.asReadonly();
+
+  private readonly isLoadingSignal = signal<boolean>(false);
+  readonly isLoading = this.isLoadingSignal.asReadonly();
+
+  private readonly errorSignal = signal<string | null>(null);
+  readonly ticketError = this.errorSignal.asReadonly();
+
   /**
-   * GET /api/tickets/user/{userId}
-   * Fetch all tickets belonging to the authenticated user.
+   * GET /api/tickets/user/{userId} & GET /api/bookings/user/{userId}
+   * Fetch all tickets and booking reservations belonging to the authenticated user.
    */
   getUserTickets(userId: number): Observable<TicketDto[]> {
-    return this.http.get<TicketDto[]>(`${this.apiUrl}/tickets/user/${userId}`);
+    this.isLoadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    return forkJoin({
+      tickets: this.http.get<TicketDto[]>(`${this.apiUrl}/tickets/user/${userId}`).pipe(
+        catchError(() => of([] as TicketDto[]))
+      ),
+      bookings: this.http.get<BookingResponse[]>(`${this.apiUrl}/bookings/user/${userId}`).pipe(
+        catchError(() => of([] as BookingResponse[]))
+      )
+    }).pipe(
+      map(({ tickets, bookings }) => {
+        const ticketList = [...(tickets || [])];
+
+        if (bookings && bookings.length > 0) {
+          bookings.forEach((b) => {
+            const ticketNum = `BK-${b.bookingId}`;
+            const exists = ticketList.some(
+              (t) => t.ticketNumber === ticketNum || t.id === b.bookingId
+            );
+            if (!exists) {
+              ticketList.push({
+                id: b.bookingId,
+                ticketNumber: ticketNum,
+                eventName: b.eventTitle,
+                seatCategoryName: b.seatCategoryName,
+                isBooked: b.status !== 'CANCELLED',
+                bookingDate: b.createdAt
+              });
+            }
+          });
+        }
+        return ticketList;
+      }),
+      tap({
+        next: (allTickets) => {
+          this.userTicketsSignal.set(allTickets);
+          this.isLoadingSignal.set(false);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isLoadingSignal.set(false);
+          const msg = err.error?.message || (typeof err.error === 'string' ? err.error : 'Failed to load user tickets. Please try again.');
+          this.errorSignal.set(msg);
+        }
+      })
+    );
   }
 
   /**
@@ -23,7 +77,19 @@ export class TicketService {
    * Create a new ticket booking reservation.
    */
   createBooking(payload: BookingCreateRequest): Observable<BookingResponse> {
-    return this.http.post<BookingResponse>(`${this.apiUrl}/bookings`, payload);
+    this.isLoadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    return this.http.post<BookingResponse>(`${this.apiUrl}/bookings`, payload).pipe(
+      tap({
+        next: () => this.isLoadingSignal.set(false),
+        error: (err: HttpErrorResponse) => {
+          this.isLoadingSignal.set(false);
+          const msg = err.error?.message || (typeof err.error === 'string' ? err.error : 'Failed to create booking.');
+          this.errorSignal.set(msg);
+        }
+      })
+    );
   }
 
   /**
@@ -31,9 +97,25 @@ export class TicketService {
    * Cancel a booking and restore seat availability.
    */
   cancelBooking(bookingId: number): Observable<string> {
+    this.isLoadingSignal.set(true);
+    this.errorSignal.set(null);
+
     return this.http.patch<string>(
       `${this.apiUrl}/bookings/${bookingId}/cancel`,
       {}
+    ).pipe(
+      tap({
+        next: () => this.isLoadingSignal.set(false),
+        error: (err: HttpErrorResponse) => {
+          this.isLoadingSignal.set(false);
+          const msg = err.error?.message || (typeof err.error === 'string' ? err.error : 'Failed to cancel booking.');
+          this.errorSignal.set(msg);
+        }
+      })
     );
+  }
+
+  clearError(): void {
+    this.errorSignal.set(null);
   }
 }

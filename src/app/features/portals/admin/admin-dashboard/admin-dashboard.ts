@@ -1,10 +1,16 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminHeaderComponent } from './components/admin-header/admin-header';
 import { MetricCardsComponent } from './components/metric-cards/metric-cards';
 import { AdminTabsComponent } from './components/admin-tabs/admin-tabs';
 import { DynamicTableComponent } from './components/dynamic-table/dynamic-table';
 import { SlideOverDrawerComponent } from './components/slide-over-drawer/slide-over-drawer';
+import { UserService } from '../../../../core/services/user.service';
+import { VenueService } from '../../../../core/services/venue.service';
+import { EventService } from '../../../../core/services/event.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { UserDto, UserRole } from '../../../../core/models/user.model';
+import { EventResponse } from '../../../../core/models/event.model';
 
 export type TabType = 'USERS' | 'ORGANIZERS' | 'VENUES' | 'MOVIES';
 
@@ -54,7 +60,12 @@ export interface MovieItem {
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
-export class AdminDashboardComponent {
+export class AdminDashboardComponent implements OnInit {
+  private readonly userService = inject(UserService);
+  private readonly venueService = inject(VenueService);
+  private readonly eventService = inject(EventService);
+  private readonly authService = inject(AuthService);
+
   // --- Core State Signals ---
   activeTab = signal<TabType>('USERS');
   currentPage = signal<number>(1);
@@ -62,54 +73,15 @@ export class AdminDashboardComponent {
   isDrawerOpen = signal<boolean>(false);
   selectedItem = signal<any | null>(null);
 
-  // Mock logged-in Admin email to test safeguards
-  currentUserEmail = signal<string>('admin@cinema.com');
+  // Current logged in admin email
+  currentUserEmail = signal<string>('');
 
-  // --- Mock Data Signals (Initialized with 8-10 items each) ---
-  users = signal<UserItem[]>([
-    { id: 'usr-1', name: 'Omar Yasser (Admin)', email: 'admin@cinema.com', role: 'ADMIN', joinedDate: '2024-01-15' },
-    { id: 'usr-2', name: 'Ahmed El-Sayed', email: 'ahmed.sayed@cinema.eg', role: 'CUSTOMER', joinedDate: '2024-02-01' },
-    { id: 'usr-3', name: 'Mohamed Hassan', email: 'mhassan@eventos.eg', role: 'ORGANIZER', joinedDate: '2024-02-12' },
-    { id: 'usr-4', name: 'Nour El-Din Sherif', email: 'nour.sherif@cinemaverse.eg', role: 'ORGANIZER', joinedDate: '2024-03-05' },
-    { id: 'usr-5', name: 'Tarek Mansour', email: 'tarek.m@vance.eg', role: 'CUSTOMER', joinedDate: '2024-03-18' },
-    { id: 'usr-6', name: 'Salma Abdelrahman', email: 'salma.a@mail.eg', role: 'CUSTOMER', joinedDate: '2024-04-02' },
-    { id: 'usr-7', name: 'Youssef Ibrahim', email: 'yibrahim@luxe.eg', role: 'ORGANIZER', joinedDate: '2024-04-20' },
-    { id: 'usr-8', name: 'Mariam Kamel', email: 'm.kamel@filmhub.eg', role: 'CUSTOMER', joinedDate: '2024-05-11' },
-    { id: 'usr-9', name: 'Kareem Zaki', email: 'kareem.z@tech.eg', role: 'CUSTOMER', joinedDate: '2024-06-01' },
-  ]);
-
-  organizers = signal<OrganizerItem[]>([
-    { id: 'org-1', name: 'Cairo Film Festival Co.', email: 'contact@ciff.eg', company: 'CIFF Foundation', joinedDate: '2024-01-10' },
-    { id: 'org-2', name: 'El Gouna Media Group', email: 'info@elgounafilm.eg', company: 'Orascom Media', joinedDate: '2024-01-22' },
-    { id: 'org-3', name: 'Alexandria Arts & Culture', email: 'ops@alexcinemas.eg', company: 'Alex Cultural Society', joinedDate: '2024-02-15' },
-    { id: 'org-4', name: 'Pyramids Live Studios', email: 'support@pyramidsevents.eg', company: 'Pyramids Entertainment', joinedDate: '2024-03-01' },
-    { id: 'org-5', name: 'Zawya Cinema Productions', email: 'admin@zawyacinema.eg', company: 'Misr International Films', joinedDate: '2024-03-25' },
-    { id: 'org-6', name: 'Nile Stage & Screen', email: 'contact@nilestage.eg', company: 'Nile Arts Group', joinedDate: '2024-04-14' },
-    { id: 'org-7', name: 'Pharaohs Visual Media', email: 'hello@pharaohsmedia.eg', company: 'Pharaohs Creative', joinedDate: '2024-05-03' },
-    { id: 'org-8', name: 'Zamalek Culture Club', email: 'booking@zamalekevents.eg', company: 'Zamalek Nightlife', joinedDate: '2024-05-29' },
-  ]);
-
-  venues = signal<VenueItem[]>([
-    { id: 'ven-1', name: 'Vox Cinema Mall of Egypt', address: 'Wahhat Rd, 6th of October City, Giza', capacity: 450 },
-    { id: 'ven-2', name: 'Sea Cinema El Gouna', address: 'Abu Tig Marina, El Gouna, Red Sea', capacity: 220 },
-    { id: 'ven-3', name: 'Cairo Opera House Main Hall', address: 'El-Borg Gezira St, Zamalek, Cairo', capacity: 850 },
-    { id: 'ven-4', name: 'Renaissance Cinema Downtown', address: 'Emad El-Din St, Downtown, Cairo', capacity: 310 },
-    { id: 'ven-5', name: 'San Stefano Grand Cinema', address: 'El-Geish Rd, San Stefano, Alexandria', capacity: 180 },
-    { id: 'ven-6', name: 'Zawya Cinema Downtown', address: '15 Emad El-Din St, Downtown, Cairo', capacity: 600 },
-    { id: 'ven-7', name: 'Galaxy Cinema El Manial', address: 'Abdulaziz Al Saud St, El Manial, Cairo', capacity: 500 },
-    { id: 'ven-8', name: 'Sun City Cinema Heliopolis', address: 'Autostrad Rd, Heliopolis, Cairo', capacity: 150 },
-  ]);
-
-  movies = signal<MovieItem[]>([
-    { id: 'mov-1', title: 'Kira & El Gin', genre: 'Action / Drama', duration: '175 min', rating: '15+', releaseDate: '2022-06-30' },
-    { id: 'mov-2', title: 'The Blue Elephant 2', genre: 'Horror / Mystery', duration: '130 min', rating: '18+', releaseDate: '2019-07-25' },
-    { id: 'mov-3', title: 'Voy! Voy! Voy!', genre: 'Comedy / Drama', duration: '108 min', rating: '12+', releaseDate: '2023-09-13' },
-    { id: 'mov-4', title: 'El Emeleyyah Maziq', genre: 'Action / Comedy', duration: '115 min', rating: 'PG-13', releaseDate: '2024-01-04' },
-    { id: 'mov-5', title: 'El Arif (The Knower)', genre: 'Action / Thriller', duration: '125 min', rating: '15+', releaseDate: '2021-07-14' },
-    { id: 'mov-6', title: 'Welad Rizk 3: El Qadia', genre: 'Action / Crime', duration: '135 min', rating: '15+', releaseDate: '2024-06-12' },
-    { id: 'mov-7', title: 'Abou El Nasab', genre: 'Comedy / Action', duration: '110 min', rating: 'PG-13', releaseDate: '2023-12-21' },
-    { id: 'mov-8', title: 'El Geness (The Species)', genre: 'Sci-Fi / Drama', duration: '120 min', rating: 'PG-13', releaseDate: '2024-05-10' },
-  ]);
+  // --- Dynamic Backend Signals ---
+  users = signal<UserItem[]>([]);
+  organizers = signal<OrganizerItem[]>([]);
+  venues = signal<VenueItem[]>([]);
+  movies = signal<MovieItem[]>([]);
+  isLoading = signal<boolean>(false);
 
   // --- Drawer Form Signals / Bindings ---
   formName = signal<string>('');
@@ -126,6 +98,78 @@ export class AdminDashboardComponent {
   formDuration = signal<string>('120 min');
   formRating = signal<string>('PG-13');
   formReleaseDate = signal<string>('');
+
+  ngOnInit(): void {
+    const user = this.authService.currentUser();
+    if (user && user.email) {
+      this.currentUserEmail.set(user.email);
+    }
+    this.loadAdminData();
+  }
+
+  /**
+   * Fetches real live data from Spring Boot REST Endpoints
+   */
+  loadAdminData(): void {
+    this.isLoading.set(true);
+
+    // 1. Fetch system users from GET /api/admin/users
+    this.userService.getAllUsers().subscribe({
+      next: (dtos: UserDto[]) => {
+        const mappedUsers: UserItem[] = (dtos || []).map((u) => ({
+          id: String(u.id),
+          name: u.name || u.email,
+          email: u.email,
+          role: (u.role || 'CUSTOMER') as 'ADMIN' | 'ORGANIZER' | 'CUSTOMER',
+          joinedDate: '2026-08-01',
+        }));
+        this.users.set(mappedUsers);
+
+        // Filter organizers
+        const mappedOrgs: OrganizerItem[] = (dtos || [])
+          .filter((u) => u.role === 'ORGANIZER')
+          .map((u) => ({
+            id: String(u.id),
+            name: u.name || u.email,
+            email: u.email,
+            company: 'Event Organizer',
+            joinedDate: '2026-08-01',
+          }));
+        this.organizers.set(mappedOrgs);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false),
+    });
+
+    // 2. Fetch venues from GET /api/venues
+    this.venueService.getVenues().subscribe({
+      next: (venueList) => {
+        const mappedVenues: VenueItem[] = (venueList || []).map((v) => ({
+          id: String(v.id),
+          name: v.name,
+          address: v.address || 'Cairo, Egypt',
+          capacity: v.capacity || 500,
+        }));
+        this.venues.set(mappedVenues);
+      },
+    });
+
+    // 3. Fetch public events from GET /api/public/events
+    this.eventService.getPublicEvents(0, 100).subscribe({
+      next: (pagedRes) => {
+        const eventList: EventResponse[] = pagedRes?.content || [];
+        const mappedMovies: MovieItem[] = eventList.map((e) => ({
+          id: String(e.id),
+          title: e.title,
+          genre: e.category || 'General',
+          duration: '120 min',
+          rating: 'PG-13',
+          releaseDate: e.startDate ? e.startDate.split('T')[0] : '2026-08-01',
+        }));
+        this.movies.set(mappedMovies);
+      },
+    });
+  }
 
   // --- Computed Metrics (Top Overview Cards) ---
   totalUsersCount = computed(() => this.users().length);
@@ -254,139 +298,119 @@ export class AdminDashboardComponent {
   saveDrawerItem() {
     const selected = this.selectedItem();
     const tab = this.activeTab();
-    const today = new Date().toISOString().split('T')[0];
 
-    if (tab === 'USERS') {
-      if (selected) {
-        this.users.update((list) =>
-          list.map((u) =>
-            u.id === selected.id
-              ? {
-                  ...u,
-                  name: this.formName(),
-                  email: this.formEmail(),
-                  role: this.formRole(),
-                }
-              : u
-          )
-        );
+    if (tab === 'VENUES') {
+      const payload = {
+        name: this.formVenueName(),
+        address: this.formAddress(),
+        capacity: Number(this.formCapacity()),
+      };
+      if (selected && selected.id) {
+        this.venueService.updateVenue(Number(selected.id), payload).subscribe({
+          next: () => {
+            this.loadAdminData();
+            this.closeDrawer();
+          },
+        });
       } else {
-        const newUser: UserItem = {
-          id: 'usr-' + Date.now(),
-          name: this.formName() || 'New User',
-          email: this.formEmail() || 'user@cinema.com',
-          role: this.formRole(),
-          joinedDate: today,
-        };
-        this.users.update((list) => [newUser, ...list]);
+        this.venueService.createVenue(payload).subscribe({
+          next: () => {
+            this.loadAdminData();
+            this.closeDrawer();
+          },
+        });
       }
-    } else if (tab === 'ORGANIZERS') {
-      if (selected) {
-        this.organizers.update((list) =>
-          list.map((o) =>
-            o.id === selected.id
-              ? {
-                  ...o,
-                  name: this.formName(),
-                  email: this.formEmail(),
-                  company: this.formCompany(),
-                }
-              : o
-          )
-        );
+    } else if (tab === 'USERS') {
+      if (selected && selected.id) {
+        this.userService.updateUserRole(Number(selected.id), this.formRole() as UserRole).subscribe({
+          next: () => {
+            this.loadAdminData();
+            this.closeDrawer();
+          },
+        });
       } else {
-        const newOrg: OrganizerItem = {
-          id: 'org-' + Date.now(),
-          name: this.formName() || 'New Organizer',
-          email: this.formEmail() || 'org@cinema.com',
-          company: this.formCompany() || 'Independent',
-          joinedDate: today,
-        };
-        this.organizers.update((list) => [newOrg, ...list]);
-      }
-    } else if (tab === 'VENUES') {
-      if (selected) {
-        this.venues.update((list) =>
-          list.map((v) =>
-            v.id === selected.id
-              ? {
-                  ...v,
-                  name: this.formVenueName(),
-                  address: this.formAddress(),
-                  capacity: Number(this.formCapacity()),
-                }
-              : v
-          )
-        );
-      } else {
-        const newVenue: VenueItem = {
-          id: 'ven-' + Date.now(),
-          name: this.formVenueName() || 'New Cinema Hall',
-          address: this.formAddress() || '123 Main Street',
-          capacity: Number(this.formCapacity()) || 100,
-        };
-        this.venues.update((list) => [newVenue, ...list]);
+        this.closeDrawer();
       }
     } else if (tab === 'MOVIES') {
-      if (selected) {
-        this.movies.update((list) =>
-          list.map((m) =>
-            m.id === selected.id
-              ? {
-                  ...m,
-                  title: this.formTitle(),
-                  genre: this.formGenre(),
-                  duration: this.formDuration(),
-                  rating: this.formRating(),
-                  releaseDate: this.formReleaseDate(),
-                }
-              : m
-          )
-        );
-      } else {
-        const newMov: MovieItem = {
-          id: 'mov-' + Date.now(),
-          title: this.formTitle() || 'New Movie',
-          genre: this.formGenre() || 'Action / Drama',
-          duration: this.formDuration() || '120 min',
-          rating: this.formRating() || 'PG-13',
-          releaseDate: this.formReleaseDate() || today,
-        };
-        this.movies.update((list) => [newMov, ...list]);
-      }
-    }
+      const payload = {
+        title: this.formTitle(),
+        description: `Admin movie: ${this.formTitle()}`,
+        category: this.formGenre() || 'General',
+        startDate: this.formReleaseDate() ? `${this.formReleaseDate()}T20:00:00` : '2026-08-25T20:00:00',
+        endDate: this.formReleaseDate() ? `${this.formReleaseDate()}T22:00:00` : '2026-08-25T22:00:00',
+        status: 'PUBLISHED' as const,
+        venueId: 1,
+        imageUrl: ''
+      };
 
-    this.closeDrawer();
+      if (selected && selected.id) {
+        this.eventService.updateEvent(Number(selected.id), payload).subscribe({
+          next: () => {
+            this.loadAdminData();
+            this.closeDrawer();
+          }
+        });
+      } else {
+        this.eventService.createEvent(payload).subscribe({
+          next: (created) => {
+            const newMovie: MovieItem = {
+              id: String(created.id),
+              title: created.title,
+              genre: created.category || 'General',
+              duration: '120 min',
+              rating: 'PG-13',
+              releaseDate: created.startDate ? created.startDate.split('T')[0] : '2026-08-25',
+            };
+            this.movies.update((current) => [newMovie, ...current]);
+            this.loadAdminData();
+            this.closeDrawer();
+          }
+        });
+      }
+    } else {
+      this.closeDrawer();
+    }
   }
 
   updateUserRole(user: UserItem, newRole: 'ADMIN' | 'CUSTOMER' | 'ORGANIZER') {
     if (user.email === this.currentUserEmail()) {
       return;
     }
+    const numId = Number(user.id);
+    if (!numId) return;
 
-    this.users.update((list) =>
-      list.map((u) => (u.id === user.id ? { ...u, role: newRole } : u))
-    );
+    this.userService.updateUserRole(numId, newRole as UserRole).subscribe({
+      next: () => this.loadAdminData(),
+      error: (err) => alert(err?.error?.message || 'Failed to update user role.'),
+    });
   }
 
   deleteItem(item: any) {
     const tab = this.activeTab();
+    const numId = Number(item.id);
 
-    if (tab === 'USERS') {
-      if (item.email === this.currentUserEmail()) {
-        return;
-      }
-      this.users.update((list) => list.filter((u) => u.id !== item.id));
-    } else if (tab === 'ORGANIZERS') {
-      this.organizers.update((list) => list.filter((o) => o.id !== item.id));
+    if (tab === 'USERS' || tab === 'ORGANIZERS') {
+      if (item.email === this.currentUserEmail()) return;
+      if (!numId) return;
+
+      this.userService.deleteUser(numId).subscribe({
+        next: () => this.loadAdminData(),
+        error: (err) => alert(err?.error?.message || 'Failed to delete user.'),
+      });
     } else if (tab === 'VENUES') {
-      this.venues.update((list) => list.filter((v) => v.id !== item.id));
-    } else if (tab === 'MOVIES') {
-      this.movies.update((list) => list.filter((m) => m.id !== item.id));
-    }
+      if (!numId) return;
 
-    if (this.currentPage() > this.totalPages()) {
-      this.currentPage.set(this.totalPages());
+      this.venueService.deleteVenue(numId).subscribe({
+        next: () => this.loadAdminData(),
+        error: (err) => alert(err?.error?.message || 'Failed to delete venue.'),
+      });
+    } else if (tab === 'MOVIES') {
+      if (!numId) return;
+
+      this.eventService.deleteEvent(numId).subscribe({
+        next: () => this.loadAdminData(),
+        error: (err) => alert(err?.error?.message || 'Failed to delete event.'),
+      });
     }
   }
 

@@ -1,8 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { email } from '@angular/forms/signals';
 
 export interface LoginRequest {
   email: string;
@@ -43,10 +42,12 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly TOKEN_KEY = 'jwt';
 
-  // 1. Reactive state trigger for JWT token changes
+  // 1. Reactive state signals
   private readonly tokenSignal = signal<string | null>(this.getToken());
+  private readonly errorSignal = signal<string | null>(null);
+  private readonly loadingSignal = signal<boolean>(false);
 
-  // 2. Public currentUser computed signal accessed by Navbar & Guards
+  // 2. Public computed signals
   readonly currentUser = computed<UserSession | null>(() => {
     const token = this.tokenSignal();
     if (!token) return null;
@@ -64,28 +65,58 @@ export class AuthService {
     };
   });
 
+  readonly isAuthenticated = computed<boolean>(() => !!this.currentUser());
+  readonly authError = this.errorSignal.asReadonly();
+  readonly isLoading = this.loadingSignal.asReadonly();
+
   /** POST /api/v1/auth/login */
   login(credentials: LoginRequest): Observable<AuthResponse> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
     return this.http.post<AuthResponse>(
       `${environment.apiUrl}/v1/auth/login`,
       credentials
     ).pipe(
-      tap(res => {
-        if (res?.token) this.storeToken(res.token);
+      tap({
+        next: (res) => {
+          this.loadingSignal.set(false);
+          if (res?.token) this.storeToken(res.token);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.loadingSignal.set(false);
+          const errorMsg = this.extractErrorMessage(err, 'Login failed. Please check your credentials and try again.');
+          this.errorSignal.set(errorMsg);
+        }
       })
     );
   }
 
   /** POST /api/v1/auth/register */
   register(payload: RegisterRequest): Observable<AuthResponse> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
     return this.http.post<AuthResponse>(
       `${environment.apiUrl}/v1/auth/register`,
       payload
     ).pipe(
-      tap(res => {
-        if (res?.token) this.storeToken(res.token);
+      tap({
+        next: (res) => {
+          this.loadingSignal.set(false);
+          if (res?.token) this.storeToken(res.token);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.loadingSignal.set(false);
+          const errorMsg = this.extractErrorMessage(err, 'Registration failed. Please try again.');
+          this.errorSignal.set(errorMsg);
+        }
       })
     );
+  }
+
+  clearError(): void {
+    this.errorSignal.set(null);
   }
 
   /** Persist JWT to localStorage & trigger state update */
@@ -103,6 +134,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     this.tokenSignal.set(null);
+    this.errorSignal.set(null);
   }
 
   /** Returns true when a valid JWT is present */
@@ -154,5 +186,24 @@ export class AuthService {
     if (!rawRole) return null;
     const role = String(rawRole).replace(/^ROLE_/, '') as UserRole;
     return ['CUSTOMER', 'ORGANIZER', 'ADMIN'].includes(role) ? role : null;
+  }
+
+  private extractErrorMessage(err: HttpErrorResponse, fallback: string): string {
+    if (err.error?.message) {
+      return err.error.message;
+    }
+    if (typeof err.error === 'string') {
+      return err.error;
+    }
+    if (err.status === 400) {
+      return 'Invalid request details provided.';
+    }
+    if (err.status === 401) {
+      return 'Invalid credentials. Please check your email and password.';
+    }
+    if (err.status === 403) {
+      return 'Access denied.';
+    }
+    return fallback;
   }
 }
