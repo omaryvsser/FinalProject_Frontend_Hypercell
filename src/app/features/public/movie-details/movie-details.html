@@ -50,6 +50,28 @@
 
             <h1 class="movie-title">{{ m.title }}</h1>
 
+            <!-- Movie Details under title: Director, Duration, Language -->
+            <div class="movie-sub-details" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 6px; margin-bottom: 14px; font-size: 0.95rem; color: rgba(255, 255, 255, 0.85);">
+              @if (m.director && m.director !== 'N/A') {
+                <span class="sub-detail-item" style="display: inline-flex; align-items: center; gap: 4px;">
+                  <span class="material-symbols-outlined" style="font-size: 1.1rem; color: var(--primary, #e50914);">movie_filter</span>
+                  <strong>Director:</strong> {{ m.director }}
+                </span>
+              }
+              @if (m.runtime && m.runtime !== 'N/A') {
+                <span class="sub-detail-item" style="display: inline-flex; align-items: center; gap: 4px;">
+                  <span class="material-symbols-outlined" style="font-size: 1.1rem; color: var(--primary, #e50914);">timer</span>
+                  <strong>Duration:</strong> {{ m.runtime }}
+                </span>
+              }
+              @if (m.language) {
+                <span class="sub-detail-item" style="display: inline-flex; align-items: center; gap: 4px;">
+                  <span class="material-symbols-outlined" style="font-size: 1.1rem; color: var(--primary, #e50914);">translate</span>
+                  <strong>Language:</strong> {{ m.language }}
+                </span>
+              }
+            </div>
+
             <div class="genre-list">
               @for (genre of m.genres; track genre) {
                 <span class="genre-pill">{{ genre }}</span>

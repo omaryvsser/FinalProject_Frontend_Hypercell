@@ -38,7 +38,20 @@
       />
     </div>
 
-    <!-- 🟢 Image Poster (File Upload + URL Link) -->
+    <!-- Description / Synopsis -->
+    <div class="form-group">
+      <label class="form-label" for="movie-description">Description / Synopsis</label>
+      <textarea
+        id="movie-description"
+        class="form-control"
+        rows="3"
+        [(ngModel)]="formDescription"
+        name="description"
+        placeholder="Enter movie synopsis..."
+      ></textarea>
+    </div>
+
+    <!--  Image Poster (File Upload + URL Link) -->
     <div class="form-group">
       <label class="form-label">Poster Image</label>
 
@@ -84,6 +97,46 @@
         name="category"
         placeholder="e.g. Drama, Action, Sci-Fi"
         required
+      />
+    </div>
+
+    <!-- Director -->
+    <div class="form-group">
+      <label class="form-label" for="movie-director">Director</label>
+      <input
+        id="movie-director"
+        type="text"
+        class="form-control"
+        [(ngModel)]="formDirector"
+        name="director"
+        placeholder="e.g. Christopher Nolan"
+      />
+    </div>
+
+    <!-- Duration (Minutes) -->
+    <div class="form-group">
+      <label class="form-label" for="movie-duration">Duration (Minutes)</label>
+      <input
+        id="movie-duration"
+        type="number"
+        min="1"
+        class="form-control"
+        [(ngModel)]="formDurationMinutes"
+        name="durationMinutes"
+        placeholder="e.g. 148"
+      />
+    </div>
+
+    <!-- Language -->
+    <div class="form-group">
+      <label class="form-label" for="movie-language">Language</label>
+      <input
+        id="movie-language"
+        type="text"
+        class="form-control"
+        [(ngModel)]="formLanguage"
+        name="language"
+        placeholder="e.g. English / Arabic Subtitles"
       />
     </div>
 

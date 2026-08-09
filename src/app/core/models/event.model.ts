@@ -7,6 +7,9 @@ export interface EventResponse {
   startDate: string;   // ISO datetime string from backend
   endDate: string;
   status: EventStatus;
+  director?: string | null;
+  durationMinutes?: number | null;
+  language?: string | null;
   venueId?: number | null;
   venueName: string;
   imageUrl: string | null;

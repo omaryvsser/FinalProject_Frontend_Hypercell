@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,7 +15,7 @@ type MovieStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
   selector: 'app-event-editor',
   standalone: true,
   imports: [
-    FormsModule,
+    ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
     MatCardModule,
@@ -31,17 +31,10 @@ export class EventEditor implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private eventService = inject(EventService);
+  private fb = inject(FormBuilder);
 
   readonly movieId = signal<number | null>(null);
   readonly isEditMode = computed(() => this.movieId() !== null);
-
-  readonly title = signal<string>('');
-  readonly description = signal<string>('');
-  readonly category = signal<string>('');
-  readonly startDate = signal<string>('');
-  readonly endDate = signal<string>('');
-  readonly status = signal<MovieStatus>('DRAFT');
-  readonly venueId = signal<number | null>(null);
 
   readonly isSaving = signal<boolean>(false);
   readonly isSubmitted = signal<boolean>(false);
@@ -63,15 +56,19 @@ export class EventEditor implements OnInit {
     { id: 2, name: 'Al Manara Arts Center' },
   ];
 
-  readonly isFormValid = computed(
-    () =>
-      this.title().trim().length > 0 &&
-      this.category().length > 0 &&
-      this.startDate().length > 0 &&
-      this.endDate().length > 0 &&
-      this.endDate() > this.startDate() &&
-      this.venueId() !== null
-  );
+  // Reactive Form Group setup
+  readonly eventForm: FormGroup = this.fb.group({
+    title: ['', [Validators.required, Validators.maxLength(255)]],
+    description: ['', [Validators.maxLength(2000)]],
+    category: ['', [Validators.required]],
+    startDate: ['', [Validators.required]],
+    endDate: ['', [Validators.required]],
+    status: ['DRAFT', [Validators.required]],
+    venueId: [null as number | null, [Validators.required]],
+    director: ['', [Validators.maxLength(150)]],
+    durationMinutes: [null as number | null, [Validators.min(1)]],
+    language: ['', [Validators.maxLength(100)]],
+  });
 
   ngOnInit(): void {
     const idParameter = this.route.snapshot.paramMap.get('id');
@@ -87,14 +84,19 @@ export class EventEditor implements OnInit {
 
   private loadMovieForEditing(movieId: number): void {
     this.eventService.getEventById(movieId).subscribe({
-      next: (movie) => {
-        this.title.set(movie.title ?? '');
-        this.description.set(movie.description ?? '');
-        this.category.set(movie.category ?? '');
-        this.startDate.set(movie.startDate ? movie.startDate.substring(0, 16) : '');
-        this.endDate.set(movie.endDate ? movie.endDate.substring(0, 16) : '');
-        this.status.set(movie.status ?? 'DRAFT');
-        this.venueId.set(movie.venueId ?? null);
+      next: (movie: any) => {
+        this.eventForm.patchValue({
+          title: movie.title ?? '',
+          description: movie.description ?? '',
+          category: movie.category ?? '',
+          startDate: movie.startDate ? movie.startDate.substring(0, 16) : '',
+          endDate: movie.endDate ? movie.endDate.substring(0, 16) : '',
+          status: movie.status ?? 'DRAFT',
+          venueId: movie.venueId ?? null,
+          director: movie.director ?? '',
+          durationMinutes: movie.durationMinutes ?? null,
+          language: movie.language ?? '',
+        });
       },
       error: (err) => {
         console.error('Failed to load event from backend:', err);
@@ -104,36 +106,36 @@ export class EventEditor implements OnInit {
   }
 
   onSubmit(): void {
-    console.log('👉 onSubmit() WAS CALLED!');
-    console.log('Form State:', {
-      title: this.title(),
-      category: this.category(),
-      startDate: this.startDate(),
-      endDate: this.endDate(),
-      venueId: this.venueId(),
-      isValid: this.isFormValid(),
-    });
-
+    console.log(' onSubmit() WAS CALLED!');
     this.isSubmitted.set(true);
     this.saveMessage.set(null);
     this.errorMessage.set(null);
 
-    if (!this.isFormValid()) {
-      console.warn('⚠️ Validation failed! Request cancelled.');
+    if (this.eventForm.invalid) {
+      console.warn(' Form validation failed! Request cancelled.');
       return;
     }
 
-    console.log('🚀 Sending POST request to backend...');
+    const formValues = this.eventForm.value;
+    if (formValues.startDate && formValues.endDate && formValues.endDate <= formValues.startDate) {
+      this.errorMessage.set('End date must be later than the start date');
+      return;
+    }
+
+    console.log(' Sending request to backend...');
     this.isSaving.set(true);
 
     const moviePayload = {
-      title: this.title().trim(),
-      description: this.description().trim(),
-      category: this.category(),
-      startDate: `${this.startDate()}:00`,
-      endDate: `${this.endDate()}:00`,
-      status: this.status(),
-      venueId: this.venueId(),
+      title: formValues.title.trim(),
+      description: formValues.description ? formValues.description.trim() : '',
+      category: formValues.category,
+      startDate: formValues.startDate.length === 16 ? `${formValues.startDate}:00` : formValues.startDate,
+      endDate: formValues.endDate.length === 16 ? `${formValues.endDate}:00` : formValues.endDate,
+      status: formValues.status,
+      venueId: formValues.venueId,
+      director: formValues.director ? formValues.director.trim() : undefined,
+      durationMinutes: formValues.durationMinutes ? Number(formValues.durationMinutes) : undefined,
+      language: formValues.language ? formValues.language.trim() : undefined,
     };
 
     const request$ = this.isEditMode()
@@ -141,7 +143,7 @@ export class EventEditor implements OnInit {
       : this.eventService.createEvent(moviePayload);
 
     request$.subscribe({
-      next: (response) => {
+      next: () => {
         this.isSaving.set(false);
         this.saveMessage.set(
           this.isEditMode()

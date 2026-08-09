@@ -94,12 +94,36 @@ export class MovieDetailsComponent implements OnInit {
       next: (eventData: any) => {
         console.log('🎬 Backend Event Details:', eventData);
 
-        // 1. Format dates from event start time if available
+        // 1. Format dates from event start time
         const startDate = eventData.startDate ? new Date(eventData.startDate) : new Date();
         const formattedTime = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+        // Generate dynamic Date Options from event startDate
+        const dateList: DateOption[] = [];
+        const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+        for (let i = 0; i < 4; i++) {
+          const d = new Date(startDate);
+          d.setDate(startDate.getDate() + i);
+          const isoId = d.toISOString().split('T')[0];
+          const dayLabel = i === 0 ? 'TODAY' : days[d.getDay()];
+          const dateNumber = String(d.getDate()).padStart(2, '0');
+          const month = months[d.getMonth()];
+          dateList.push({ id: isoId, dayLabel, dateNumber, month });
+        }
+
+        this.dates.set(dateList);
+        if (dateList.length > 0) {
+          this.selectedDate.set(dateList[0].id);
+        }
+
         // 2. Map Backend Response to Movie Signal Model
         const defaultImage = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1920&auto=format&fit=crop';
+
+        const runtimeStr = eventData.durationMinutes
+          ? `${eventData.durationMinutes} mins`
+          : 'N/A';
 
         this.movie.set({
           id: eventData.id,
@@ -107,20 +131,20 @@ export class MovieDetailsComponent implements OnInit {
           backdropUrl: eventData.imageUrl || defaultImage,
           posterUrl: eventData.imageUrl || defaultImage,
           synopsis: eventData.description || 'No synopsis provided for this event.',
-          runtime: '2h 15m', // Standard display placeholder
+          runtime: runtimeStr,
           rating: '8.0',
-          genres: eventData.category ? [eventData.category] : ['Historical'],
-          director: 'Organizer Special',
+          genres: eventData.category ? [eventData.category] : ['General'],
+          director: eventData.director || 'N/A',
           releaseYear: startDate.getFullYear(),
           ageRating: 'PG-13',
-          language: 'English / Arabic Subtitles',
+          language: eventData.language || 'N/A',
         });
 
         // 3. Map Venue Data returned from Backend
         this.venues.set([
           {
             name: eventData.venueName || 'Main Cinema Venue',
-            address: eventData.venueAddress || '123 Entertainment Hub',
+            address: eventData.venueAddress || 'Cinema Address',
             screenType: 'Standard Digital',
             showtimes: [formattedTime, '18:00', '21:00'],
           },
@@ -129,7 +153,7 @@ export class MovieDetailsComponent implements OnInit {
         this.isLoading.set(false);
       },
       error: (err: any) => {
-        console.error('❌ Failed to load event details:', err);
+        console.error(' Failed to load event details:', err);
         this.isLoading.set(false);
         this.errorMessage.set('Could not load movie details from server.');
       },

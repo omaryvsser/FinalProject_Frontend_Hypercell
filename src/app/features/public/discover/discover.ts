@@ -152,7 +152,7 @@ export class Discover implements OnInit {
         const apiMovies = (page?.content || page || []).map((event: any) => {
           const mapped = eventToMovie(event);
 
-          // 🟢 Extract image directly from backend response OR mapped object
+          //  Extract image directly from backend response OR mapped object
           const image = event.imageUrl || mapped?.imageUrl || mapped?.posterUrl;
 
           return {

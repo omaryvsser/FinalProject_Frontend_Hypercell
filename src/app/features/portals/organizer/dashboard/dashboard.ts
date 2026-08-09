@@ -8,7 +8,7 @@ import { OrganizerTabsComponent, OrganizerTabType } from './components/organizer
 import { OrganizerTableComponent, OrganizerMovie } from './components/organizer-table/organizer-table';
 import { OrganizerSlideOverDrawerComponent } from './components/organizer-slide-over-drawer/organizer-slide-over-drawer';
 import { EventService, EventPayload } from '../../../../core/services/event.service';
-import { VenueService, Venue } from '../../../../core/services/venue.service'; // 🟢 IMPORTED VENUE SERVICE
+import { VenueService, Venue } from '../../../../core/services/venue.service'; //  IMPORTED VENUE SERVICE
 
 @Component({
   selector: 'app-dashboard',
@@ -27,7 +27,7 @@ import { VenueService, Venue } from '../../../../core/services/venue.service'; /
 export class Dashboard implements OnInit {
   private router = inject(Router);
   private eventService = inject(EventService);
-  private venueService = inject(VenueService); // 🟢 INJECTED
+  private venueService = inject(VenueService); //  INJECTED
 
   // --- Core State Signals ---
   activeTab = signal<OrganizerTabType>('ALL');
@@ -40,19 +40,23 @@ export class Dashboard implements OnInit {
   organizerMovies = signal<OrganizerMovie[]>([]);
 
   // --- Venue Signals ---
-  venues = signal<Venue[]>([]); // 🟢 ADDED: List of fetched venues
+  venues = signal<Venue[]>([]); //  ADDED: List of fetched venues
 
   // --- Drawer Form Signals ---
   formTitle = signal<string>('');
+  formDescription = signal<string>('');
   formImageUrl = signal<string>('');
   formCategory = signal<string>('');
-  formVenueId = signal<number | null>(null); // 🟢 REPLACED formVenueName WITH formVenueId
+  formDirector = signal<string>('');
+  formDurationMinutes = signal<number | null>(null);
+  formLanguage = signal<string>('');
+  formVenueId = signal<number | null>(null);
   formStartDate = signal<string>('');
   formStatus = signal<'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED'>('DRAFT');
 
   ngOnInit(): void {
     this.loadEventsFromBackend();
-    this.loadVenues(); // 🟢 FETCH VENUES ON COMPONENT INIT
+    this.loadVenues(); //  FETCH VENUES ON COMPONENT INIT
   }
 
   // --- Backend API Integration ---
@@ -69,7 +73,7 @@ export class Dashboard implements OnInit {
         }
       },
       error: (err) => {
-        console.error('❌ Failed to load venues:', err);
+        console.error(' Failed to load venues:', err);
       }
     });
   }
@@ -99,7 +103,7 @@ export class Dashboard implements OnInit {
         this.organizerMovies.set(mappedMovies);
       },
       error: (err) => {
-        console.error('❌ Failed to load organizer events:', err);
+        console.error(' Failed to load organizer events:', err);
       }
     });
   }
@@ -149,34 +153,37 @@ export class Dashboard implements OnInit {
     // 6. Construct Payload
     const payload: EventPayload = {
       title: title,
-      description: `Movie screening for ${title}`,
+      description: this.formDescription().trim() || `Movie screening for ${title}`,
       category: this.formCategory().trim() || 'General',
       startDate: rawDate,
       endDate: rawDate,
       status: validStatus,
       venueId: selectedVenueId,
-      imageUrl: finalImageUrl
+      imageUrl: finalImageUrl,
+      director: this.formDirector().trim() || undefined,
+      durationMinutes: this.formDurationMinutes() ? Number(this.formDurationMinutes()) : undefined,
+      language: this.formLanguage().trim() || undefined,
     };
 
-    console.log('📤 Sending payload to Spring Boot:', payload);
+    console.log(' Sending payload to Spring Boot:', payload);
 
     const currentSelected = this.selectedMovie();
 
     if (currentSelected && currentSelected.id) {
       this.eventService.updateEvent(currentSelected.id, payload).subscribe({
         next: (updatedMovie) => {
-          console.log('✅ Movie updated successfully:', updatedMovie);
+          console.log(' Movie updated successfully:', updatedMovie);
           this.loadEventsFromBackend();
           this.closeDrawer();
         },
-        error: (err) => console.error('❌ Failed to update movie:', err)
+        error: (err) => console.error(' Failed to update movie:', err)
       });
     } else {
       this.eventService.createEvent(payload).subscribe({
         next: (createdMovie) => {
-          console.log('✅ Movie created successfully:', createdMovie);
+          console.log(' Movie created successfully:', createdMovie);
 
-          // 🟢 Optimistically add the new movie into the Signal array immediately
+          //  Optimistically add the new movie into the Signal array immediately
           const selectedVenue = this.venues().find((v) => v.id === payload.venueId);
           const newMappedMovie: OrganizerMovie = {
             id: createdMovie.id,
@@ -196,7 +203,7 @@ export class Dashboard implements OnInit {
           this.closeDrawer();
         },
         error: (err) => {
-          console.error('❌ Failed to create movie in Spring Boot:', err);
+          console.error(' Failed to create movie in Spring Boot:', err);
           alert('Validation failed on server: ' + JSON.stringify(err.error?.errors || err.error?.message));
         }
       });
@@ -263,18 +270,26 @@ export class Dashboard implements OnInit {
 
   resetFormFields(): void {
     this.formTitle.set('');
+    this.formDescription.set('');
     this.formImageUrl.set('');
     this.formCategory.set('Science Fiction');
-    this.formVenueId.set(this.venues().length > 0 ? this.venues()[0].id : null); // 🟢 RESET TO FIRST VENUE ID
+    this.formDirector.set('');
+    this.formDurationMinutes.set(null);
+    this.formLanguage.set('');
+    this.formVenueId.set(this.venues().length > 0 ? this.venues()[0].id : null);
     this.formStartDate.set('2026-08-20T20:00:00');
     this.formStatus.set('DRAFT');
   }
 
   populateFormFields(movie: any): void {
     this.formTitle.set(movie.title || '');
+    this.formDescription.set(movie.description || '');
     this.formImageUrl.set(movie.imageUrl || '');
     this.formCategory.set(movie.category || '');
-    this.formVenueId.set(movie.venueId || (this.venues().length > 0 ? this.venues()[0].id : null)); // 🟢 POPULATE VENUE ID
+    this.formDirector.set(movie.director || '');
+    this.formDurationMinutes.set(movie.durationMinutes || null);
+    this.formLanguage.set(movie.language || '');
+    this.formVenueId.set(movie.venueId || (this.venues().length > 0 ? this.venues()[0].id : null));
     this.formStartDate.set(movie.startDate || '');
     this.formStatus.set(movie.status || 'DRAFT');
   }
@@ -294,7 +309,7 @@ export class Dashboard implements OnInit {
 
     this.eventService.deleteEvent(movie.id).subscribe({
       next: () => {
-        console.log(`✅ Movie with ID ${movie.id} deleted successfully from database.`);
+        console.log(` Movie with ID ${movie.id} deleted successfully from database.`);
 
         this.organizerMovies.update((list) => list.filter((m) => m.id !== movie.id));
 
@@ -303,7 +318,7 @@ export class Dashboard implements OnInit {
         }
       },
       error: (err) => {
-        console.error('❌ Failed to delete event in Spring Boot:', err);
+        console.error(' Failed to delete event in Spring Boot:', err);
         alert('Failed to delete movie. Please try again.');
       }
     });

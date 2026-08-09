@@ -18,8 +18,12 @@ export class OrganizerSlideOverDrawerComponent {
 
   // --- Two-Way Model Signals ---
   formTitle = model<string>('');
+  formDescription = model<string>('');
   formImageUrl = model<string>('');
   formCategory = model<string>('');
+  formDirector = model<string>('');
+  formDurationMinutes = model<number | null>(null);
+  formLanguage = model<string>('');
   formVenueId = model<number | null>(null);
   formStartDate = model<string>('');
   formStatus = model<'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED'>('DRAFT');
@@ -29,7 +33,7 @@ export class OrganizerSlideOverDrawerComponent {
   saveMovie = output<void>();
 
   /**
-   * 🟢 Handles file selection & converts image to Data URL for instant preview & backend storage
+   *  Handles file selection & converts image to Data URL for instant preview & backend storage
    */
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;

@@ -11,6 +11,9 @@ export interface EventPayload {
   startDate: string;
   endDate: string;
   status: 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
+  director?: string;
+  durationMinutes?: number | null;
+  language?: string;
   venueId?: number | null;
   venueName?: string;
   imageUrl?: string;

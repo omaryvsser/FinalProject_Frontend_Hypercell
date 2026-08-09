@@ -9,7 +9,10 @@ export interface Movie {
   id: number;
   title: string;
   genre: string;           // maps to EventDto.category
-  duration: string;        // not in backend — kept for UI compatibility
+  duration: string;        // formatted duration string
+  durationMinutes?: number | null;
+  director?: string | null;
+  language?: string | null;
   rating: string;          // not in backend — kept for UI compatibility
   showtime: string;        // maps to EventDto.startDate (formatted)
   cinemaName: string;      // maps to EventDto.venueName
@@ -28,7 +31,10 @@ export function eventToMovie(event: EventResponse): Movie {
     id: Number(event.id),
     title: event.title,
     genre: event.category,
-    duration: '',           // backend does not expose duration
+    duration: event.durationMinutes ? `${event.durationMinutes} mins` : '',
+    durationMinutes: event.durationMinutes,
+    director: event.director ?? '',
+    language: event.language ?? '',
     rating: '',             // backend does not expose rating
     showtime: event.startDate
       ? new Date(event.startDate).toLocaleString('en-US', {

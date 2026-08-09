@@ -178,7 +178,7 @@ export class BookingPage implements OnInit {
       next: (res) => {
         this.isSubmitting.set(false);
 
-        // 🎯 1. Optimistic UI Update (Instant Feedback)
+        //  1. Optimistic UI Update (Instant Feedback)
         const bookedQty = this.quantity();
         const targetCatId = selectedCat.id;
 
@@ -196,13 +196,13 @@ export class BookingPage implements OnInit {
           );
         }
 
-        // 🎯 2. Absolute Truth Re-fetch (Concurrency & DB Sync)
+        //  2. Absolute Truth Re-fetch (Concurrency & DB Sync)
         this.loadEventDetails(this.eventId());
 
-        // 🎯 3. Form Reset
+        //  3. Form Reset
         this.quantity.set(1);
 
-        // 🎯 4. Clean Navigation to My Tickets page
+        //  4. Clean Navigation to My Tickets page
         this.router.navigate(['/my-tickets'], {
           queryParams: { confirmed: 'true', bookingId: res?.bookingId }
         });
