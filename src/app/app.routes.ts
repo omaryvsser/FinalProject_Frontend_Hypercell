@@ -52,8 +52,8 @@ export const routes: Routes = [
     path: 'seat-selection/:id',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/booking/seat-selection/seat-selection').then(
-        (m) => m.SeatSelection
+      import('./features/booking/booking-page/booking-page').then(
+        (m) => m.BookingPage
       ),
   },
   {

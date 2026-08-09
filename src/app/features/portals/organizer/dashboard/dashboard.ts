@@ -52,6 +52,7 @@ export class Dashboard implements OnInit {
   formLanguage = signal<string>('');
   formVenueId = signal<number | null>(null);
   formStartDate = signal<string>('');
+  formEndDate = signal<string>('');
   formStatus = signal<'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED'>('DRAFT');
 
   ngOnInit(): void {
@@ -122,13 +123,21 @@ export class Dashboard implements OnInit {
       return;
     }
 
-    // 2. Format date string (YYYY-MM-DDTHH:mm:ss)
+    // 2. Format date strings (YYYY-MM-DDTHH:mm:ss)
     let rawDate = (this.formStartDate() || '').trim();
     if (rawDate && !rawDate.includes('T')) {
       rawDate = rawDate.replace(' ', 'T');
     }
     if (rawDate && rawDate.length === 16) {
       rawDate += ':00';
+    }
+
+    let endDateVal = (this.formEndDate() || rawDate).trim();
+    if (endDateVal && !endDateVal.includes('T')) {
+      endDateVal = endDateVal.replace(' ', 'T');
+    }
+    if (endDateVal && endDateVal.length === 16) {
+      endDateVal += ':00';
     }
 
     // 3. Status Clamp
@@ -156,7 +165,7 @@ export class Dashboard implements OnInit {
       description: this.formDescription().trim() || `Movie screening for ${title}`,
       category: this.formCategory().trim() || 'General',
       startDate: rawDate,
-      endDate: rawDate,
+      endDate: endDateVal,
       status: validStatus,
       venueId: selectedVenueId,
       imageUrl: finalImageUrl,
@@ -278,6 +287,7 @@ export class Dashboard implements OnInit {
     this.formLanguage.set('');
     this.formVenueId.set(this.venues().length > 0 ? this.venues()[0].id : null);
     this.formStartDate.set('2026-08-20T20:00:00');
+    this.formEndDate.set('2026-08-20T22:00:00');
     this.formStatus.set('DRAFT');
   }
 
@@ -291,6 +301,7 @@ export class Dashboard implements OnInit {
     this.formLanguage.set(movie.language || '');
     this.formVenueId.set(movie.venueId || (this.venues().length > 0 ? this.venues()[0].id : null));
     this.formStartDate.set(movie.startDate || '');
+    this.formEndDate.set(movie.endDate || movie.startDate || '');
     this.formStatus.set(movie.status || 'DRAFT');
   }
 

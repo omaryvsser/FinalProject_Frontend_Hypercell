@@ -94,10 +94,16 @@ export class AdminDashboardComponent implements OnInit {
   formCapacity = signal<number>(100);
 
   formTitle = signal<string>('');
-  formGenre = signal<string>('');
-  formDuration = signal<string>('120 min');
-  formRating = signal<string>('PG-13');
-  formReleaseDate = signal<string>('');
+  formDescription = signal<string>('');
+  formImageUrl = signal<string>('');
+  formGenre = signal<string>('Action');
+  formStatus = signal<'DRAFT' | 'PUBLISHED'>('PUBLISHED');
+  formDirector = signal<string>('');
+  formDurationMinutes = signal<number | string>(120);
+  formLanguage = signal<string>('English');
+  formStartDate = signal<string>('');
+  formEndDate = signal<string>('');
+  formVenueId = signal<number>(1);
 
   ngOnInit(): void {
     const user = this.authService.currentUser();
@@ -262,10 +268,17 @@ export class AdminDashboardComponent implements OnInit {
     this.formAddress.set('');
     this.formCapacity.set(100);
     this.formTitle.set('');
-    this.formGenre.set('');
-    this.formDuration.set('120 min');
-    this.formRating.set('PG-13');
-    this.formReleaseDate.set('');
+    this.formDescription.set('');
+    this.formImageUrl.set('');
+    this.formGenre.set('Action');
+    this.formStatus.set('PUBLISHED');
+    this.formDirector.set('');
+    this.formDurationMinutes.set(120);
+    this.formLanguage.set('English');
+    this.formStartDate.set('');
+    this.formEndDate.set('');
+    const firstVenue = this.venues().length > 0 ? Number(this.venues()[0].id) : 1;
+    this.formVenueId.set(firstVenue);
   }
 
   populateFormFields(item: any) {
@@ -287,10 +300,16 @@ export class AdminDashboardComponent implements OnInit {
         break;
       case 'MOVIES':
         this.formTitle.set(item.title || '');
-        this.formGenre.set(item.genre || '');
-        this.formDuration.set(item.duration || '120 min');
-        this.formRating.set(item.rating || 'PG-13');
-        this.formReleaseDate.set(item.releaseDate || '');
+        this.formDescription.set(item.description || '');
+        this.formImageUrl.set(item.imageUrl || '');
+        this.formGenre.set(item.genre || 'Action');
+        this.formStatus.set(item.status || 'PUBLISHED');
+        this.formDirector.set(item.director || '');
+        this.formDurationMinutes.set(item.durationMinutes || item.duration || 120);
+        this.formLanguage.set(item.language || 'English');
+        this.formStartDate.set(item.startDate || '');
+        this.formEndDate.set(item.endDate || '');
+        this.formVenueId.set(item.venueId ? Number(item.venueId) : (this.venues().length > 0 ? Number(this.venues()[0].id) : 1));
         break;
     }
   }
@@ -322,25 +341,43 @@ export class AdminDashboardComponent implements OnInit {
       }
     } else if (tab === 'USERS') {
       if (selected && selected.id) {
-        this.userService.updateUserRole(Number(selected.id), this.formRole() as UserRole).subscribe({
-          next: () => {
-            this.loadAdminData();
+        const targetRoleId = Number(selected.id);
+        const requestedRole = this.formRole() as UserRole;
+        this.userService.updateUserRole(targetRoleId, requestedRole).subscribe({
+          next: (updatedDto) => {
+            const targetRole = (updatedDto?.role || requestedRole) as 'ADMIN' | 'ORGANIZER' | 'CUSTOMER';
+            this.users.update((current) =>
+              current.map((u) => (u.id === String(targetRoleId) ? { ...u, role: targetRole } : u))
+            );
+            this.syncOrganizersSignal();
             this.closeDrawer();
           },
+          error: (err) => alert(err?.error?.message || 'Failed to update user role.'),
         });
       } else {
         this.closeDrawer();
       }
     } else if (tab === 'MOVIES') {
+      const sDate = this.formStartDate();
+      const eDate = this.formEndDate();
+
+      let imgUrl = this.formImageUrl().trim();
+      if (!imgUrl) {
+        imgUrl = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba';
+      }
+
       const payload = {
-        title: this.formTitle(),
-        description: `Admin movie: ${this.formTitle()}`,
-        category: this.formGenre() || 'General',
-        startDate: this.formReleaseDate() ? `${this.formReleaseDate()}T20:00:00` : '2026-08-25T20:00:00',
-        endDate: this.formReleaseDate() ? `${this.formReleaseDate()}T22:00:00` : '2026-08-25T22:00:00',
-        status: 'PUBLISHED' as const,
-        venueId: 1,
-        imageUrl: ''
+        title: this.formTitle().trim(),
+        description: this.formDescription() ? this.formDescription().trim() : '',
+        category: this.formGenre() || 'Action',
+        startDate: sDate ? (sDate.length === 16 ? `${sDate}:00` : sDate) : '2026-08-25T20:00:00',
+        endDate: eDate ? (eDate.length === 16 ? `${eDate}:00` : eDate) : '2026-08-25T22:00:00',
+        status: this.formStatus() || 'PUBLISHED',
+        venueId: Number(this.formVenueId()) || 1,
+        director: this.formDirector() ? this.formDirector().trim() : undefined,
+        durationMinutes: Number(this.formDurationMinutes()) || 120,
+        language: this.formLanguage() ? this.formLanguage().trim() : undefined,
+        imageUrl: imgUrl
       };
 
       if (selected && selected.id) {
@@ -348,7 +385,8 @@ export class AdminDashboardComponent implements OnInit {
           next: () => {
             this.loadAdminData();
             this.closeDrawer();
-          }
+          },
+          error: (err) => alert(err?.error?.message || 'Failed to update movie.')
         });
       } else {
         this.eventService.createEvent(payload).subscribe({
@@ -356,15 +394,16 @@ export class AdminDashboardComponent implements OnInit {
             const newMovie: MovieItem = {
               id: String(created.id),
               title: created.title,
-              genre: created.category || 'General',
-              duration: '120 min',
+              genre: created.category || 'Action',
+              duration: `${created.durationMinutes || 120} min`,
               rating: 'PG-13',
               releaseDate: created.startDate ? created.startDate.split('T')[0] : '2026-08-25',
             };
             this.movies.update((current) => [newMovie, ...current]);
             this.loadAdminData();
             this.closeDrawer();
-          }
+          },
+          error: (err) => alert(err?.error?.message || 'Failed to create movie.')
         });
       }
     } else {
@@ -380,7 +419,16 @@ export class AdminDashboardComponent implements OnInit {
     if (!numId) return;
 
     this.userService.updateUserRole(numId, newRole as UserRole).subscribe({
-      next: () => this.loadAdminData(),
+      next: (updatedDto) => {
+        const targetRole = (updatedDto?.role || newRole) as 'ADMIN' | 'ORGANIZER' | 'CUSTOMER';
+        // Immediately update local Signal containing user list upon 200 OK
+        this.users.update((currentUsers) =>
+          currentUsers.map((u) =>
+            u.id === String(numId) ? { ...u, role: targetRole } : u
+          )
+        );
+        this.syncOrganizersSignal();
+      },
       error: (err) => alert(err?.error?.message || 'Failed to update user role.'),
     });
   }
@@ -416,5 +464,18 @@ export class AdminDashboardComponent implements OnInit {
 
   isCurrentUser(email: string): boolean {
     return email === this.currentUserEmail();
+  }
+
+  private syncOrganizersSignal(): void {
+    const mappedOrgs: OrganizerItem[] = this.users()
+      .filter((u) => u.role === 'ORGANIZER')
+      .map((u) => ({
+        id: String(u.id),
+        name: u.name || u.email,
+        email: u.email,
+        company: 'Event Organizer',
+        joinedDate: u.joinedDate || '2026-08-01',
+      }));
+    this.organizers.set(mappedOrgs);
   }
 }

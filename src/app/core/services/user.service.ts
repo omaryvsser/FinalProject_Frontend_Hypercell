@@ -67,7 +67,7 @@ export class UserService {
     this.isLoadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.put<UserDto>(`${this.apiUrl}/admin/users/${id}/role`, { role }).pipe(
+    return this.http.put<UserDto>(`${this.apiUrl}/admin/users/${id}/role`, { newRole: role }).pipe(
       tap({
         next: (updatedUser) => {
           this.usersSignal.update((list) =>

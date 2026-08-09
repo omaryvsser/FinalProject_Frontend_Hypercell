@@ -170,6 +170,93 @@
   color: #ffffff;
 }
 
+.drawer-panel.wide-panel {
+  max-width: 580px;
+}
+
+.form-section {
+  background-color: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #38bdf8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title .icon {
+  font-size: 1.1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.col-half {
+  flex: 1;
+  min-width: 0;
+}
+
+.col-third {
+  flex: 1;
+  min-width: 0;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.or-divider {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0.35rem 0;
+  font-weight: 600;
+}
+
+.poster-preview-wrapper {
+  margin-top: 0.25rem;
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: 180px;
+  border: 1px solid #334155;
+}
+
+.poster-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+input[type="datetime-local"].form-input {
+  color-scheme: dark;
+}
+
+.btn-save-icon {
+  font-size: 1.1rem;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+}
+
 .btn-save {
   background: linear-gradient(135deg, #38bdf8, #0284c7);
   border: none;
@@ -181,6 +268,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+  display: inline-flex;
+  align-items: center;
 }
 
 .btn-save:hover {

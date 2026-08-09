@@ -1,7 +1,7 @@
 <div class="drawer-wrapper" [class.open]="isOpen()">
   <div class="drawer-backdrop" (click)="onClose()"></div>
 
-  <aside class="drawer-panel">
+  <aside class="drawer-panel" [class.wide-panel]="activeTab() === 'MOVIES'">
     <header class="drawer-header">
       <div>
         <h2 class="drawer-title">
@@ -18,213 +18,346 @@
       <form (submit)="$event.preventDefault(); onSave()">
         @switch (activeTab()) {
           @case ('USERS') {
-            <div class="form-group">
-              <label class="form-label" for="user-name">Full Name</label>
-              <input
-                id="user-name"
-                type="text"
-                class="form-input"
-                placeholder="e.g. Ahmed El-Sayed"
-                [ngModel]="formName()()"
-                (ngModelChange)="formName().set($event)"
-                name="userName"
-                required
-              />
-            </div>
+            <div class="form-section">
+              <div class="form-group">
+                <label class="form-label" for="user-name">Full Name</label>
+                <input
+                  id="user-name"
+                  type="text"
+                  class="form-input"
+                  placeholder="e.g. Ahmed El-Sayed"
+                  [ngModel]="formName()()"
+                  (ngModelChange)="formName().set($event)"
+                  name="userName"
+                  required
+                />
+              </div>
 
-            <div class="form-group">
-              <label class="form-label" for="user-email">Email Address</label>
-              <input
-                id="user-email"
-                type="email"
-                class="form-input"
-                placeholder="e.g. ahmed@cinema.eg"
-                [ngModel]="formEmail()()"
-                (ngModelChange)="formEmail().set($event)"
-                name="userEmail"
-                [disabled]="selectedItem() && isCurrentUser(selectedItem().email)"
-                required
-              />
-            </div>
+              <div class="form-group">
+                <label class="form-label" for="user-email">Email Address</label>
+                <input
+                  id="user-email"
+                  type="email"
+                  class="form-input"
+                  placeholder="e.g. ahmed@cinema.eg"
+                  [ngModel]="formEmail()()"
+                  (ngModelChange)="formEmail().set($event)"
+                  name="userEmail"
+                  [disabled]="selectedItem() && isCurrentUser(selectedItem().email)"
+                  required
+                />
+              </div>
 
-            <div class="form-group">
-              <label class="form-label" for="user-role">User Role</label>
-              <select
-                id="user-role"
-                class="form-select"
-                [ngModel]="formRole()()"
-                (ngModelChange)="formRole().set($event)"
-                name="userRole"
-                [disabled]="selectedItem() && isCurrentUser(selectedItem().email)"
-              >
-                <option value="ADMIN">ADMIN</option>
-                <option value="ORGANIZER">ORGANIZER</option>
-                <option value="CUSTOMER">CUSTOMER</option>
-              </select>
+              <div class="form-group">
+                <label class="form-label" for="user-role">User Role</label>
+                <select
+                  id="user-role"
+                  class="form-select"
+                  [ngModel]="formRole()()"
+                  (ngModelChange)="formRole().set($event)"
+                  name="userRole"
+                  [disabled]="selectedItem() && isCurrentUser(selectedItem().email)"
+                >
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="ORGANIZER">ORGANIZER</option>
+                  <option value="CUSTOMER">CUSTOMER</option>
+                </select>
+              </div>
             </div>
           }
 
           @case ('ORGANIZERS') {
-            <div class="form-group">
-              <label class="form-label" for="org-name">Organizer Contact Name</label>
-              <input
-                id="org-name"
-                type="text"
-                class="form-input"
-                placeholder="e.g. Mohamed Hassan"
-                [ngModel]="formName()()"
-                (ngModelChange)="formName().set($event)"
-                name="orgName"
-                required
-              />
-            </div>
+            <div class="form-section">
+              <div class="form-group">
+                <label class="form-label" for="org-name">Organizer Contact Name</label>
+                <input
+                  id="org-name"
+                  type="text"
+                  class="form-input"
+                  placeholder="e.g. Mohamed Hassan"
+                  [ngModel]="formName()()"
+                  (ngModelChange)="formName().set($event)"
+                  name="orgName"
+                  required
+                />
+              </div>
 
-            <div class="form-group">
-              <label class="form-label" for="org-email">Contact Email</label>
-              <input
-                id="org-email"
-                type="email"
-                class="form-input"
-                placeholder="e.g. contact@ciff.eg"
-                [ngModel]="formEmail()()"
-                (ngModelChange)="formEmail().set($event)"
-                name="orgEmail"
-                required
-              />
-            </div>
+              <div class="form-group">
+                <label class="form-label" for="org-email">Contact Email</label>
+                <input
+                  id="org-email"
+                  type="email"
+                  class="form-input"
+                  placeholder="e.g. contact@ciff.eg"
+                  [ngModel]="formEmail()()"
+                  (ngModelChange)="formEmail().set($event)"
+                  name="orgEmail"
+                  required
+                />
+              </div>
 
-            <div class="form-group">
-              <label class="form-label" for="org-company">Company / Organization</label>
-              <input
-                id="org-company"
-                type="text"
-                class="form-input"
-                placeholder="e.g. CIFF Foundation"
-                [ngModel]="formCompany()()"
-                (ngModelChange)="formCompany().set($event)"
-                name="orgCompany"
-                required
-              />
+              <div class="form-group">
+                <label class="form-label" for="org-company">Company / Organization</label>
+                <input
+                  id="org-company"
+                  type="text"
+                  class="form-input"
+                  placeholder="e.g. CIFF Foundation"
+                  [ngModel]="formCompany()()"
+                  (ngModelChange)="formCompany().set($event)"
+                  name="orgCompany"
+                  required
+                />
+              </div>
             </div>
           }
 
           @case ('VENUES') {
-            <div class="form-group">
-              <label class="form-label" for="venue-name">Venue Name</label>
-              <input
-                id="venue-name"
-                type="text"
-                class="form-input"
-                placeholder="e.g. Vox Cinema Mall of Egypt"
-                [ngModel]="formVenueName()()"
-                (ngModelChange)="formVenueName().set($event)"
-                name="venueName"
-                required
-              />
-            </div>
+            <div class="form-section">
+              <div class="form-group">
+                <label class="form-label" for="venue-name">Venue Name</label>
+                <input
+                  id="venue-name"
+                  type="text"
+                  class="form-input"
+                  placeholder="e.g. Vox Cinema Mall of Egypt"
+                  [ngModel]="formVenueName()()"
+                  (ngModelChange)="formVenueName().set($event)"
+                  name="venueName"
+                  required
+                />
+              </div>
 
-            <div class="form-group">
-              <label class="form-label" for="venue-address">Street Address</label>
-              <input
-                id="venue-address"
-                type="text"
-                class="form-input"
-                placeholder="e.g. Wahhat Rd, 6th of October City, Giza"
-                [ngModel]="formAddress()()"
-                (ngModelChange)="formAddress().set($event)"
-                name="venueAddress"
-                required
-              />
-            </div>
+              <div class="form-group">
+                <label class="form-label" for="venue-address">Street Address</label>
+                <input
+                  id="venue-address"
+                  type="text"
+                  class="form-input"
+                  placeholder="e.g. Wahhat Rd, 6th of October City, Giza"
+                  [ngModel]="formAddress()()"
+                  (ngModelChange)="formAddress().set($event)"
+                  name="venueAddress"
+                  required
+                />
+              </div>
 
-            <div class="form-group">
-              <label class="form-label" for="venue-capacity">Total Seat Capacity</label>
-              <input
-                id="venue-capacity"
-                type="number"
-                class="form-input"
-                placeholder="e.g. 450"
-                [ngModel]="formCapacity()()"
-                (ngModelChange)="formCapacity().set($event)"
-                name="venueCapacity"
-                min="10"
-                required
-              />
+              <div class="form-group">
+                <label class="form-label" for="venue-capacity">Total Seat Capacity</label>
+                <input
+                  id="venue-capacity"
+                  type="number"
+                  class="form-input"
+                  placeholder="e.g. 450"
+                  [ngModel]="formCapacity()()"
+                  (ngModelChange)="formCapacity().set($event)"
+                  name="venueCapacity"
+                  min="10"
+                  required
+                />
+              </div>
             </div>
           }
 
           @case ('MOVIES') {
-            <div class="form-group">
-              <label class="form-label" for="movie-title">Movie Title</label>
-              <input
-                id="movie-title"
-                type="text"
-                class="form-input"
-                placeholder="e.g. Kira & El Gin"
-                [ngModel]="formTitle()()"
-                (ngModelChange)="formTitle().set($event)"
-                name="movieTitle"
-                required
-              />
+            <!-- Section 1: Basic Information -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <span class="material-symbols-outlined icon">movie</span>
+                Basic Movie Details
+              </h3>
+
+              <div class="form-group">
+                <label class="form-label" for="movie-title">Movie Title *</label>
+                <input
+                  id="movie-title"
+                  type="text"
+                  class="form-input"
+                  placeholder="Enter the movie title"
+                  [ngModel]="formTitle()()"
+                  (ngModelChange)="formTitle().set($event)"
+                  name="movieTitle"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="movie-description">Description</label>
+                <textarea
+                  id="movie-description"
+                  class="form-input form-textarea"
+                  rows="3"
+                  placeholder="Enter a short movie description..."
+                  [ngModel]="formDescription()()"
+                  (ngModelChange)="formDescription().set($event)"
+                  name="movieDescription"
+                ></textarea>
+              </div>
+
+              <!-- Poster Image (File Upload + URL Link) -->
+              <div class="form-group">
+                <label class="form-label">Poster Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="form-input file-input"
+                  (change)="onFileSelected($event)"
+                />
+                <div class="or-divider">— OR —</div>
+                <input
+                  id="movie-image-url"
+                  type="text"
+                  class="form-input"
+                  [ngModel]="formImageUrl()()"
+                  (ngModelChange)="formImageUrl().set($event)"
+                  name="movieImageUrl"
+                  placeholder="https://images.example.com/poster.jpg"
+                />
+              </div>
+
+              <!-- Poster Image Preview -->
+              @if (formImageUrl()()) {
+                <div class="form-group preview-group">
+                  <label class="form-label">Poster Preview</label>
+                  <div class="poster-preview-wrapper">
+                    <img [src]="formImageUrl()()" alt="Poster preview" class="poster-preview-img" />
+                  </div>
+                </div>
+              }
+
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label class="form-label" for="movie-genre">Genre *</label>
+                  <select
+                    id="movie-genre"
+                    class="form-select"
+                    [ngModel]="formGenre()()"
+                    (ngModelChange)="formGenre().set($event)"
+                    name="movieGenre"
+                    required
+                  >
+                    @for (cat of categories; track cat) {
+                      <option [value]="cat">{{ cat }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="form-group col-half">
+                  <label class="form-label" for="movie-status">Status</label>
+                  <select
+                    id="movie-status"
+                    class="form-select"
+                    [ngModel]="formStatus()()"
+                    (ngModelChange)="formStatus().set($event)"
+                    name="movieStatus"
+                  >
+                    <option value="DRAFT">Draft</option>
+                    <option value="PUBLISHED">Published</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="movie-genre">Genre</label>
-              <input
-                id="movie-genre"
-                type="text"
-                class="form-input"
-                placeholder="e.g. Action / Drama"
-                [ngModel]="formGenre()()"
-                (ngModelChange)="formGenre().set($event)"
-                name="movieGenre"
-                required
-              />
+            <!-- Section 2: Credits & Metadata -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <span class="material-symbols-outlined icon">info</span>
+                Metadata & Specs
+              </h3>
+
+              <div class="form-row">
+                <div class="form-group col-third">
+                  <label class="form-label" for="movie-director">Director</label>
+                  <input
+                    id="movie-director"
+                    type="text"
+                    class="form-input"
+                    placeholder="e.g. C. Nolan"
+                    [ngModel]="formDirector()()"
+                    (ngModelChange)="formDirector().set($event)"
+                    name="movieDirector"
+                  />
+                </div>
+
+                <div class="form-group col-third">
+                  <label class="form-label" for="movie-duration-minutes">Duration (Min)</label>
+                  <input
+                    id="movie-duration-minutes"
+                    type="number"
+                    class="form-input"
+                    placeholder="148"
+                    min="1"
+                    [ngModel]="formDurationMinutes()()"
+                    (ngModelChange)="formDurationMinutes().set($event)"
+                    name="movieDurationMinutes"
+                  />
+                </div>
+
+                <div class="form-group col-third">
+                  <label class="form-label" for="movie-language">Language</label>
+                  <input
+                    id="movie-language"
+                    type="text"
+                    class="form-input"
+                    placeholder="e.g. English"
+                    [ngModel]="formLanguage()()"
+                    (ngModelChange)="formLanguage().set($event)"
+                    name="movieLanguage"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="movie-duration">Duration</label>
-              <input
-                id="movie-duration"
-                type="text"
-                class="form-input"
-                placeholder="e.g. 175 min"
-                [ngModel]="formDuration()()"
-                (ngModelChange)="formDuration().set($event)"
-                name="movieDuration"
-                required
-              />
-            </div>
+            <!-- Section 3: Schedule & Cinema -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <span class="material-symbols-outlined icon">calendar_month</span>
+                Schedule & Cinema
+              </h3>
 
-            <div class="form-group">
-              <label class="form-label" for="movie-rating">Age Rating</label>
-              <select
-                id="movie-rating"
-                class="form-select"
-                [ngModel]="formRating()()"
-                (ngModelChange)="formRating().set($event)"
-                name="movieRating"
-              >
-                <option value="G">G (General)</option>
-                <option value="PG">PG (Parental Guidance)</option>
-                <option value="PG-13">PG-13</option>
-                <option value="12+">12+</option>
-                <option value="15+">15+</option>
-                <option value="18+">18+ (Adults Only)</option>
-              </select>
-            </div>
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label class="form-label" for="movie-start-date">Start Time *</label>
+                  <input
+                    id="movie-start-date"
+                    type="datetime-local"
+                    class="form-input"
+                    [ngModel]="formStartDate()()"
+                    (ngModelChange)="formStartDate().set($event)"
+                    name="movieStartDate"
+                    required
+                  />
+                </div>
 
-            <div class="form-group">
-              <label class="form-label" for="movie-release">Release Date</label>
-              <input
-                id="movie-release"
-                type="date"
-                class="form-input"
-                [ngModel]="formReleaseDate()()"
-                (ngModelChange)="formReleaseDate().set($event)"
-                name="movieReleaseDate"
-                required
-              />
+                <div class="form-group col-half">
+                  <label class="form-label" for="movie-end-date">End Time *</label>
+                  <input
+                    id="movie-end-date"
+                    type="datetime-local"
+                    class="form-input"
+                    [ngModel]="formEndDate()()"
+                    (ngModelChange)="formEndDate().set($event)"
+                    name="movieEndDate"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="movie-venue">Cinema / Venue Location *</label>
+                <select
+                  id="movie-venue"
+                  class="form-select"
+                  [ngModel]="formVenueId()()"
+                  (ngModelChange)="formVenueId().set($event)"
+                  name="movieVenueId"
+                  required
+                >
+                  @for (v of venues(); track v.id) {
+                    <option [value]="v.id">{{ v.name }}</option>
+                  }
+                </select>
+              </div>
             </div>
           }
         }
@@ -236,6 +369,7 @@
         Cancel
       </button>
       <button type="button" class="btn-save" (click)="onSave()">
+        <span class="material-symbols-outlined btn-save-icon">save</span>
         {{ selectedItem() ? 'Save Changes' : 'Create ' + singularTabLabel() }}
       </button>
     </footer>

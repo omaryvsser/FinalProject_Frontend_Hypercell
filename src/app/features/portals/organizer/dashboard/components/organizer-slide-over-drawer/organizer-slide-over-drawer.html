@@ -6,7 +6,7 @@
 </div>
 
 <!-- Slide-Over Container -->
-<aside class="drawer-container" [class.open]="isOpen()">
+<aside class="drawer-container wide-panel" [class.open]="isOpen()">
   <!-- Header -->
   <div class="drawer-header">
     <div>
@@ -18,175 +18,213 @@
       </p>
     </div>
     <button type="button" class="close-btn" (click)="onClose()" aria-label="Close drawer">
-      &times;
+      <span class="material-symbols-outlined">close</span>
     </button>
   </div>
 
   <!-- Drawer Form Body -->
   <form (ngSubmit)="onSubmit()" class="drawer-form">
-    <!-- Movie Title -->
-    <div class="form-group">
-      <label class="form-label" for="movie-title">Movie Title</label>
-      <input
-        id="movie-title"
-        type="text"
-        class="form-control"
-        [(ngModel)]="formTitle"
-        name="title"
-        placeholder="e.g. The Godfather"
-        required
-      />
-    </div>
 
-    <!-- Description / Synopsis -->
-    <div class="form-group">
-      <label class="form-label" for="movie-description">Description / Synopsis</label>
-      <textarea
-        id="movie-description"
-        class="form-control"
-        rows="3"
-        [(ngModel)]="formDescription"
-        name="description"
-        placeholder="Enter movie synopsis..."
-      ></textarea>
-    </div>
+    <!-- Section 1: Basic Information & Poster -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <span class="material-symbols-outlined icon">movie</span>
+        Basic Movie Details & Poster
+      </h3>
 
-    <!--  Image Poster (File Upload + URL Link) -->
-    <div class="form-group">
-      <label class="form-label">Poster Image</label>
+      <!-- Movie Title -->
+      <div class="form-group">
+        <label class="form-label" for="movie-title">Movie Title *</label>
+        <input
+          id="movie-title"
+          type="text"
+          class="form-control"
+          [(ngModel)]="formTitle"
+          name="title"
+          placeholder="e.g. The Godfather"
+          required
+        />
+      </div>
 
-      <!-- File Selector -->
-      <input
-        type="file"
-        accept="image/*"
-        class="form-control file-input"
-        (change)="onFileSelected($event)"
-      />
+      <!-- Description / Synopsis -->
+      <div class="form-group">
+        <label class="form-label" for="movie-description">Description / Synopsis</label>
+        <textarea
+          id="movie-description"
+          class="form-control form-textarea"
+          rows="3"
+          [(ngModel)]="formDescription"
+          name="description"
+          placeholder="Enter movie synopsis..."
+        ></textarea>
+      </div>
 
-      <div class="or-divider">— OR —</div>
+      <!-- Poster Image (File Upload + URL Link) -->
+      <div class="form-group">
+        <label class="form-label">Poster Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          class="form-control file-input"
+          (change)="onFileSelected($event)"
+        />
+        <div class="or-divider">— OR —</div>
+        <input
+          id="movie-image-url"
+          type="text"
+          class="form-control"
+          [(ngModel)]="formImageUrl"
+          name="imageUrl"
+          placeholder="https://images.example.com/poster.jpg"
+        />
+      </div>
 
-      <!-- Image URL Text Field -->
-      <input
-        id="movie-image-url"
-        type="text"
-        class="form-control"
-        [(ngModel)]="formImageUrl"
-        name="imageUrl"
-        placeholder="https://images.example.com/poster.jpg"
-      />
-    </div>
+      <!-- Poster Image Preview -->
+      @if (formImageUrl()) {
+        <div class="form-group preview-group">
+          <label class="form-label">Poster Preview</label>
+          <div class="poster-preview-wrapper">
+            <img [src]="formImageUrl()" alt="Poster preview" class="poster-preview-img" />
+          </div>
+        </div>
+      }
 
-    <!-- Poster Image Preview -->
-    @if (formImageUrl()) {
-      <div class="form-group preview-group">
-        <label class="form-label">Poster Preview</label>
-        <div class="poster-preview-wrapper">
-          <img [src]="formImageUrl()" alt="Poster preview" class="poster-preview-img" />
+      <div class="form-row">
+        <!-- Category / Genre -->
+        <div class="form-group col-half">
+          <label class="form-label" for="movie-category">Category / Genre *</label>
+          <input
+            id="movie-category"
+            type="text"
+            class="form-control"
+            [(ngModel)]="formCategory"
+            name="category"
+            placeholder="e.g. Drama, Action, Sci-Fi"
+            required
+          />
+        </div>
+
+        <!-- Publishing Status -->
+        <div class="form-group col-half">
+          <label class="form-label" for="movie-status">Publishing Status *</label>
+          <select
+            id="movie-status"
+            class="form-control form-select"
+            [(ngModel)]="formStatus"
+            name="status"
+            required
+          >
+            <option value="DRAFT">DRAFT</option>
+            <option value="PUBLISHED">PUBLISHED</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="CANCELLED">CANCELLED</option>
+          </select>
         </div>
       </div>
-    }
-
-    <!-- Category / Genre -->
-    <div class="form-group">
-      <label class="form-label" for="movie-category">Category / Genre</label>
-      <input
-        id="movie-category"
-        type="text"
-        class="form-control"
-        [(ngModel)]="formCategory"
-        name="category"
-        placeholder="e.g. Drama, Action, Sci-Fi"
-        required
-      />
     </div>
 
-    <!-- Director -->
-    <div class="form-group">
-      <label class="form-label" for="movie-director">Director</label>
-      <input
-        id="movie-director"
-        type="text"
-        class="form-control"
-        [(ngModel)]="formDirector"
-        name="director"
-        placeholder="e.g. Christopher Nolan"
-      />
+    <!-- Section 2: Metadata & Specs -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <span class="material-symbols-outlined icon">info</span>
+        Metadata & Specs
+      </h3>
+
+      <div class="form-row">
+        <!-- Director -->
+        <div class="form-group col-third">
+          <label class="form-label" for="movie-director">Director</label>
+          <input
+            id="movie-director"
+            type="text"
+            class="form-control"
+            [(ngModel)]="formDirector"
+            name="director"
+            placeholder="e.g. C. Nolan"
+          />
+        </div>
+
+        <!-- Duration (Minutes) -->
+        <div class="form-group col-third">
+          <label class="form-label" for="movie-duration">Duration (Min)</label>
+          <input
+            id="movie-duration"
+            type="number"
+            min="1"
+            class="form-control"
+            [(ngModel)]="formDurationMinutes"
+            name="durationMinutes"
+            placeholder="148"
+          />
+        </div>
+
+        <!-- Language -->
+        <div class="form-group col-third">
+          <label class="form-label" for="movie-language">Language</label>
+          <input
+            id="movie-language"
+            type="text"
+            class="form-control"
+            [(ngModel)]="formLanguage"
+            name="language"
+            placeholder="e.g. English"
+          />
+        </div>
+      </div>
     </div>
 
-    <!-- Duration (Minutes) -->
-    <div class="form-group">
-      <label class="form-label" for="movie-duration">Duration (Minutes)</label>
-      <input
-        id="movie-duration"
-        type="number"
-        min="1"
-        class="form-control"
-        [(ngModel)]="formDurationMinutes"
-        name="durationMinutes"
-        placeholder="e.g. 148"
-      />
-    </div>
+    <!-- Section 3: Schedule & Cinema -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <span class="material-symbols-outlined icon">calendar_month</span>
+        Schedule & Cinema
+      </h3>
 
-    <!-- Language -->
-    <div class="form-group">
-      <label class="form-label" for="movie-language">Language</label>
-      <input
-        id="movie-language"
-        type="text"
-        class="form-control"
-        [(ngModel)]="formLanguage"
-        name="language"
-        placeholder="e.g. English / Arabic Subtitles"
-      />
-    </div>
+      <div class="form-row">
+        <!-- Start Date & Time -->
+        <div class="form-group col-half">
+          <label class="form-label" for="movie-start-date">Start Date & Time *</label>
+          <input
+            id="movie-start-date"
+            type="datetime-local"
+            class="form-control"
+            [(ngModel)]="formStartDate"
+            name="startDate"
+            required
+          />
+        </div>
 
-    <!-- Cinema Venue Dropdown -->
-    <div class="form-group">
-      <label class="form-label" for="movie-venue">Cinema Venue</label>
-      <select
-        id="movie-venue"
-        class="form-control form-select"
-        [(ngModel)]="formVenueId"
-        name="venueId"
-        required
-      >
-        <option [ngValue]="null" disabled>Select a cinema venue...</option>
-        @for (venue of venues(); track venue.id) {
-          <option [ngValue]="venue.id">
-            {{ venue.name }} {{ venue.capacity ? '(Capacity: ' + venue.capacity + ')' : '' }}
-          </option>
-        }
-      </select>
-    </div>
+        <!-- End Date & Time -->
+        <div class="form-group col-half">
+          <label class="form-label" for="movie-end-date">End Date & Time *</label>
+          <input
+            id="movie-end-date"
+            type="datetime-local"
+            class="form-control"
+            [(ngModel)]="formEndDate"
+            name="endDate"
+            required
+          />
+        </div>
+      </div>
 
-    <!-- Start Date & Time -->
-    <div class="form-group">
-      <label class="form-label" for="movie-start-date">Start Date & Time</label>
-      <input
-        id="movie-start-date"
-        type="datetime-local"
-        class="form-control"
-        [(ngModel)]="formStartDate"
-        name="startDate"
-        required
-      />
-    </div>
-
-    <!-- Publishing Status -->
-    <div class="form-group">
-      <label class="form-label" for="movie-status">Publishing Status</label>
-      <select
-        id="movie-status"
-        class="form-control form-select"
-        [(ngModel)]="formStatus"
-        name="status"
-        required
-      >
-        <option value="DRAFT">DRAFT</option>
-        <option value="PUBLISHED">PUBLISHED</option>
-        <option value="COMPLETED">COMPLETED</option>
-        <option value="CANCELLED">CANCELLED</option>
-      </select>
+      <div class="form-group">
+        <label class="form-label" for="movie-venue">Cinema Venue Location *</label>
+        <select
+          id="movie-venue"
+          class="form-control form-select"
+          [(ngModel)]="formVenueId"
+          name="venueId"
+          required
+        >
+          <option [ngValue]="null" disabled>Select a cinema venue...</option>
+          @for (venue of venues(); track venue.id) {
+            <option [ngValue]="venue.id">
+              {{ venue.name }} {{ venue.capacity ? '(Cap: ' + venue.capacity + ')' : '' }}
+            </option>
+          }
+        </select>
+      </div>
     </div>
 
     <!-- Footer Action Buttons -->
@@ -195,6 +233,7 @@
         Cancel
       </button>
       <button type="submit" class="btn btn-primary">
+        <span class="material-symbols-outlined btn-save-icon">save</span>
         {{ selectedMovie() ? 'Save Changes' : 'Create Movie' }}
       </button>
     </div>

@@ -26,6 +26,7 @@ export class OrganizerSlideOverDrawerComponent {
   formLanguage = model<string>('');
   formVenueId = model<number | null>(null);
   formStartDate = model<string>('');
+  formEndDate = model<string>('');
   formStatus = model<'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED'>('DRAFT');
 
   // --- Outputs ---
