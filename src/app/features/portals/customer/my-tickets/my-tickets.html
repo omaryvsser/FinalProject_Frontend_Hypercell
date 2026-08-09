@@ -70,20 +70,26 @@
                     <span>{{ ticket.cinemaName }}</span>
                   </div>
                 }
+
+                <!-- Seat Position -->
                 <div class="detail-item">
                   <span class="material-symbols-outlined detail-icon">event_seat</span>
                   <span>{{ ticket.seatNumber }}</span>
                 </div>
+
+                <!-- Showtime -->
                 <div class="detail-item">
                   <span class="material-symbols-outlined detail-icon">schedule</span>
                   <span>{{ ticket.showtime }}</span>
                 </div>
+
+                <!-- Ticket Reference Code -->
                 <div class="detail-item">
                   <span class="material-symbols-outlined detail-icon">confirmation_number</span>
                   <span class="ticket-id-code">{{ ticket.id }}</span>
                 </div>
               </div>
-            </div>
+            </div> <!-- 🟢 Fixed missing closing tag -->
 
             <!-- Right Side: Ticket Stub -->
             <div class="ticket-stub-side">

@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -7,8 +7,8 @@ import { OrganizerMetricCardsComponent } from './components/organizer-metric-car
 import { OrganizerTabsComponent, OrganizerTabType } from './components/organizer-tabs/organizer-tabs';
 import { OrganizerTableComponent, OrganizerMovie } from './components/organizer-table/organizer-table';
 import { OrganizerSlideOverDrawerComponent } from './components/organizer-slide-over-drawer/organizer-slide-over-drawer';
-import { EventService, EventPayload } from '../../../../core/services/event.service';
-import { VenueService, Venue } from '../../../../core/services/venue.service'; //  IMPORTED VENUE SERVICE
+import { EventService, EventPayload, SeatCategoryPayload } from '../../../../core/services/event.service';
+import { VenueService, Venue } from '../../../../core/services/venue.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,7 +27,10 @@ import { VenueService, Venue } from '../../../../core/services/venue.service'; /
 export class Dashboard implements OnInit {
   private router = inject(Router);
   private eventService = inject(EventService);
-  private venueService = inject(VenueService); //  INJECTED
+  private venueService = inject(VenueService);
+
+  // 👇 Reference to drawer component to read seatCategories signal
+  @ViewChild(OrganizerSlideOverDrawerComponent) drawerComponent!: OrganizerSlideOverDrawerComponent;
 
   // --- Core State Signals ---
   activeTab = signal<OrganizerTabType>('ALL');
@@ -40,7 +43,7 @@ export class Dashboard implements OnInit {
   organizerMovies = signal<OrganizerMovie[]>([]);
 
   // --- Venue Signals ---
-  venues = signal<Venue[]>([]); //  ADDED: List of fetched venues
+  venues = signal<Venue[]>([]);
 
   // --- Drawer Form Signals ---
   formTitle = signal<string>('');
@@ -57,37 +60,28 @@ export class Dashboard implements OnInit {
 
   ngOnInit(): void {
     this.loadEventsFromBackend();
-    this.loadVenues(); //  FETCH VENUES ON COMPONENT INIT
+    this.loadVenues();
   }
 
   // --- Backend API Integration ---
 
-  /**
-   * Fetches all registered venues from Spring Boot (/api/v1/venues)
-   */
   loadVenues(): void {
     this.venueService.getVenues().subscribe({
       next: (venueList) => {
         this.venues.set(venueList);
         if (venueList.length > 0) {
-          this.formVenueId.set(venueList[0].id); // Default to first venue
+          this.formVenueId.set(venueList[0].id);
         }
       },
-      error: (err) => {
-        console.error(' Failed to load venues:', err);
-      }
+      error: (err) => console.error('Failed to load venues:', err)
     });
   }
 
-  /**
-   * Fetches events from Spring Boot (/api/public/events or /api/v1/events)
-   */
   loadEventsFromBackend(): void {
     this.eventService.getOrganizerEvents(0, 100).subscribe({
       next: (response: any) => {
         const eventsList = response?.content || response || [];
 
-        // Map backend events into OrganizerMovie shape
         const mappedMovies: OrganizerMovie[] = eventsList.map((event: any) => ({
           id: event.id,
           title: event.title,
@@ -103,9 +97,7 @@ export class Dashboard implements OnInit {
 
         this.organizerMovies.set(mappedMovies);
       },
-      error: (err) => {
-        console.error(' Failed to load organizer events:', err);
-      }
+      error: (err) => console.error('Failed to load organizer events:', err)
     });
   }
 
@@ -117,13 +109,11 @@ export class Dashboard implements OnInit {
 
     const title = this.formTitle().trim();
 
-    // 1. Title Validation Guard
     if (!title) {
       alert('Please enter a Movie Title before saving!');
       return;
     }
 
-    // 2. Format date strings (YYYY-MM-DDTHH:mm:ss)
     let rawDate = (this.formStartDate() || '').trim();
     if (rawDate && !rawDate.includes('T')) {
       rawDate = rawDate.replace(' ', 'T');
@@ -140,26 +130,38 @@ export class Dashboard implements OnInit {
       endDateVal += ':00';
     }
 
-    // 3. Status Clamp
     const currentStatus = this.formStatus();
     const validStatus: 'DRAFT' | 'PUBLISHED' =
       currentStatus === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT';
 
-    // 4. Venue Guard
     const selectedVenueId = this.formVenueId();
     if (!selectedVenueId) {
       alert('Please select a cinema venue');
       return;
     }
 
-    // 5. Image URL Guard (Fall back to a standard placeholder if Base64 or empty)
     let finalImageUrl = this.formImageUrl().trim();
     if (!finalImageUrl) {
-      // Standard placeholder image if uploaded file / empty
       finalImageUrl = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba';
     }
 
-    // 6. Construct Payload
+    // 🟢 Read and Map Seat Categories from the Drawer ViewChild
+    let categoriesPayload: SeatCategoryPayload[] = [];
+    if (this.drawerComponent && this.drawerComponent.seatCategories) {
+      categoriesPayload = this.drawerComponent.seatCategories().map(cat => ({
+        name: cat.name,
+        price: Number(cat.price) || 0,
+        totalSeats: Number(cat.totalSeats) || 0
+      }));
+    }
+
+    // Guard: Ensure at least 1 category exists
+    if (categoriesPayload.length === 0) {
+      alert('Please add at least one seat category!');
+      return;
+    }
+
+    // Construct Payload including seatCategories
     const payload: EventPayload = {
       title: title,
       description: this.formDescription().trim() || `Movie screening for ${title}`,
@@ -172,27 +174,27 @@ export class Dashboard implements OnInit {
       director: this.formDirector().trim() || undefined,
       durationMinutes: this.formDurationMinutes() ? Number(this.formDurationMinutes()) : undefined,
       language: this.formLanguage().trim() || undefined,
+      seatCategories: categoriesPayload // 👈 Included in Spring Boot payload
     };
 
-    console.log(' Sending payload to Spring Boot:', payload);
+    console.log('Sending payload to Spring Boot:', payload);
 
     const currentSelected = this.selectedMovie();
 
     if (currentSelected && currentSelected.id) {
       this.eventService.updateEvent(currentSelected.id, payload).subscribe({
         next: (updatedMovie) => {
-          console.log(' Movie updated successfully:', updatedMovie);
+          console.log('Movie updated successfully:', updatedMovie);
           this.loadEventsFromBackend();
           this.closeDrawer();
         },
-        error: (err) => console.error(' Failed to update movie:', err)
+        error: (err) => console.error('Failed to update movie:', err)
       });
     } else {
       this.eventService.createEvent(payload).subscribe({
         next: (createdMovie) => {
-          console.log(' Movie created successfully:', createdMovie);
+          console.log('Movie created successfully with categories:', createdMovie);
 
-          //  Optimistically add the new movie into the Signal array immediately
           const selectedVenue = this.venues().find((v) => v.id === payload.venueId);
           const newMappedMovie: OrganizerMovie = {
             id: createdMovie.id,
@@ -206,20 +208,18 @@ export class Dashboard implements OnInit {
           };
 
           this.organizerMovies.update((current) => [newMappedMovie, ...current]);
-
-          // Re-fetch from backend to guarantee full persistence sync
           this.loadEventsFromBackend();
           this.closeDrawer();
         },
         error: (err) => {
-          console.error(' Failed to create movie in Spring Boot:', err);
+          console.error('Failed to create movie in Spring Boot:', err);
           alert('Validation failed on server: ' + JSON.stringify(err.error?.errors || err.error?.message));
         }
       });
     }
   }
 
-  // --- Computed Metrics ---
+  // --- Computed Metrics & Pagination ---
   totalMovies = computed(() => this.organizerMovies().length);
   publishedMovies = computed(() => this.organizerMovies().filter((m) => m.status === 'PUBLISHED').length);
   draftMovies = computed(() => this.organizerMovies().filter((m) => m.status === 'DRAFT').length);
@@ -228,7 +228,6 @@ export class Dashboard implements OnInit {
   totalBookings = computed(() => this.organizerMovies().reduce((total, m) => total + (m.bookings || 0), 0));
   totalAttendees = computed(() => this.organizerMovies().reduce((total, m) => total + (m.attendees || 0), 0));
 
-  // --- Computed Filtered & Paginated Movies ---
   filteredMovies = computed(() => {
     const tab = this.activeTab();
     if (tab === 'ALL') return this.organizerMovies();
@@ -289,6 +288,13 @@ export class Dashboard implements OnInit {
     this.formStartDate.set('2026-08-20T20:00:00');
     this.formEndDate.set('2026-08-20T22:00:00');
     this.formStatus.set('DRAFT');
+
+    // 🟢 Reset drawer seat categories to initial state
+    if (this.drawerComponent) {
+      this.drawerComponent.seatCategories.set([
+        { name: 'STANDARD', price: 100, totalSeats: 50 }
+      ]);
+    }
   }
 
   populateFormFields(movie: any): void {
@@ -320,8 +326,7 @@ export class Dashboard implements OnInit {
 
     this.eventService.deleteEvent(movie.id).subscribe({
       next: () => {
-        console.log(` Movie with ID ${movie.id} deleted successfully from database.`);
-
+        console.log(`Movie with ID ${movie.id} deleted successfully from database.`);
         this.organizerMovies.update((list) => list.filter((m) => m.id !== movie.id));
 
         if (this.currentPage() > this.totalPages()) {
@@ -329,7 +334,7 @@ export class Dashboard implements OnInit {
         }
       },
       error: (err) => {
-        console.error(' Failed to delete event in Spring Boot:', err);
+        console.error('Failed to delete event in Spring Boot:', err);
         alert('Failed to delete movie. Please try again.');
       }
     });

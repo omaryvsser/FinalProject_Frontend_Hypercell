@@ -4,6 +4,17 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { EventResponse, EventDetailResponse, PagedResponse } from '../models/event.model';
 
+
+
+export type SeatCategoryName = 'STANDARD' | 'VIP' | 'IMAX' ;
+
+
+export interface SeatCategoryPayload {
+  name: SeatCategoryName;
+  price: number;
+  totalSeats: number;
+}
+
 export interface EventPayload {
   title: string;
   description: string;
@@ -17,6 +28,7 @@ export interface EventPayload {
   venueId?: number | null;
   venueName?: string;
   imageUrl?: string;
+  seatCategories?: SeatCategoryPayload[];
 }
 
 @Injectable({

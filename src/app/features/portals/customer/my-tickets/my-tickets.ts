@@ -24,29 +24,39 @@ export interface Ticket {
 }
 
 /** Convert a raw backend TicketDto to the UI Ticket shape */
-function ticketDtoToUi(dto: TicketDto): Ticket {
+function ticketDtoToUi(dto: TicketDto, index: number): Ticket {
+  // Extract seat number if embedded in ticketNumber (e.g. "TKN-7E658B-1" -> "Seat #1")
+  let formattedSeat = `Seat #${index + 1}`;
+  if (dto.ticketNumber && dto.ticketNumber.includes('-')) {
+    const parts = dto.ticketNumber.split('-');
+    const lastPart = parts[parts.length - 1];
+    if (!isNaN(Number(lastPart))) {
+      formattedSeat = `Seat #${lastPart}`;
+    }
+  }
+
   return {
-    id: dto.ticketNumber ?? String(dto.id),
-    movieTitle: dto.eventName,
+    id: dto.ticketNumber ?? `TKN-${dto.id}`,
+    movieTitle: dto.eventName || 'Cinema Screening',
     posterUrl: undefined,
     cinemaName: 'Hypercell Cinema',
-    seatCategory: dto.seatCategoryName,
-    seatNumber: dto.ticketNumber,
+    seatCategory: dto.seatCategoryName || 'STANDARD',
+    seatNumber: formattedSeat,
     bookingDate: dto.bookingDate
       ? new Date(dto.bookingDate).toLocaleDateString('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric',
-        })
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+      })
       : '—',
     showtime: dto.bookingDate
       ? new Date(dto.bookingDate).toLocaleString('en-US', {
-          weekday: 'long',
-          hour: 'numeric',
-          minute: '2-digit',
-        })
+        weekday: 'short',
+        hour: 'numeric',
+        minute: '2-digit',
+      })
       : '—',
-    price: 0,
+    price: (dto as any).price ?? 0,
     status: dto.isBooked ? 'UPCOMING' : 'COMPLETED',
   };
 }
@@ -109,7 +119,7 @@ export class MyTickets implements OnInit {
 
     this.ticketService.getUserTickets(userId).subscribe({
       next: (dtos: TicketDto[]) => {
-        const mapped = (dtos || []).map(ticketDtoToUi);
+        const mapped = (dtos || []).map((dto, idx) => ticketDtoToUi(dto, idx));
         this.tickets.set(mapped);
         this.isLoading.set(false);
       },

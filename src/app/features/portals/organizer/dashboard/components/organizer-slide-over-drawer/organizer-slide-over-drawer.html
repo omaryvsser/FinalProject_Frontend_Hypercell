@@ -226,6 +226,91 @@
         </select>
       </div>
     </div>
+    <!-- Section 4: Seat Categories & Pricing -->
+    <div class="form-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 class="section-title" style="margin-bottom: 0;">
+          <span class="material-symbols-outlined icon">confirmation_number</span>
+          Seat Categories & Ticket Pricing *
+        </h3>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          style="padding: 0.25rem 0.75rem; font-size: 0.85rem;"
+          (click)="addSeatCategory()"
+        >
+          <span class="material-symbols-outlined" style="font-size: 1.1rem; vertical-align: middle;">add</span>
+          Add Category
+        </button>
+      </div>
+
+      <div class="seat-categories-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        @for (cat of seatCategories(); track $index) {
+          <div class="form-row" style="align-items: flex-end; background-color: var(--surface-hover, #f8f9fa); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color, #e0e0e0);">
+
+            <!-- Category Enum Selector -->
+            <div class="form-group col-third" style="margin-bottom: 0;">
+              <label class="form-label" [for]="'cat-name-' + $index">Category Tier</label>
+              <select
+                [id]="'cat-name-' + $index"
+                class="form-control form-select"
+                [(ngModel)]="cat.name"
+                [name]="'catName_' + $index"
+                required
+              >
+                @for (opt of categoryOptions; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Price (EGP) -->
+            <div class="form-group col-third" style="margin-bottom: 0;">
+              <label class="form-label" [for]="'cat-price-' + $index">Price (EGP)</label>
+              <input
+                [id]="'cat-price-' + $index"
+                type="number"
+                min="0"
+                step="0.01"
+                class="form-control"
+                [(ngModel)]="cat.price"
+                [name]="'catPrice_' + $index"
+                placeholder="100.00"
+                required
+              />
+            </div>
+
+            <!-- Total Capacity -->
+            <div class="form-group col-third" style="margin-bottom: 0;">
+              <label class="form-label" [for]="'cat-seats-' + $index">Total Seats</label>
+              <input
+                [id]="'cat-seats-' + $index"
+                type="number"
+                min="1"
+                class="form-control"
+                [(ngModel)]="cat.totalSeats"
+                [name]="'catSeats_' + $index"
+                placeholder="50"
+                required
+              />
+            </div>
+
+            <!-- Delete Button -->
+            <button
+              type="button"
+              class="close-btn"
+              style="margin-bottom: 0.25rem; color: #dc3545;"
+              (click)="removeSeatCategory($index)"
+              [disabled]="seatCategories().length === 1"
+              title="Remove Category Tier"
+            >
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+
+          </div>
+        }
+      </div>
+    </div>
 
     <!-- Footer Action Buttons -->
     <div class="drawer-footer">

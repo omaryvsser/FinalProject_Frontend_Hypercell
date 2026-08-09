@@ -6,6 +6,8 @@ import { EventService } from '../../../core/services/event.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SeatCategoryResponse } from '../../../core/models/event.model';
 import { BookingCreateRequest } from '../../../core/models/booking.model';
+import { FormsModule,ReactiveFormsModule } from '@angular/forms';
+
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,6 +28,8 @@ const DEFAULT_CATEGORIES: SeatCategoryResponse[] = [
   imports: [
     CommonModule,
     RouterLink,
+    FormsModule,
+    ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -74,7 +78,11 @@ export class BookingPage implements OnInit {
     if (!email) return true;
     return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   });
-  readonly phoneInvalid = computed(() => this.customerPhone().trim().length < 8);
+  readonly phoneInvalid = computed(() => {
+    const phone = this.customerPhone().trim();
+    if (!phone) return true;
+    return phone.length < 8;
+  });
 
   readonly isFormValid = computed(() => {
     return (
@@ -153,9 +161,17 @@ export class BookingPage implements OnInit {
   }
 
   onSubmitBooking(): void {
+
     this.nameTouched.set(true);
     this.emailTouched.set(true);
     this.phoneTouched.set(true);
+    console.log('Form state:', {
+      category: this.selectedCategory(),
+      nameEmpty: this.nameEmpty(),
+      emailInvalid: this.emailInvalid(),
+      phoneInvalid: this.phoneInvalid(),
+      isValid: this.isFormValid()
+    });
 
     if (!this.isFormValid()) return;
 
