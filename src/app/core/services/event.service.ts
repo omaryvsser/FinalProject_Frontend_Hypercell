@@ -5,6 +5,12 @@ import { environment } from '../../../environments/environment';
 import { EventResponse, EventDetailResponse } from '../models/event.model';
 import { PaginatedResponse } from '../models/pagination.model';
 
+export interface SeatCategoryPayload {
+  name: string;
+  price: number;
+  totalSeats: number;
+}
+
 export interface EventPayload {
   title: string;
   description: string;
@@ -18,6 +24,7 @@ export interface EventPayload {
   venueId?: number | null;
   venueName?: string;
   imageUrl?: string;
+  seatCategories?: SeatCategoryPayload[]; // 🟢 Fixed: Added seatCategories payload!
 }
 
 @Injectable({

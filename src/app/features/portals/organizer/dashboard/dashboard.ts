@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit,ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -122,21 +122,14 @@ export class Dashboard implements OnInit {
       return;
     }
 
+    // --- Dates formatting ---
     let rawDate = (this.formStartDate() || '').trim();
-    if (rawDate && !rawDate.includes('T')) {
-      rawDate = rawDate.replace(' ', 'T');
-    }
-    if (rawDate && rawDate.length === 16) {
-      rawDate += ':00';
-    }
+    if (rawDate && !rawDate.includes('T')) rawDate = rawDate.replace(' ', 'T');
+    if (rawDate && rawDate.length === 16) rawDate += ':00';
 
     let endDateVal = (this.formEndDate() || rawDate).trim();
-    if (endDateVal && !endDateVal.includes('T')) {
-      endDateVal = endDateVal.replace(' ', 'T');
-    }
-    if (endDateVal && endDateVal.length === 16) {
-      endDateVal += ':00';
-    }
+    if (endDateVal && !endDateVal.includes('T')) endDateVal = endDateVal.replace(' ', 'T');
+    if (endDateVal && endDateVal.length === 16) endDateVal += ':00';
 
     const currentStatus = this.formStatus();
     const validStatus: 'DRAFT' | 'PUBLISHED' =
@@ -153,6 +146,15 @@ export class Dashboard implements OnInit {
       finalImageUrl = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba';
     }
 
+    // 🟢 Extract configured seat categories from the drawer component
+    const seatCategoriesPayload = this.drawerComponent?.seatCategories()
+      .filter(cat => cat.name && cat.price && cat.totalSeats)
+      .map(cat => ({
+        name: cat.name,
+        price: Number(cat.price),
+        totalSeats: Number(cat.totalSeats)
+      })) || [];
+
     const payload: EventPayload = {
       title: title,
       description: this.formDescription().trim() || `Movie screening for ${title}`,
@@ -165,6 +167,9 @@ export class Dashboard implements OnInit {
       director: this.formDirector().trim() || undefined,
       durationMinutes: this.formDurationMinutes() ? Number(this.formDurationMinutes()) : undefined,
       language: this.formLanguage().trim() || undefined,
+
+      // 🟢 CRITICAL MISSING LINK: Send categories to Spring Boot!
+      seatCategories: seatCategoriesPayload
     };
 
     const currentSelected = this.selectedMovie();
@@ -183,19 +188,6 @@ export class Dashboard implements OnInit {
     } else {
       this.eventService.createEvent(payload).subscribe({
         next: (createdMovie) => {
-          const selectedVenue = this.venues().find((v) => v.id === payload.venueId);
-          const newMappedMovie: OrganizerMovie = {
-            id: createdMovie.id,
-            title: createdMovie.title,
-            category: createdMovie.category || payload.category || 'General',
-            startDate: createdMovie.startDate || payload.startDate || '',
-            status: (createdMovie.status || payload.status || 'DRAFT') as any,
-            venueName: createdMovie.venueName || selectedVenue?.name || 'Cinema Venue',
-            bookings: 0,
-            attendees: 0,
-          };
-
-          this.organizerMovies.update((current) => [newMappedMovie, ...current]);
           this.loadEventsFromBackend(this.currentPage());
           this.closeDrawer();
         },
@@ -251,22 +243,62 @@ export class Dashboard implements OnInit {
     }
   }
 
-  openAddDrawer(): void {
-    this.selectedMovie.set(null);
-    this.resetFormFields();
-    this.isDrawerOpen.set(true);
-  }
+  // openAddDrawer(): void {
+  //   this.selectedMovie.set(null);
+  //   this.resetFormFields();
+  //   this.isDrawerOpen.set(true);
+  // }
 
   openEditDrawer(movie: OrganizerMovie): void {
     this.selectedMovie.set(movie);
     this.populateFormFields(movie);
     this.isDrawerOpen.set(true);
+
+    if (movie.id) {
+      // 🟢 Fetch seat categories for the specific movie being edited
+      this.eventService.getSeatCategories(movie.id).subscribe({
+        next: (categories) => {
+          if (categories && categories.length > 0) {
+            const mappedCategories = categories.map((cat: any) => ({
+              name: cat.categoryName || cat.name,
+              price: Number(cat.price),
+              totalSeats: Number(cat.totalSeats)
+            }));
+
+            // Set the existing categories on the drawer component signal
+            this.drawerComponent?.seatCategories.set(mappedCategories);
+          } else {
+            this.setDefaultDrawerCategories();
+          }
+        },
+        error: (err) => {
+          console.error(`Failed to load seat categories for event #${movie.id}:`, err);
+          this.setDefaultDrawerCategories();
+        }
+      });
+    }
+  }
+
+  openAddDrawer(): void {
+    this.selectedMovie.set(null);
+    this.resetFormFields();
+    this.setDefaultDrawerCategories();
+    this.isDrawerOpen.set(true);
+  }
+
+  private setDefaultDrawerCategories(): void {
+    this.drawerComponent?.seatCategories.set([
+      { name: 'STANDARD', price: 100, totalSeats: 50 },
+      { name: 'VIP', price: 150, totalSeats: 20 },
+      { name: 'IMAX', price: 200, totalSeats: 20 }
+    ]);
   }
 
   closeDrawer(): void {
     this.isDrawerOpen.set(false);
     this.selectedMovie.set(null);
   }
+
 
   resetFormFields(): void {
     this.formTitle.set('');
@@ -340,4 +372,6 @@ export class Dashboard implements OnInit {
       },
     });
   }
+  @ViewChild(OrganizerSlideOverDrawerComponent)
+  drawerComponent!: OrganizerSlideOverDrawerComponent;
 }

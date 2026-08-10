@@ -111,27 +111,32 @@ export class BookingPage implements OnInit {
   private loadEventDetails(id: number): void {
     this.isLoadingDetails.set(true);
     this.eventService.getEventDetails(id).subscribe({
-      next: (details) => {
+      next: (details: any) => {
         this.isLoadingDetails.set(false);
         if (details) {
           this.movieTitle.set(details.title || 'Cinema Event');
           this.cinemaName.set(details.venueName || 'Hypercell Cinema');
 
-          const categories = details.seatCategories && details.seatCategories.length > 0
-            ? details.seatCategories
-            : DEFAULT_CATEGORIES;
+          // Check if categories exist on the response
+          if (details.seatCategories && details.seatCategories.length > 0) {
+            const formattedCategories: SeatCategoryResponse[] = details.seatCategories.map((cat: any) => ({
+              id: cat.id,
+              // Handle both 'categoryName' and 'name' properties safely
+              categoryName: cat.categoryName || cat.name,
+              price: Number(cat.price),
+              availableSeats: cat.availableSeats ?? cat.totalSeats
+            }));
 
-          this.seatCategories.set(categories);
-          if (categories.length > 0) {
-            this.selectedCategory.set(categories[0]);
+            this.seatCategories.set(formattedCategories);
+            this.selectedCategory.set(formattedCategories[0]);
+          } else {
+            console.warn('Backend returned no seat categories for event #' + id);
           }
         }
       },
-      error: () => {
+      error: (err) => {
         this.isLoadingDetails.set(false);
-        // Fallback categories for display resilience
-        this.seatCategories.set(DEFAULT_CATEGORIES);
-        this.selectedCategory.set(DEFAULT_CATEGORIES[0]);
+        console.error('Failed to load event details:', err);
       }
     });
   }
