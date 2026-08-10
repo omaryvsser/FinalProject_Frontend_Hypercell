@@ -1,6 +1,9 @@
 import { Component, input, model, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { Venue } from '../../../../../../core/services/venue.service';
 
 export type SeatCategoryName = 'STANDARD' | 'VIP' | 'IMAX';
@@ -14,7 +17,7 @@ export interface SeatCategoryInput {
 @Component({
   selector: 'app-organizer-slide-over-drawer',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatSelectModule, MatFormFieldModule, MatInputModule],
   templateUrl: './organizer-slide-over-drawer.html',
   styleUrl: './organizer-slide-over-drawer.css',
 })

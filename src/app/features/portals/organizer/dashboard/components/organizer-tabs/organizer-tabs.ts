@@ -1,10 +1,13 @@
 import { Component, input, output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 export type OrganizerTabType = 'ALL' | 'PUBLISHED' | 'DRAFT' | 'COMPLETED';
 
 @Component({
   selector: 'app-organizer-tabs',
   standalone: true,
+  imports: [MatButtonModule, MatIconModule],
   templateUrl: './organizer-tabs.html',
   styleUrl: './organizer-tabs.css'
 })

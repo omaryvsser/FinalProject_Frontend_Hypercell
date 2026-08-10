@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { TabType, UserItem, OrganizerItem, VenueItem, MovieItem } from '../../admin-dashboard';
 
 @Component({
   selector: 'app-dynamic-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatTableModule, MatSelectModule],
+  imports: [CommonModule, FormsModule, MatTableModule, MatSelectModule, MatFormFieldModule],
   templateUrl: './dynamic-table.html',
   styleUrl: './dynamic-table.css'
 })

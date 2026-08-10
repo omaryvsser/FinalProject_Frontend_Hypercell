@@ -36,17 +36,18 @@
       <ng-container matColumnDef="role">
         <th mat-header-cell *matHeaderCellDef>Role</th>
         <td mat-cell *matCellDef="let row">
-          <select
-            class="role-select"
-            [ngModel]="row.role"
-            (ngModelChange)="onRoleUpdate(row, $event)"
-            [disabled]="isCurrentUser(row.email)"
-            [class.disabled-select]="isCurrentUser(row.email)"
-          >
-            <option value="ADMIN">ADMIN</option>
-            <option value="ORGANIZER">ORGANIZER</option>
-            <option value="CUSTOMER">CUSTOMER</option>
-          </select>
+          <mat-form-field appearance="outline" class="role-select-field" subscriptSizing="dynamic">
+            <mat-select
+              [ngModel]="row.role"
+              (ngModelChange)="onRoleUpdate(row, $event)"
+              [disabled]="isCurrentUser(row.email)"
+              aria-label="User role"
+            >
+              <mat-option value="ADMIN">ADMIN</mat-option>
+              <mat-option value="ORGANIZER">ORGANIZER</mat-option>
+              <mat-option value="CUSTOMER">CUSTOMER</mat-option>
+            </mat-select>
+          </mat-form-field>
         </td>
       </ng-container>
 

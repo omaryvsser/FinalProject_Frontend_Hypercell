@@ -19,142 +19,171 @@
         @switch (activeTab()) {
           @case ('USERS') {
             <div class="form-section">
+              <h3 class="section-title">
+                <span class="material-symbols-outlined icon">person</span>
+                User Account Profile
+              </h3>
               <div class="form-group">
-                <label class="form-label" for="user-name">Full Name</label>
-                <input
-                  id="user-name"
-                  type="text"
-                  class="form-input"
-                  placeholder="e.g. Ahmed El-Sayed"
-                  [ngModel]="formName()()"
-                  (ngModelChange)="formName().set($event)"
-                  name="userName"
-                  required
-                />
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Full Name *</mat-label>
+                  <input
+                    matInput
+                    id="user-name"
+                    type="text"
+                    placeholder="e.g. Ahmed El-Sayed"
+                    [ngModel]="formName()()"
+                    (ngModelChange)="formName().set($event)"
+                    name="userName"
+                    required
+                  />
+                </mat-form-field>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="user-email">Email Address</label>
-                <input
-                  id="user-email"
-                  type="email"
-                  class="form-input"
-                  placeholder="e.g. ahmed@cinema.eg"
-                  [ngModel]="formEmail()()"
-                  (ngModelChange)="formEmail().set($event)"
-                  name="userEmail"
-                  [disabled]="selectedItem() && isCurrentUser(selectedItem().email)"
-                  required
-                />
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Email Address *</mat-label>
+                  <input
+                    matInput
+                    id="user-email"
+                    type="email"
+                    placeholder="e.g. ahmed@cinema.eg"
+                    [ngModel]="formEmail()()"
+                    (ngModelChange)="formEmail().set($event)"
+                    name="userEmail"
+                    [disabled]="selectedItem() && isCurrentUser(selectedItem().email)"
+                    required
+                  />
+                </mat-form-field>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="user-role">User Role</label>
-                <select
-                  id="user-role"
-                  class="form-select"
-                  [ngModel]="formRole()()"
-                  (ngModelChange)="formRole().set($event)"
-                  name="userRole"
-                  [disabled]="selectedItem() && isCurrentUser(selectedItem().email)"
-                >
-                  <option value="ADMIN">ADMIN</option>
-                  <option value="ORGANIZER">ORGANIZER</option>
-                  <option value="CUSTOMER">CUSTOMER</option>
-                </select>
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>User Role *</mat-label>
+                  <mat-select
+                    id="user-role"
+                    [ngModel]="formRole()()"
+                    (ngModelChange)="formRole().set($event)"
+                    name="userRole"
+                    [disabled]="selectedItem() && isCurrentUser(selectedItem().email)"
+                  >
+                    <mat-option value="ADMIN">ADMIN</mat-option>
+                    <mat-option value="ORGANIZER">ORGANIZER</mat-option>
+                    <mat-option value="CUSTOMER">CUSTOMER</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
             </div>
           }
 
           @case ('ORGANIZERS') {
             <div class="form-section">
+              <h3 class="section-title">
+                <span class="material-symbols-outlined icon">corporate_fare</span>
+                Organization Profile
+              </h3>
               <div class="form-group">
-                <label class="form-label" for="org-name">Organizer Contact Name</label>
-                <input
-                  id="org-name"
-                  type="text"
-                  class="form-input"
-                  placeholder="e.g. Mohamed Hassan"
-                  [ngModel]="formName()()"
-                  (ngModelChange)="formName().set($event)"
-                  name="orgName"
-                  required
-                />
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Organizer Contact Name *</mat-label>
+                  <input
+                    matInput
+                    id="org-name"
+                    type="text"
+                    placeholder="e.g. Mohamed Hassan"
+                    [ngModel]="formName()()"
+                    (ngModelChange)="formName().set($event)"
+                    name="orgName"
+                    required
+                  />
+                </mat-form-field>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="org-email">Contact Email</label>
-                <input
-                  id="org-email"
-                  type="email"
-                  class="form-input"
-                  placeholder="e.g. contact@ciff.eg"
-                  [ngModel]="formEmail()()"
-                  (ngModelChange)="formEmail().set($event)"
-                  name="orgEmail"
-                  required
-                />
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Contact Email *</mat-label>
+                  <input
+                    matInput
+                    id="org-email"
+                    type="email"
+                    placeholder="e.g. contact@ciff.eg"
+                    [ngModel]="formEmail()()"
+                    (ngModelChange)="formEmail().set($event)"
+                    name="orgEmail"
+                    required
+                  />
+                </mat-form-field>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="org-company">Company / Organization</label>
-                <input
-                  id="org-company"
-                  type="text"
-                  class="form-input"
-                  placeholder="e.g. CIFF Foundation"
-                  [ngModel]="formCompany()()"
-                  (ngModelChange)="formCompany().set($event)"
-                  name="orgCompany"
-                  required
-                />
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Company / Organization *</mat-label>
+                  <input
+                    matInput
+                    id="org-company"
+                    type="text"
+                    placeholder="e.g. CIFF Foundation"
+                    [ngModel]="formCompany()()"
+                    (ngModelChange)="formCompany().set($event)"
+                    name="orgCompany"
+                    required
+                  />
+                </mat-form-field>
               </div>
             </div>
           }
 
           @case ('VENUES') {
             <div class="form-section">
+              <h3 class="section-title">
+                <span class="material-symbols-outlined icon">location_on</span>
+                Venue Details & Capacity
+              </h3>
               <div class="form-group">
-                <label class="form-label" for="venue-name">Venue Name</label>
-                <input
-                  id="venue-name"
-                  type="text"
-                  class="form-input"
-                  placeholder="e.g. Vox Cinema Mall of Egypt"
-                  [ngModel]="formVenueName()()"
-                  (ngModelChange)="formVenueName().set($event)"
-                  name="venueName"
-                  required
-                />
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Venue Name *</mat-label>
+                  <input
+                    matInput
+                    id="venue-name"
+                    type="text"
+                    placeholder="e.g. Vox Cinema Mall of Egypt"
+                    [ngModel]="formVenueName()()"
+                    (ngModelChange)="formVenueName().set($event)"
+                    name="venueName"
+                    required
+                  />
+                </mat-form-field>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="venue-address">Street Address</label>
-                <input
-                  id="venue-address"
-                  type="text"
-                  class="form-input"
-                  placeholder="e.g. Wahhat Rd, 6th of October City, Giza"
-                  [ngModel]="formAddress()()"
-                  (ngModelChange)="formAddress().set($event)"
-                  name="venueAddress"
-                  required
-                />
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Street Address *</mat-label>
+                  <input
+                    matInput
+                    id="venue-address"
+                    type="text"
+                    placeholder="e.g. Wahhat Rd, 6th of October City, Giza"
+                    [ngModel]="formAddress()()"
+                    (ngModelChange)="formAddress().set($event)"
+                    name="venueAddress"
+                    required
+                  />
+                </mat-form-field>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="venue-capacity">Total Seat Capacity</label>
-                <input
-                  id="venue-capacity"
-                  type="number"
-                  class="form-input"
-                  placeholder="e.g. 450"
-                  [ngModel]="formCapacity()()"
-                  (ngModelChange)="formCapacity().set($event)"
-                  name="venueCapacity"
-                  min="10"
-                  required
-                />
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Total Seat Capacity *</mat-label>
+                  <input
+                    matInput
+                    id="venue-capacity"
+                    type="number"
+                    placeholder="e.g. 450"
+                    [ngModel]="formCapacity()()"
+                    (ngModelChange)="formCapacity().set($event)"
+                    name="venueCapacity"
+                    min="10"
+                    required
+                  />
+                </mat-form-field>
               </div>
             </div>
           }
@@ -168,30 +197,34 @@
               </h3>
 
               <div class="form-group">
-                <label class="form-label" for="movie-title">Movie Title *</label>
-                <input
-                  id="movie-title"
-                  type="text"
-                  class="form-input"
-                  placeholder="Enter the movie title"
-                  [ngModel]="formTitle()()"
-                  (ngModelChange)="formTitle().set($event)"
-                  name="movieTitle"
-                  required
-                />
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Movie Title *</mat-label>
+                  <input
+                    matInput
+                    id="movie-title"
+                    type="text"
+                    placeholder="Enter the movie title"
+                    [ngModel]="formTitle()()"
+                    (ngModelChange)="formTitle().set($event)"
+                    name="movieTitle"
+                    required
+                  />
+                </mat-form-field>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="movie-description">Description</label>
-                <textarea
-                  id="movie-description"
-                  class="form-input form-textarea"
-                  rows="3"
-                  placeholder="Enter a short movie description..."
-                  [ngModel]="formDescription()()"
-                  (ngModelChange)="formDescription().set($event)"
-                  name="movieDescription"
-                ></textarea>
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Description</mat-label>
+                  <textarea
+                    matInput
+                    id="movie-description"
+                    rows="3"
+                    placeholder="Enter a short movie description..."
+                    [ngModel]="formDescription()()"
+                    (ngModelChange)="formDescription().set($event)"
+                    name="movieDescription"
+                  ></textarea>
+                </mat-form-field>
               </div>
 
               <!-- Poster Image (File Upload + URL Link) -->
@@ -204,15 +237,18 @@
                   (change)="onFileSelected($event)"
                 />
                 <div class="or-divider">— OR —</div>
-                <input
-                  id="movie-image-url"
-                  type="text"
-                  class="form-input"
-                  [ngModel]="formImageUrl()()"
-                  (ngModelChange)="formImageUrl().set($event)"
-                  name="movieImageUrl"
-                  placeholder="https://images.example.com/poster.jpg"
-                />
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Image Web URL</mat-label>
+                  <input
+                    matInput
+                    id="movie-image-url"
+                    type="text"
+                    [ngModel]="formImageUrl()()"
+                    (ngModelChange)="formImageUrl().set($event)"
+                    name="movieImageUrl"
+                    placeholder="https://images.example.com/poster.jpg"
+                  />
+                </mat-form-field>
               </div>
 
               <!-- Poster Image Preview -->
@@ -227,33 +263,35 @@
 
               <div class="form-row">
                 <div class="form-group col-half">
-                  <label class="form-label" for="movie-genre">Genre *</label>
-                  <select
-                    id="movie-genre"
-                    class="form-select"
-                    [ngModel]="formGenre()()"
-                    (ngModelChange)="formGenre().set($event)"
-                    name="movieGenre"
-                    required
-                  >
-                    @for (cat of categories; track cat) {
-                      <option [value]="cat">{{ cat }}</option>
-                    }
-                  </select>
+                  <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                    <mat-label>Genre *</mat-label>
+                    <mat-select
+                      id="movie-genre"
+                      [ngModel]="formGenre()()"
+                      (ngModelChange)="formGenre().set($event)"
+                      name="movieGenre"
+                      required
+                    >
+                      @for (cat of categories; track cat) {
+                        <mat-option [value]="cat">{{ cat }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
                 </div>
 
                 <div class="form-group col-half">
-                  <label class="form-label" for="movie-status">Status</label>
-                  <select
-                    id="movie-status"
-                    class="form-select"
-                    [ngModel]="formStatus()()"
-                    (ngModelChange)="formStatus().set($event)"
-                    name="movieStatus"
-                  >
-                    <option value="DRAFT">Draft</option>
-                    <option value="PUBLISHED">Published</option>
-                  </select>
+                  <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                    <mat-label>Status</mat-label>
+                    <mat-select
+                      id="movie-status"
+                      [ngModel]="formStatus()()"
+                      (ngModelChange)="formStatus().set($event)"
+                      name="movieStatus"
+                    >
+                      <mat-option value="DRAFT">Draft</mat-option>
+                      <mat-option value="PUBLISHED">Published</mat-option>
+                    </mat-select>
+                  </mat-form-field>
                 </div>
               </div>
             </div>
@@ -267,43 +305,49 @@
 
               <div class="form-row">
                 <div class="form-group col-third">
-                  <label class="form-label" for="movie-director">Director</label>
-                  <input
-                    id="movie-director"
-                    type="text"
-                    class="form-input"
-                    placeholder="e.g. C. Nolan"
-                    [ngModel]="formDirector()()"
-                    (ngModelChange)="formDirector().set($event)"
-                    name="movieDirector"
-                  />
+                  <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                    <mat-label>Director</mat-label>
+                    <input
+                      matInput
+                      id="movie-director"
+                      type="text"
+                      placeholder="e.g. C. Nolan"
+                      [ngModel]="formDirector()()"
+                      (ngModelChange)="formDirector().set($event)"
+                      name="movieDirector"
+                    />
+                  </mat-form-field>
                 </div>
 
                 <div class="form-group col-third">
-                  <label class="form-label" for="movie-duration-minutes">Duration (Min)</label>
-                  <input
-                    id="movie-duration-minutes"
-                    type="number"
-                    class="form-input"
-                    placeholder="148"
-                    min="1"
-                    [ngModel]="formDurationMinutes()()"
-                    (ngModelChange)="formDurationMinutes().set($event)"
-                    name="movieDurationMinutes"
-                  />
+                  <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                    <mat-label>Duration (Min)</mat-label>
+                    <input
+                      matInput
+                      id="movie-duration-minutes"
+                      type="number"
+                      placeholder="148"
+                      min="1"
+                      [ngModel]="formDurationMinutes()()"
+                      (ngModelChange)="formDurationMinutes().set($event)"
+                      name="movieDurationMinutes"
+                    />
+                  </mat-form-field>
                 </div>
 
                 <div class="form-group col-third">
-                  <label class="form-label" for="movie-language">Language</label>
-                  <input
-                    id="movie-language"
-                    type="text"
-                    class="form-input"
-                    placeholder="e.g. English"
-                    [ngModel]="formLanguage()()"
-                    (ngModelChange)="formLanguage().set($event)"
-                    name="movieLanguage"
-                  />
+                  <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                    <mat-label>Language</mat-label>
+                    <input
+                      matInput
+                      id="movie-language"
+                      type="text"
+                      placeholder="e.g. English"
+                      [ngModel]="formLanguage()()"
+                      (ngModelChange)="formLanguage().set($event)"
+                      name="movieLanguage"
+                    />
+                  </mat-form-field>
                 </div>
               </div>
             </div>
@@ -317,46 +361,51 @@
 
               <div class="form-row">
                 <div class="form-group col-half">
-                  <label class="form-label" for="movie-start-date">Start Time *</label>
-                  <input
-                    id="movie-start-date"
-                    type="datetime-local"
-                    class="form-input"
-                    [ngModel]="formStartDate()()"
-                    (ngModelChange)="formStartDate().set($event)"
-                    name="movieStartDate"
-                    required
-                  />
+                  <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                    <mat-label>Start Time *</mat-label>
+                    <input
+                      matInput
+                      id="movie-start-date"
+                      type="datetime-local"
+                      [ngModel]="formStartDate()()"
+                      (ngModelChange)="formStartDate().set($event)"
+                      name="movieStartDate"
+                      required
+                    />
+                  </mat-form-field>
                 </div>
 
                 <div class="form-group col-half">
-                  <label class="form-label" for="movie-end-date">End Time *</label>
-                  <input
-                    id="movie-end-date"
-                    type="datetime-local"
-                    class="form-input"
-                    [ngModel]="formEndDate()()"
-                    (ngModelChange)="formEndDate().set($event)"
-                    name="movieEndDate"
-                    required
-                  />
+                  <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                    <mat-label>End Time *</mat-label>
+                    <input
+                      matInput
+                      id="movie-end-date"
+                      type="datetime-local"
+                      [ngModel]="formEndDate()()"
+                      (ngModelChange)="formEndDate().set($event)"
+                      name="movieEndDate"
+                      required
+                    />
+                  </mat-form-field>
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="movie-venue">Cinema / Venue Location *</label>
-                <select
-                  id="movie-venue"
-                  class="form-select"
-                  [ngModel]="formVenueId()()"
-                  (ngModelChange)="formVenueId().set($event)"
-                  name="movieVenueId"
-                  required
-                >
-                  @for (v of venues(); track v.id) {
-                    <option [value]="v.id">{{ v.name }}</option>
-                  }
-                </select>
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Cinema / Venue Location *</mat-label>
+                  <mat-select
+                    id="movie-venue"
+                    [ngModel]="formVenueId()()"
+                    (ngModelChange)="formVenueId().set($event)"
+                    name="movieVenueId"
+                    required
+                  >
+                    @for (v of venues(); track v.id) {
+                      <mat-option [value]="v.id">{{ v.name }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
               </div>
             </div>
           }

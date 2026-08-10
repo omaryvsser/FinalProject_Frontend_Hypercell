@@ -30,29 +30,31 @@
 
           <!-- Movie Title -->
           <div class="form-group">
-            <label class="form-label" for="movie-title">Movie Title *</label>
-            <input
-              id="movie-title"
-              type="text"
-              class="form-input"
-              [(ngModel)]="formTitle"
-              name="title"
-              placeholder="e.g. The Godfather"
-              required
-            />
+            <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+              <mat-label>Movie Title *</mat-label>
+              <input
+                matInput
+                type="text"
+                [(ngModel)]="formTitle"
+                name="title"
+                placeholder="e.g. The Godfather"
+                required
+              />
+            </mat-form-field>
           </div>
 
           <!-- Description / Synopsis -->
           <div class="form-group">
-            <label class="form-label" for="movie-description">Description / Synopsis</label>
-            <textarea
-              id="movie-description"
-              class="form-input form-textarea"
-              rows="3"
-              [(ngModel)]="formDescription"
-              name="description"
-              placeholder="Enter movie synopsis..."
-            ></textarea>
+            <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+              <mat-label>Description / Synopsis</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="formDescription"
+                name="description"
+                placeholder="Enter movie synopsis..."
+              ></textarea>
+            </mat-form-field>
           </div>
 
           <!-- Poster Image (File Upload + URL Link) -->
@@ -65,14 +67,16 @@
               (change)="onFileSelected($event)"
             />
             <div class="or-divider">— OR —</div>
-            <input
-              id="movie-image-url"
-              type="text"
-              class="form-input"
-              [(ngModel)]="formImageUrl"
-              name="imageUrl"
-              placeholder="https://images.example.com/poster.jpg"
-            />
+            <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+              <mat-label>Image Web URL</mat-label>
+              <input
+                matInput
+                type="url"
+                [(ngModel)]="formImageUrl"
+                name="imageUrl"
+                placeholder="https://images.example.com/poster.jpg"
+              />
+            </mat-form-field>
           </div>
 
           <!-- Poster Image Preview -->
@@ -88,33 +92,35 @@
           <div class="form-row">
             <!-- Category / Genre -->
             <div class="form-group col-half">
-              <label class="form-label" for="movie-category">Category / Genre *</label>
-              <input
-                id="movie-category"
-                type="text"
-                class="form-input"
-                [(ngModel)]="formCategory"
-                name="category"
-                placeholder="e.g. Drama, Action, Sci-Fi"
-                required
-              />
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>Category / Genre *</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  [(ngModel)]="formCategory"
+                  name="category"
+                  placeholder="e.g. Drama, Action, Sci-Fi"
+                  required
+                />
+              </mat-form-field>
             </div>
 
             <!-- Publishing Status -->
             <div class="form-group col-half">
-              <label class="form-label" for="movie-status">Publishing Status *</label>
-              <select
-                id="movie-status"
-                class="form-select"
-                [(ngModel)]="formStatus"
-                name="status"
-                required
-              >
-                <option value="DRAFT">DRAFT</option>
-                <option value="PUBLISHED">PUBLISHED</option>
-                <option value="COMPLETED">COMPLETED</option>
-                <option value="CANCELLED">CANCELLED</option>
-              </select>
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>Publishing Status *</mat-label>
+                <mat-select
+                  id="movie-status"
+                  [(ngModel)]="formStatus"
+                  name="status"
+                  required
+                >
+                  <mat-option value="DRAFT">DRAFT</mat-option>
+                  <mat-option value="PUBLISHED">PUBLISHED</mat-option>
+                  <mat-option value="COMPLETED">COMPLETED</mat-option>
+                  <mat-option value="CANCELLED">CANCELLED</mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
           </div>
         </div>
@@ -129,42 +135,45 @@
           <div class="form-row">
             <!-- Director -->
             <div class="form-group col-third">
-              <label class="form-label" for="movie-director">Director</label>
-              <input
-                id="movie-director"
-                type="text"
-                class="form-input"
-                [(ngModel)]="formDirector"
-                name="director"
-                placeholder="e.g. C. Nolan"
-              />
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>Director</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  [(ngModel)]="formDirector"
+                  name="director"
+                  placeholder="e.g. C. Nolan"
+                />
+              </mat-form-field>
             </div>
 
             <!-- Duration (Minutes) -->
             <div class="form-group col-third">
-              <label class="form-label" for="movie-duration">Duration (Min)</label>
-              <input
-                id="movie-duration"
-                type="number"
-                min="1"
-                class="form-input"
-                [(ngModel)]="formDurationMinutes"
-                name="durationMinutes"
-                placeholder="148"
-              />
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>Duration (Min)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="1"
+                  [(ngModel)]="formDurationMinutes"
+                  name="durationMinutes"
+                  placeholder="148"
+                />
+              </mat-form-field>
             </div>
 
             <!-- Language -->
             <div class="form-group col-third">
-              <label class="form-label" for="movie-language">Language</label>
-              <input
-                id="movie-language"
-                type="text"
-                class="form-input"
-                [(ngModel)]="formLanguage"
-                name="language"
-                placeholder="e.g. English"
-              />
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>Language</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  [(ngModel)]="formLanguage"
+                  name="language"
+                  placeholder="e.g. English"
+                />
+              </mat-form-field>
             </div>
           </div>
         </div>
@@ -179,47 +188,50 @@
           <div class="form-row">
             <!-- Start Date & Time -->
             <div class="form-group col-half">
-              <label class="form-label" for="movie-start-date">Start Date & Time *</label>
-              <input
-                id="movie-start-date"
-                type="datetime-local"
-                class="form-input"
-                [(ngModel)]="formStartDate"
-                name="startDate"
-                required
-              />
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>Start Date & Time *</mat-label>
+                <input
+                  matInput
+                  type="datetime-local"
+                  [(ngModel)]="formStartDate"
+                  name="startDate"
+                  required
+                />
+              </mat-form-field>
             </div>
 
             <!-- End Date & Time -->
             <div class="form-group col-half">
-              <label class="form-label" for="movie-end-date">End Date & Time *</label>
-              <input
-                id="movie-end-date"
-                type="datetime-local"
-                class="form-input"
-                [(ngModel)]="formEndDate"
-                name="endDate"
-                required
-              />
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>End Date & Time *</mat-label>
+                <input
+                  matInput
+                  type="datetime-local"
+                  [(ngModel)]="formEndDate"
+                  name="endDate"
+                  required
+                />
+              </mat-form-field>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="movie-venue">Cinema Venue Location *</label>
-            <select
-              id="movie-venue"
-              class="form-select"
-              [(ngModel)]="formVenueId"
-              name="venueId"
-              required
-            >
-              <option [ngValue]="null" disabled>Select a cinema venue...</option>
-              @for (venue of venues(); track venue.id) {
-                <option [ngValue]="venue.id">
-                  {{ venue.name }} {{ venue.capacity ? '(Cap: ' + venue.capacity + ')' : '' }}
-                </option>
-              }
-            </select>
+            <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+              <mat-label>Cinema Venue Location *</mat-label>
+              <mat-select
+                id="movie-venue"
+                [(ngModel)]="formVenueId"
+                name="venueId"
+                required
+              >
+                <mat-option [value]="null" disabled>Select a cinema venue...</mat-option>
+                @for (venue of venues(); track venue.id) {
+                  <mat-option [value]="venue.id">
+                    {{ venue.name }} {{ venue.capacity ? '(Cap: ' + venue.capacity + ')' : '' }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
           </div>
         </div>
 
@@ -246,49 +258,52 @@
                 <div class="form-row category-row">
                   <!-- Category Enum Selector -->
                   <div class="form-group col-third">
-                    <label class="form-label" [for]="'cat-name-' + $index">Category Tier</label>
-                    <select
-                      [id]="'cat-name-' + $index"
-                      class="form-select"
-                      [(ngModel)]="cat.name"
-                      [name]="'catName_' + $index"
-                      required
-                    >
-                      @for (opt of categoryOptions; track opt) {
-                        <option [value]="opt">{{ opt }}</option>
-                      }
-                    </select>
+                    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                      <mat-label>Category Tier</mat-label>
+                      <mat-select
+                        [id]="'cat-name-' + $index"
+                        [(ngModel)]="cat.name"
+                        [name]="'catName_' + $index"
+                        required
+                      >
+                        @for (opt of categoryOptions; track opt) {
+                          <mat-option [value]="opt">{{ opt }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
                   </div>
 
                   <!-- Price (EGP) -->
                   <div class="form-group col-third">
-                    <label class="form-label" [for]="'cat-price-' + $index">Price (EGP)</label>
-                    <input
-                      [id]="'cat-price-' + $index"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      class="form-input"
-                      [(ngModel)]="cat.price"
-                      [name]="'catPrice_' + $index"
-                      placeholder="100.00"
-                      required
-                    />
+                    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                      <mat-label>Price (EGP)</mat-label>
+                      <input
+                        matInput
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        [(ngModel)]="cat.price"
+                        [name]="'catPrice_' + $index"
+                        placeholder="100.00"
+                        required
+                      />
+                    </mat-form-field>
                   </div>
 
                   <!-- Total Capacity -->
                   <div class="form-group col-third">
-                    <label class="form-label" [for]="'cat-seats-' + $index">Total Seats</label>
-                    <input
-                      [id]="'cat-seats-' + $index"
-                      type="number"
-                      min="1"
-                      class="form-input"
-                      [(ngModel)]="cat.totalSeats"
-                      [name]="'catSeats_' + $index"
-                      placeholder="50"
-                      required
-                    />
+                    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                      <mat-label>Total Seats</mat-label>
+                      <input
+                        matInput
+                        type="number"
+                        min="1"
+                        [(ngModel)]="cat.totalSeats"
+                        [name]="'catSeats_' + $index"
+                        placeholder="50"
+                        required
+                      />
+                    </mat-form-field>
                   </div>
 
                   <!-- Delete Button -->

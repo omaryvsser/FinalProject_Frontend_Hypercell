@@ -1,9 +1,12 @@
 import { Component, input, output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { TabType } from '../../admin-dashboard';
 
 @Component({
   selector: 'app-admin-tabs',
   standalone: true,
+  imports: [MatButtonModule, MatIconModule],
   templateUrl: './admin-tabs.html',
   styleUrl: './admin-tabs.css'
 })

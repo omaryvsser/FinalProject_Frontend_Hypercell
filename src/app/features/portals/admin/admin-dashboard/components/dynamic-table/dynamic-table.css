@@ -103,27 +103,15 @@ table.data-table {
   text-align: right;
 }
 
-.role-select {
-  background-color: #1e293b;
-  color: #38bdf8;
-  border: 1px solid #334155;
-  padding: 0.4rem 0.75rem;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  outline: none;
-  transition: border-color 0.2s ease;
+.role-select-field {
+  width: 145px;
+  --mdc-outlined-text-field-container-shape: 8px;
 }
 
-.role-select:focus {
-  border-color: #38bdf8;
-}
-
-.role-select.disabled-select {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: #0f172a;
+.role-select-field .mat-mdc-select-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #38bdf8 !important;
 }
 
 .badge-you {

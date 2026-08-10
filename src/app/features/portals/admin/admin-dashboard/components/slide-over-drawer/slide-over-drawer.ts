@@ -1,12 +1,15 @@
 import { Component, input, output, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { TabType, VenueItem } from '../../admin-dashboard';
 
 @Component({
   selector: 'app-slide-over-drawer',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatSelectModule, MatFormFieldModule, MatInputModule],
   templateUrl: './slide-over-drawer.html',
   styleUrl: './slide-over-drawer.css'
 })
