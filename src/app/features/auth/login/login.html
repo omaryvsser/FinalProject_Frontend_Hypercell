@@ -27,17 +27,17 @@
             matInput
             type="email"
             name="email"
-            [(ngModel)]="email"
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)"
             (blur)="emailTouched.set(true)"
+            [errorStateMatcher]="emailMatcher"
             placeholder="hypercell@hypercell.com"
             autocomplete="email"
           >
           <mat-icon matPrefix class="input-icon">email</mat-icon>
 
-          @if ((isSubmitted() || emailTouched()) && emailEmpty()) {
-            <mat-error>Email address is required</mat-error>
-          } @else if ((isSubmitted() || emailTouched()) && emailInvalid()) {
-            <mat-error>Please enter a valid email address</mat-error>
+          @if ((isSubmitted() || emailTouched()) && emailError(); as err) {
+            <mat-error>{{ err }}</mat-error>
           }
         </mat-form-field>
 
@@ -48,8 +48,10 @@
             matInput
             [type]="hidePassword() ? 'password' : 'text'"
             name="password"
-            [(ngModel)]="password"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
             (blur)="passwordTouched.set(true)"
+            [errorStateMatcher]="passwordMatcher"
             placeholder="Enter your password"
             autocomplete="current-password"
           >
@@ -65,8 +67,8 @@
             <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
 
-          @if ((isSubmitted() || passwordTouched()) && passwordEmpty()) {
-            <mat-error>Password is required</mat-error>
+          @if ((isSubmitted() || passwordTouched()) && passwordError(); as err) {
+            <mat-error>{{ err }}</mat-error>
           }
         </mat-form-field>
 

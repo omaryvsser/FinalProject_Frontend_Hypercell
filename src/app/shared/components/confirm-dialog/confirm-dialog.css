@@ -1,0 +1,104 @@
+.confirm-dialog-container {
+  padding: 24px;
+  background: #121216;
+  border-radius: 16px;
+  color: #f4f4f5;
+  min-width: 320px;
+  max-width: 440px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-circle.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.icon-circle.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.icon-circle.info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.dialog-title {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.dialog-content {
+  margin: 0 !important;
+  padding: 8px 0 16px 0 !important;
+}
+
+.dialog-message {
+  color: #a1a1aa;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 0 0 0 !important;
+  margin: 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-cancel {
+  color: #a1a1aa !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+.btn-confirm {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  padding: 0 20px !important;
+}
+
+.btn-confirm.danger {
+  background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+  color: #ffffff !important;
+}
+
+.btn-confirm.warning {
+  background: linear-gradient(135deg, #d97706, #f59e0b) !important;
+  color: #ffffff !important;
+}
+
+.btn-confirm.info {
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+  color: #ffffff !important;
+}

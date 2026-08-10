@@ -27,14 +27,16 @@
             matInput
             type="text"
             name="name"
-            [(ngModel)]="name"
+            [ngModel]="name()"
+            (ngModelChange)="name.set($event)"
             (blur)="nameTouched.set(true)"
+            [errorStateMatcher]="nameMatcher"
             placeholder="Your Name"
           >
           <mat-icon matPrefix class="input-icon">person</mat-icon>
 
-          @if ((isSubmitted() || nameTouched()) && nameEmpty()) {
-            <mat-error>Full name is required</mat-error>
+          @if ((isSubmitted() || nameTouched()) && nameError(); as err) {
+            <mat-error>{{ err }}</mat-error>
           }
         </mat-form-field>
 
@@ -45,16 +47,16 @@
             matInput
             type="email"
             name="email"
-            [(ngModel)]="email"
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)"
             (blur)="emailTouched.set(true)"
+            [errorStateMatcher]="emailMatcher"
             placeholder="hypercell@hypercell.com"
           >
           <mat-icon matPrefix class="input-icon">email</mat-icon>
 
-          @if ((isSubmitted() || emailTouched()) && emailEmpty()) {
-            <mat-error>Email address is required</mat-error>
-          } @else if ((isSubmitted() || emailTouched()) && emailInvalid()) {
-            <mat-error>Please enter a valid email address</mat-error>
+          @if ((isSubmitted() || emailTouched()) && emailError(); as err) {
+            <mat-error>{{ err }}</mat-error>
           }
         </mat-form-field>
 
@@ -65,8 +67,10 @@
             matInput
             [type]="hidePassword() ? 'password' : 'text'"
             name="password"
-            [(ngModel)]="password"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
             (blur)="passwordTouched.set(true)"
+            [errorStateMatcher]="passwordMatcher"
             placeholder="At least 8 characters"
           >
           <mat-icon matPrefix class="input-icon">lock</mat-icon>
@@ -81,10 +85,8 @@
             <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
 
-          @if ((isSubmitted() || passwordTouched()) && passwordEmpty()) {
-            <mat-error>Password is required</mat-error>
-          } @else if ((isSubmitted() || passwordTouched()) && passwordTooShort()) {
-            <mat-error>Password must be at least 8 characters long</mat-error>
+          @if ((isSubmitted() || passwordTouched()) && passwordError(); as err) {
+            <mat-error>{{ err }}</mat-error>
           }
         </mat-form-field>
 
@@ -95,8 +97,10 @@
             matInput
             [type]="hideConfirmPassword() ? 'password' : 'text'"
             name="confirmPassword"
-            [(ngModel)]="confirmPassword"
+            [ngModel]="confirmPassword()"
+            (ngModelChange)="confirmPassword.set($event)"
             (blur)="confirmPasswordTouched.set(true)"
+            [errorStateMatcher]="confirmPasswordMatcher"
             placeholder="Confirm your password"
           >
           <mat-icon matPrefix class="input-icon">lock_reset</mat-icon>
@@ -111,10 +115,8 @@
             <mat-icon>{{ hideConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
 
-          @if ((isSubmitted() || confirmPasswordTouched()) && confirmPasswordEmpty()) {
-            <mat-error>Please re-enter your password</mat-error>
-          } @else if ((isSubmitted() || confirmPasswordTouched()) && passwordMismatch()) {
-            <mat-error>Passwords do not match</mat-error>
+          @if ((isSubmitted() || confirmPasswordTouched()) && confirmPasswordError(); as err) {
+            <mat-error>{{ err }}</mat-error>
           }
         </mat-form-field>
 

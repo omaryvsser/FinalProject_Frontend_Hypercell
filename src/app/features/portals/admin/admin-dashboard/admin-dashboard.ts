@@ -1,16 +1,19 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AdminHeaderComponent } from './components/admin-header/admin-header';
 import { MetricCardsComponent } from './components/metric-cards/metric-cards';
 import { AdminTabsComponent } from './components/admin-tabs/admin-tabs';
 import { DynamicTableComponent } from './components/dynamic-table/dynamic-table';
 import { SlideOverDrawerComponent } from './components/slide-over-drawer/slide-over-drawer';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { UserService } from '../../../../core/services/user.service';
 import { VenueService } from '../../../../core/services/venue.service';
 import { EventService } from '../../../../core/services/event.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UserDto, UserRole } from '../../../../core/models/user.model';
 import { EventResponse } from '../../../../core/models/event.model';
+import { PaginatedResponse } from '../../../../core/models/pagination.model';
 
 export type TabType = 'USERS' | 'ORGANIZERS' | 'VENUES' | 'MOVIES';
 
@@ -51,6 +54,7 @@ export interface MovieItem {
   standalone: true,
   imports: [
     CommonModule,
+    MatDialogModule,
     AdminHeaderComponent,
     MetricCardsComponent,
     AdminTabsComponent,
@@ -65,11 +69,15 @@ export class AdminDashboardComponent implements OnInit {
   private readonly venueService = inject(VenueService);
   private readonly eventService = inject(EventService);
   private readonly authService = inject(AuthService);
+  private readonly dialog = inject(MatDialog);
 
   // --- Core State Signals ---
   activeTab = signal<TabType>('USERS');
   currentPage = signal<number>(1);
-  pageSize = signal<number>(5);
+  readonly pageSize = signal<number>(5); // Strict hardcoded page size 5
+  totalServerPages = signal<number>(1);
+  totalServerElements = signal<number>(0);
+
   isDrawerOpen = signal<boolean>(false);
   selectedItem = signal<any | null>(null);
 
@@ -110,110 +118,97 @@ export class AdminDashboardComponent implements OnInit {
     if (user && user.email) {
       this.currentUserEmail.set(user.email);
     }
-    this.loadAdminData();
+    this.loadAdminData(1);
   }
 
   /**
-   * Fetches real live data from Spring Boot REST Endpoints
+   * Fetches page-by-page server-side paginated data from Spring Boot REST Endpoints (size = 5)
    */
-  loadAdminData(): void {
+  loadAdminData(page: number = this.currentPage()): void {
     this.isLoading.set(true);
+    const currentTab = this.activeTab();
 
-    // 1. Fetch system users from GET /api/admin/users
-    this.userService.getAllUsers().subscribe({
-      next: (dtos: UserDto[]) => {
-        const mappedUsers: UserItem[] = (dtos || []).map((u) => ({
-          id: String(u.id),
-          name: u.name || u.email,
-          email: u.email,
-          role: (u.role || 'CUSTOMER') as 'ADMIN' | 'ORGANIZER' | 'CUSTOMER',
-          joinedDate: '2026-08-01',
-        }));
-        this.users.set(mappedUsers);
-
-        // Filter organizers
-        const mappedOrgs: OrganizerItem[] = (dtos || [])
-          .filter((u) => u.role === 'ORGANIZER')
-          .map((u) => ({
+    if (currentTab === 'USERS' || currentTab === 'ORGANIZERS') {
+      this.userService.getPaginatedUsers(page, 5).subscribe({
+        next: (res: PaginatedResponse<UserDto>) => {
+          const mappedUsers: UserItem[] = (res.content || []).map((u) => ({
             id: String(u.id),
             name: u.name || u.email,
             email: u.email,
-            company: 'Event Organizer',
+            role: (u.role || 'CUSTOMER') as 'ADMIN' | 'ORGANIZER' | 'CUSTOMER',
             joinedDate: '2026-08-01',
           }));
-        this.organizers.set(mappedOrgs);
-        this.isLoading.set(false);
-      },
-      error: () => this.isLoading.set(false),
-    });
+          this.users.set(mappedUsers);
 
-    // 2. Fetch venues from GET /api/venues
-    this.venueService.getVenues().subscribe({
-      next: (venueList) => {
-        const mappedVenues: VenueItem[] = (venueList || []).map((v) => ({
-          id: String(v.id),
-          name: v.name,
-          address: v.address || 'Cairo, Egypt',
-          capacity: v.capacity || 500,
-        }));
-        this.venues.set(mappedVenues);
-      },
-    });
+          const mappedOrgs: OrganizerItem[] = (res.content || [])
+            .filter((u) => u.role === 'ORGANIZER')
+            .map((u) => ({
+              id: String(u.id),
+              name: u.name || u.email,
+              email: u.email,
+              company: 'Event Organizer',
+              joinedDate: '2026-08-01',
+            }));
+          this.organizers.set(mappedOrgs);
 
-    // 3. Fetch public events from GET /api/public/events
-    this.eventService.getPublicEvents(0, 100).subscribe({
-      next: (pagedRes) => {
-        const eventList: EventResponse[] = pagedRes?.content || [];
-        const mappedMovies: MovieItem[] = eventList.map((e) => ({
-          id: String(e.id),
-          title: e.title,
-          genre: e.category || 'General',
-          duration: '120 min',
-          rating: 'PG-13',
-          releaseDate: e.startDate ? e.startDate.split('T')[0] : '2026-08-01',
-        }));
-        this.movies.set(mappedMovies);
-      },
-    });
+          this.totalServerPages.set(res.totalPages || 1);
+          this.totalServerElements.set(res.totalElements || 0);
+          this.isLoading.set(false);
+        },
+        error: () => this.isLoading.set(false),
+      });
+    } else if (currentTab === 'VENUES') {
+      this.venueService.getPaginatedVenues(page, 5).subscribe({
+        next: (res) => {
+          const mappedVenues: VenueItem[] = (res.content || []).map((v) => ({
+            id: String(v.id),
+            name: v.name,
+            address: v.address || 'Cairo, Egypt',
+            capacity: v.capacity || 500,
+          }));
+          this.venues.set(mappedVenues);
+          this.totalServerPages.set(res.totalPages || 1);
+          this.totalServerElements.set(res.totalElements || 0);
+          this.isLoading.set(false);
+        },
+        error: () => this.isLoading.set(false),
+      });
+    } else if (currentTab === 'MOVIES') {
+      this.eventService.getOrganizerEvents(page, 5).subscribe({
+        next: (res) => {
+          const eventList: EventResponse[] = res.content || [];
+          const mappedMovies: MovieItem[] = eventList.map((e) => ({
+            id: String(e.id),
+            title: e.title,
+            genre: e.category || 'General',
+            duration: '120 min',
+            rating: 'PG-13',
+            releaseDate: e.startDate ? e.startDate.split('T')[0] : '2026-08-01',
+          }));
+          this.movies.set(mappedMovies);
+          this.totalServerPages.set(res.totalPages || 1);
+          this.totalServerElements.set(res.totalElements || 0);
+          this.isLoading.set(false);
+        },
+        error: () => this.isLoading.set(false),
+      });
+    }
   }
 
-  // --- Computed Metrics (Top Overview Cards) ---
+  // --- Computed Metrics ---
   totalUsersCount = computed(() => this.users().length);
   activeOrganizersCount = computed(() => this.organizers().length);
   registeredVenuesCount = computed(() => this.venues().length);
   totalMoviesCount = computed(() => this.movies().length);
 
-  // --- Computed Pagination & Type-Safe Slice Signals ---
-  totalItems = computed(() => {
-    switch (this.activeTab()) {
-      case 'USERS': return this.users().length;
-      case 'ORGANIZERS': return this.organizers().length;
-      case 'VENUES': return this.venues().length;
-      case 'MOVIES': return this.movies().length;
-    }
-  });
+  totalItems = computed(() => this.totalServerElements() || this.totalUsersCount());
+  totalPages = computed(() => Math.max(1, this.totalServerPages()));
 
-  totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()) || 1);
-
-  paginatedUsers = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return this.users().slice(start, start + this.pageSize());
-  });
-
-  paginatedOrganizers = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return this.organizers().slice(start, start + this.pageSize());
-  });
-
-  paginatedVenues = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return this.venues().slice(start, start + this.pageSize());
-  });
-
-  paginatedMovies = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return this.movies().slice(start, start + this.pageSize());
-  });
+  // Server-side paginated content (no frontend array slicing)
+  paginatedUsers = computed(() => this.users());
+  paginatedOrganizers = computed(() => this.organizers());
+  paginatedVenues = computed(() => this.venues());
+  paginatedMovies = computed(() => this.movies());
 
   pagesArray = computed(() => {
     const total = this.totalPages();
@@ -229,16 +224,18 @@ export class AdminDashboardComponent implements OnInit {
     }
   });
 
-  // --- Actions & Methods ---
+  // --- Server-Side Pagination Actions ---
 
   setActiveTab(tab: TabType) {
     this.activeTab.set(tab);
     this.currentPage.set(1);
+    this.loadAdminData(1);
   }
 
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
+      this.loadAdminData(page);
     }
   }
 
@@ -330,6 +327,7 @@ export class AdminDashboardComponent implements OnInit {
             this.loadAdminData();
             this.closeDrawer();
           },
+          error: (err) => this.showErrorDialog('Update Failed', err?.error?.message || 'Failed to update venue.')
         });
       } else {
         this.venueService.createVenue(payload).subscribe({
@@ -337,6 +335,7 @@ export class AdminDashboardComponent implements OnInit {
             this.loadAdminData();
             this.closeDrawer();
           },
+          error: (err) => this.showErrorDialog('Creation Failed', err?.error?.message || 'Failed to create venue.')
         });
       }
     } else if (tab === 'USERS') {
@@ -352,7 +351,7 @@ export class AdminDashboardComponent implements OnInit {
             this.syncOrganizersSignal();
             this.closeDrawer();
           },
-          error: (err) => alert(err?.error?.message || 'Failed to update user role.'),
+          error: (err) => this.showErrorDialog('Role Update Failed', err?.error?.message || 'Failed to update user role.'),
         });
       } else {
         this.closeDrawer();
@@ -386,7 +385,7 @@ export class AdminDashboardComponent implements OnInit {
             this.loadAdminData();
             this.closeDrawer();
           },
-          error: (err) => alert(err?.error?.message || 'Failed to update movie.')
+          error: (err) => this.showErrorDialog('Update Failed', err?.error?.message || 'Failed to update movie.')
         });
       } else {
         this.eventService.createEvent(payload).subscribe({
@@ -403,7 +402,7 @@ export class AdminDashboardComponent implements OnInit {
             this.loadAdminData();
             this.closeDrawer();
           },
-          error: (err) => alert(err?.error?.message || 'Failed to create movie.')
+          error: (err) => this.showErrorDialog('Creation Failed', err?.error?.message || 'Failed to create movie.')
         });
       }
     } else {
@@ -421,7 +420,6 @@ export class AdminDashboardComponent implements OnInit {
     this.userService.updateUserRole(numId, newRole as UserRole).subscribe({
       next: (updatedDto) => {
         const targetRole = (updatedDto?.role || newRole) as 'ADMIN' | 'ORGANIZER' | 'CUSTOMER';
-        // Immediately update local Signal containing user list upon 200 OK
         this.users.update((currentUsers) =>
           currentUsers.map((u) =>
             u.id === String(numId) ? { ...u, role: targetRole } : u
@@ -429,7 +427,7 @@ export class AdminDashboardComponent implements OnInit {
         );
         this.syncOrganizersSignal();
       },
-      error: (err) => alert(err?.error?.message || 'Failed to update user role.'),
+      error: (err) => this.showErrorDialog('Role Update Failed', err?.error?.message || 'Failed to update user role.'),
     });
   }
 
@@ -441,29 +439,79 @@ export class AdminDashboardComponent implements OnInit {
       if (item.email === this.currentUserEmail()) return;
       if (!numId) return;
 
-      this.userService.deleteUser(numId).subscribe({
-        next: () => this.loadAdminData(),
-        error: (err) => alert(err?.error?.message || 'Failed to delete user.'),
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        data: {
+          title: `Delete ${tab === 'USERS' ? 'User' : 'Organizer'}`,
+          message: `Are you sure you want to delete user "${item.name || item.email}"? This action cannot be undone.`,
+          confirmText: 'Delete User',
+          type: 'danger',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((confirmed) => {
+        if (confirmed) {
+          this.userService.deleteUser(numId).subscribe({
+            next: () => this.loadAdminData(),
+            error: (err) => this.showErrorDialog('Deletion Failed', err?.error?.message || 'Failed to delete user.'),
+          });
+        }
       });
     } else if (tab === 'VENUES') {
       if (!numId) return;
 
-      this.venueService.deleteVenue(numId).subscribe({
-        next: () => this.loadAdminData(),
-        error: (err) => alert(err?.error?.message || 'Failed to delete venue.'),
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        data: {
+          title: 'Delete Venue',
+          message: `Are you sure you want to delete venue "${item.name}"? This action cannot be undone.`,
+          confirmText: 'Delete Venue',
+          type: 'danger',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((confirmed) => {
+        if (confirmed) {
+          this.venueService.deleteVenue(numId).subscribe({
+            next: () => this.loadAdminData(),
+            error: (err) => this.showErrorDialog('Deletion Failed', err?.error?.message || 'Failed to delete venue.'),
+          });
+        }
       });
     } else if (tab === 'MOVIES') {
       if (!numId) return;
 
-      this.eventService.deleteEvent(numId).subscribe({
-        next: () => this.loadAdminData(),
-        error: (err) => alert(err?.error?.message || 'Failed to delete event.'),
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        data: {
+          title: 'Delete Movie',
+          message: `Are you sure you want to delete movie "${item.title}"? This action cannot be undone.`,
+          confirmText: 'Delete Movie',
+          type: 'danger',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((confirmed) => {
+        if (confirmed) {
+          this.eventService.deleteEvent(numId).subscribe({
+            next: () => this.loadAdminData(),
+            error: (err) => this.showErrorDialog('Deletion Failed', err?.error?.message || 'Failed to delete event.'),
+          });
+        }
       });
     }
   }
 
   isCurrentUser(email: string): boolean {
     return email === this.currentUserEmail();
+  }
+
+  private showErrorDialog(title: string, message: string): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title,
+        message,
+        confirmText: 'OK',
+        type: 'warning',
+      },
+    });
   }
 
   private syncOrganizersSignal(): void {

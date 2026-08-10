@@ -1,326 +1,324 @@
-<!-- Drawer Backdrop Overlay -->
-<div
-  class="drawer-overlay"
-  [class.open]="isOpen()"
-  (click)="onClose()">
-</div>
+<div class="drawer-wrapper" [class.open]="isOpen()">
+  <div class="drawer-backdrop" (click)="onClose()"></div>
 
-<!-- Slide-Over Container -->
-<aside class="drawer-container wide-panel" [class.open]="isOpen()">
-  <!-- Header -->
-  <div class="drawer-header">
-    <div>
-      <h2 class="drawer-title">
-        {{ selectedMovie() ? 'Edit Organizer Movie' : 'Add New Organizer Movie' }}
-      </h2>
-      <p class="drawer-subtitle">
-        Configure showtime, venue, poster, and publishing status
-      </p>
-    </div>
-    <button type="button" class="close-btn" (click)="onClose()" aria-label="Close drawer">
-      <span class="material-symbols-outlined">close</span>
-    </button>
-  </div>
-
-  <!-- Drawer Form Body -->
-  <form (ngSubmit)="onSubmit()" class="drawer-form">
-
-    <!-- Section 1: Basic Information & Poster -->
-    <div class="form-section">
-      <h3 class="section-title">
-        <span class="material-symbols-outlined icon">movie</span>
-        Basic Movie Details & Poster
-      </h3>
-
-      <!-- Movie Title -->
-      <div class="form-group">
-        <label class="form-label" for="movie-title">Movie Title *</label>
-        <input
-          id="movie-title"
-          type="text"
-          class="form-control"
-          [(ngModel)]="formTitle"
-          name="title"
-          placeholder="e.g. The Godfather"
-          required
-        />
+  <aside class="drawer-panel wide-panel">
+    <!-- Header -->
+    <header class="drawer-header">
+      <div>
+        <h2 class="drawer-title">
+          {{ selectedMovie() ? 'Edit Organizer Movie' : 'Add New Organizer Movie' }}
+        </h2>
+        <p class="drawer-subtitle">
+          Configure showtime, venue, poster, and publishing status
+        </p>
       </div>
+      <button type="button" class="btn-close-drawer" (click)="onClose()" aria-label="Close drawer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </header>
 
-      <!-- Description / Synopsis -->
-      <div class="form-group">
-        <label class="form-label" for="movie-description">Description / Synopsis</label>
-        <textarea
-          id="movie-description"
-          class="form-control form-textarea"
-          rows="3"
-          [(ngModel)]="formDescription"
-          name="description"
-          placeholder="Enter movie synopsis..."
-        ></textarea>
-      </div>
+    <!-- Drawer Form Body -->
+    <div class="drawer-body">
+      <form (ngSubmit)="onSubmit()" class="drawer-form">
 
-      <!-- Poster Image (File Upload + URL Link) -->
-      <div class="form-group">
-        <label class="form-label">Poster Image</label>
-        <input
-          type="file"
-          accept="image/*"
-          class="form-control file-input"
-          (change)="onFileSelected($event)"
-        />
-        <div class="or-divider">— OR —</div>
-        <input
-          id="movie-image-url"
-          type="text"
-          class="form-control"
-          [(ngModel)]="formImageUrl"
-          name="imageUrl"
-          placeholder="https://images.example.com/poster.jpg"
-        />
-      </div>
+        <!-- Section 1: Basic Information & Poster -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <span class="material-symbols-outlined icon">movie</span>
+            Basic Movie Details & Poster
+          </h3>
 
-      <!-- Poster Image Preview -->
-      @if (formImageUrl()) {
-        <div class="form-group preview-group">
-          <label class="form-label">Poster Preview</label>
-          <div class="poster-preview-wrapper">
-            <img [src]="formImageUrl()" alt="Poster preview" class="poster-preview-img" />
+          <!-- Movie Title -->
+          <div class="form-group">
+            <label class="form-label" for="movie-title">Movie Title *</label>
+            <input
+              id="movie-title"
+              type="text"
+              class="form-input"
+              [(ngModel)]="formTitle"
+              name="title"
+              placeholder="e.g. The Godfather"
+              required
+            />
           </div>
-        </div>
-      }
 
-      <div class="form-row">
-        <!-- Category / Genre -->
-        <div class="form-group col-half">
-          <label class="form-label" for="movie-category">Category / Genre *</label>
-          <input
-            id="movie-category"
-            type="text"
-            class="form-control"
-            [(ngModel)]="formCategory"
-            name="category"
-            placeholder="e.g. Drama, Action, Sci-Fi"
-            required
-          />
-        </div>
+          <!-- Description / Synopsis -->
+          <div class="form-group">
+            <label class="form-label" for="movie-description">Description / Synopsis</label>
+            <textarea
+              id="movie-description"
+              class="form-input form-textarea"
+              rows="3"
+              [(ngModel)]="formDescription"
+              name="description"
+              placeholder="Enter movie synopsis..."
+            ></textarea>
+          </div>
 
-        <!-- Publishing Status -->
-        <div class="form-group col-half">
-          <label class="form-label" for="movie-status">Publishing Status *</label>
-          <select
-            id="movie-status"
-            class="form-control form-select"
-            [(ngModel)]="formStatus"
-            name="status"
-            required
-          >
-            <option value="DRAFT">DRAFT</option>
-            <option value="PUBLISHED">PUBLISHED</option>
-            <option value="COMPLETED">COMPLETED</option>
-            <option value="CANCELLED">CANCELLED</option>
-          </select>
-        </div>
-      </div>
-    </div>
+          <!-- Poster Image (File Upload + URL Link) -->
+          <div class="form-group">
+            <label class="form-label">Poster Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              class="form-input file-input"
+              (change)="onFileSelected($event)"
+            />
+            <div class="or-divider">— OR —</div>
+            <input
+              id="movie-image-url"
+              type="text"
+              class="form-input"
+              [(ngModel)]="formImageUrl"
+              name="imageUrl"
+              placeholder="https://images.example.com/poster.jpg"
+            />
+          </div>
 
-    <!-- Section 2: Metadata & Specs -->
-    <div class="form-section">
-      <h3 class="section-title">
-        <span class="material-symbols-outlined icon">info</span>
-        Metadata & Specs
-      </h3>
-
-      <div class="form-row">
-        <!-- Director -->
-        <div class="form-group col-third">
-          <label class="form-label" for="movie-director">Director</label>
-          <input
-            id="movie-director"
-            type="text"
-            class="form-control"
-            [(ngModel)]="formDirector"
-            name="director"
-            placeholder="e.g. C. Nolan"
-          />
-        </div>
-
-        <!-- Duration (Minutes) -->
-        <div class="form-group col-third">
-          <label class="form-label" for="movie-duration">Duration (Min)</label>
-          <input
-            id="movie-duration"
-            type="number"
-            min="1"
-            class="form-control"
-            [(ngModel)]="formDurationMinutes"
-            name="durationMinutes"
-            placeholder="148"
-          />
-        </div>
-
-        <!-- Language -->
-        <div class="form-group col-third">
-          <label class="form-label" for="movie-language">Language</label>
-          <input
-            id="movie-language"
-            type="text"
-            class="form-control"
-            [(ngModel)]="formLanguage"
-            name="language"
-            placeholder="e.g. English"
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- Section 3: Schedule & Cinema -->
-    <div class="form-section">
-      <h3 class="section-title">
-        <span class="material-symbols-outlined icon">calendar_month</span>
-        Schedule & Cinema
-      </h3>
-
-      <div class="form-row">
-        <!-- Start Date & Time -->
-        <div class="form-group col-half">
-          <label class="form-label" for="movie-start-date">Start Date & Time *</label>
-          <input
-            id="movie-start-date"
-            type="datetime-local"
-            class="form-control"
-            [(ngModel)]="formStartDate"
-            name="startDate"
-            required
-          />
-        </div>
-
-        <!-- End Date & Time -->
-        <div class="form-group col-half">
-          <label class="form-label" for="movie-end-date">End Date & Time *</label>
-          <input
-            id="movie-end-date"
-            type="datetime-local"
-            class="form-control"
-            [(ngModel)]="formEndDate"
-            name="endDate"
-            required
-          />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="movie-venue">Cinema Venue Location *</label>
-        <select
-          id="movie-venue"
-          class="form-control form-select"
-          [(ngModel)]="formVenueId"
-          name="venueId"
-          required
-        >
-          <option [ngValue]="null" disabled>Select a cinema venue...</option>
-          @for (venue of venues(); track venue.id) {
-            <option [ngValue]="venue.id">
-              {{ venue.name }} {{ venue.capacity ? '(Cap: ' + venue.capacity + ')' : '' }}
-            </option>
+          <!-- Poster Image Preview -->
+          @if (formImageUrl()) {
+            <div class="form-group preview-group">
+              <label class="form-label">Poster Preview</label>
+              <div class="poster-preview-wrapper">
+                <img [src]="formImageUrl()" alt="Poster preview" class="poster-preview-img" />
+              </div>
+            </div>
           }
-        </select>
-      </div>
-    </div>
-    <!-- Section 4: Seat Categories & Pricing -->
-    <div class="form-section">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 class="section-title" style="margin-bottom: 0;">
-          <span class="material-symbols-outlined icon">confirmation_number</span>
-          Seat Categories & Ticket Pricing *
-        </h3>
-        <button
-          type="button"
-          class="btn btn-secondary"
-          style="padding: 0.25rem 0.75rem; font-size: 0.85rem;"
-          (click)="addSeatCategory()"
-        >
-          <span class="material-symbols-outlined" style="font-size: 1.1rem; vertical-align: middle;">add</span>
-          Add Category
-        </button>
-      </div>
 
-      <div class="seat-categories-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
-        @for (cat of seatCategories(); track $index) {
-          <div class="form-row" style="align-items: flex-end; background-color: var(--surface-hover, #f8f9fa); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color, #e0e0e0);">
+          <div class="form-row">
+            <!-- Category / Genre -->
+            <div class="form-group col-half">
+              <label class="form-label" for="movie-category">Category / Genre *</label>
+              <input
+                id="movie-category"
+                type="text"
+                class="form-input"
+                [(ngModel)]="formCategory"
+                name="category"
+                placeholder="e.g. Drama, Action, Sci-Fi"
+                required
+              />
+            </div>
 
-            <!-- Category Enum Selector -->
-            <div class="form-group col-third" style="margin-bottom: 0;">
-              <label class="form-label" [for]="'cat-name-' + $index">Category Tier</label>
+            <!-- Publishing Status -->
+            <div class="form-group col-half">
+              <label class="form-label" for="movie-status">Publishing Status *</label>
               <select
-                [id]="'cat-name-' + $index"
-                class="form-control form-select"
-                [(ngModel)]="cat.name"
-                [name]="'catName_' + $index"
+                id="movie-status"
+                class="form-select"
+                [(ngModel)]="formStatus"
+                name="status"
                 required
               >
-                @for (opt of categoryOptions; track opt) {
-                  <option [value]="opt">{{ opt }}</option>
-                }
+                <option value="DRAFT">DRAFT</option>
+                <option value="PUBLISHED">PUBLISHED</option>
+                <option value="COMPLETED">COMPLETED</option>
+                <option value="CANCELLED">CANCELLED</option>
               </select>
             </div>
+          </div>
+        </div>
 
-            <!-- Price (EGP) -->
-            <div class="form-group col-third" style="margin-bottom: 0;">
-              <label class="form-label" [for]="'cat-price-' + $index">Price (EGP)</label>
+        <!-- Section 2: Metadata & Specs -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <span class="material-symbols-outlined icon">info</span>
+            Metadata & Specs
+          </h3>
+
+          <div class="form-row">
+            <!-- Director -->
+            <div class="form-group col-third">
+              <label class="form-label" for="movie-director">Director</label>
               <input
-                [id]="'cat-price-' + $index"
-                type="number"
-                min="0"
-                step="0.01"
-                class="form-control"
-                [(ngModel)]="cat.price"
-                [name]="'catPrice_' + $index"
-                placeholder="100.00"
-                required
+                id="movie-director"
+                type="text"
+                class="form-input"
+                [(ngModel)]="formDirector"
+                name="director"
+                placeholder="e.g. C. Nolan"
               />
             </div>
 
-            <!-- Total Capacity -->
-            <div class="form-group col-third" style="margin-bottom: 0;">
-              <label class="form-label" [for]="'cat-seats-' + $index">Total Seats</label>
+            <!-- Duration (Minutes) -->
+            <div class="form-group col-third">
+              <label class="form-label" for="movie-duration">Duration (Min)</label>
               <input
-                [id]="'cat-seats-' + $index"
+                id="movie-duration"
                 type="number"
                 min="1"
-                class="form-control"
-                [(ngModel)]="cat.totalSeats"
-                [name]="'catSeats_' + $index"
-                placeholder="50"
+                class="form-input"
+                [(ngModel)]="formDurationMinutes"
+                name="durationMinutes"
+                placeholder="148"
+              />
+            </div>
+
+            <!-- Language -->
+            <div class="form-group col-third">
+              <label class="form-label" for="movie-language">Language</label>
+              <input
+                id="movie-language"
+                type="text"
+                class="form-input"
+                [(ngModel)]="formLanguage"
+                name="language"
+                placeholder="e.g. English"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Schedule & Cinema -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <span class="material-symbols-outlined icon">calendar_month</span>
+            Schedule & Cinema
+          </h3>
+
+          <div class="form-row">
+            <!-- Start Date & Time -->
+            <div class="form-group col-half">
+              <label class="form-label" for="movie-start-date">Start Date & Time *</label>
+              <input
+                id="movie-start-date"
+                type="datetime-local"
+                class="form-input"
+                [(ngModel)]="formStartDate"
+                name="startDate"
                 required
               />
             </div>
 
-            <!-- Delete Button -->
+            <!-- End Date & Time -->
+            <div class="form-group col-half">
+              <label class="form-label" for="movie-end-date">End Date & Time *</label>
+              <input
+                id="movie-end-date"
+                type="datetime-local"
+                class="form-input"
+                [(ngModel)]="formEndDate"
+                name="endDate"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="movie-venue">Cinema Venue Location *</label>
+            <select
+              id="movie-venue"
+              class="form-select"
+              [(ngModel)]="formVenueId"
+              name="venueId"
+              required
+            >
+              <option [ngValue]="null" disabled>Select a cinema venue...</option>
+              @for (venue of venues(); track venue.id) {
+                <option [ngValue]="venue.id">
+                  {{ venue.name }} {{ venue.capacity ? '(Cap: ' + venue.capacity + ')' : '' }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Section 4: Seat Categories & Ticket Pricing -->
+        <div class="form-section">
+          <div class="section-header-row">
+            <h3 class="section-title">
+              <span class="material-symbols-outlined icon">confirmation_number</span>
+              Seat Categories & Pricing *
+            </h3>
             <button
               type="button"
-              class="close-btn"
-              style="margin-bottom: 0.25rem; color: #dc3545;"
-              (click)="removeSeatCategory($index)"
-              [disabled]="seatCategories().length === 1"
-              title="Remove Category Tier"
+              class="btn-add-category"
+              (click)="addSeatCategory()"
             >
-              <span class="material-symbols-outlined">delete</span>
+              <span class="material-symbols-outlined btn-icon">add</span>
+              Add Category
             </button>
-
           </div>
-        }
-      </div>
+
+          <div class="seat-categories-container">
+            @for (cat of seatCategories(); track $index) {
+              <div class="seat-category-card">
+                <div class="form-row category-row">
+                  <!-- Category Enum Selector -->
+                  <div class="form-group col-third">
+                    <label class="form-label" [for]="'cat-name-' + $index">Category Tier</label>
+                    <select
+                      [id]="'cat-name-' + $index"
+                      class="form-select"
+                      [(ngModel)]="cat.name"
+                      [name]="'catName_' + $index"
+                      required
+                    >
+                      @for (opt of categoryOptions; track opt) {
+                        <option [value]="opt">{{ opt }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  <!-- Price (EGP) -->
+                  <div class="form-group col-third">
+                    <label class="form-label" [for]="'cat-price-' + $index">Price (EGP)</label>
+                    <input
+                      [id]="'cat-price-' + $index"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="form-input"
+                      [(ngModel)]="cat.price"
+                      [name]="'catPrice_' + $index"
+                      placeholder="100.00"
+                      required
+                    />
+                  </div>
+
+                  <!-- Total Capacity -->
+                  <div class="form-group col-third">
+                    <label class="form-label" [for]="'cat-seats-' + $index">Total Seats</label>
+                    <input
+                      [id]="'cat-seats-' + $index"
+                      type="number"
+                      min="1"
+                      class="form-input"
+                      [(ngModel)]="cat.totalSeats"
+                      [name]="'catSeats_' + $index"
+                      placeholder="50"
+                      required
+                    />
+                  </div>
+
+                  <!-- Delete Button -->
+                  <button
+                    type="button"
+                    class="btn-remove-category"
+                    (click)="removeSeatCategory($index)"
+                    [disabled]="seatCategories().length === 1"
+                    title="Remove Category Tier"
+                  >
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+      </form>
     </div>
 
     <!-- Footer Action Buttons -->
-    <div class="drawer-footer">
-      <button type="button" class="btn btn-secondary" (click)="onClose()">
+    <footer class="drawer-footer">
+      <button type="button" class="btn-cancel" (click)="onClose()">
         Cancel
       </button>
-      <button type="submit" class="btn btn-primary">
+      <button type="button" class="btn-save" (click)="onSubmit()">
         <span class="material-symbols-outlined btn-save-icon">save</span>
         {{ selectedMovie() ? 'Save Changes' : 'Create Movie' }}
       </button>
-    </div>
-  </form>
-</aside>
+    </footer>
+  </aside>
+</div>

@@ -1,8 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { UserDto, UserRole } from '../models/user.model';
+import { PaginatedResponse } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -20,7 +21,7 @@ export class UserService {
 
   /**
    * GET /api/admin/users
-   * Fetch all registered users for Admin management.
+   * Fetch all registered users for Admin management (unpaginated list).
    */
   getAllUsers(): Observable<UserDto[]> {
     this.isLoadingSignal.set(true);
@@ -35,6 +36,36 @@ export class UserService {
         error: (err: HttpErrorResponse) => {
           this.isLoadingSignal.set(false);
           const msg = this.extractErrorMessage(err, 'Failed to load user list.');
+          this.errorSignal.set(msg);
+        }
+      })
+    );
+  }
+
+  /**
+   * GET /api/admin/users?page={pageNumber}&size=5
+   * Fetch paginated users for Admin management.
+   */
+  getPaginatedUsers(page: number = 1, size: number = 5): Observable<PaginatedResponse<UserDto>> {
+    this.isLoadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    const pageIndex = Math.max(0, page - 1);
+    const params = new HttpParams()
+      .set('page', pageIndex.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedResponse<UserDto>>(`${this.apiUrl}/admin/users`, { params }).pipe(
+      tap({
+        next: (res) => {
+          if (res?.content) {
+            this.usersSignal.set(res.content);
+          }
+          this.isLoadingSignal.set(false);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isLoadingSignal.set(false);
+          const msg = this.extractErrorMessage(err, 'Failed to load paginated users.');
           this.errorSignal.set(msg);
         }
       })

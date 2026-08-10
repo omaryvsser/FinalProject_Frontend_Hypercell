@@ -1,7 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { PaginatedResponse } from '../models/pagination.model';
 
 export interface Venue {
   id: number;
@@ -28,7 +29,7 @@ export class VenueService {
 
   /**
    * GET /api/venues
-   * Fetch all registered cinema venues (Used by Organizers and Admins)
+   * Fetch all registered cinema venues (unpaginated).
    */
   getVenues(): Observable<Venue[]> {
     this.isLoadingSignal.set(true);
@@ -43,6 +44,36 @@ export class VenueService {
         error: (err: HttpErrorResponse) => {
           this.isLoadingSignal.set(false);
           const msg = this.extractErrorMessage(err, 'Failed to load venues.');
+          this.errorSignal.set(msg);
+        }
+      })
+    );
+  }
+
+  /**
+   * GET /api/venues?page={pageNumber}&size=5
+   * Fetch server-side paginated venues.
+   */
+  getPaginatedVenues(page: number = 1, size: number = 5): Observable<PaginatedResponse<Venue>> {
+    this.isLoadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    const pageIndex = Math.max(0, page - 1);
+    const params = new HttpParams()
+      .set('page', pageIndex.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedResponse<Venue>>(this.apiUrl, { params }).pipe(
+      tap({
+        next: (res) => {
+          if (res?.content) {
+            this.venuesSignal.set(res.content);
+          }
+          this.isLoadingSignal.set(false);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isLoadingSignal.set(false);
+          const msg = this.extractErrorMessage(err, 'Failed to load paginated venues.');
           this.errorSignal.set(msg);
         }
       })
@@ -70,7 +101,6 @@ export class VenueService {
 
   /**
    * POST /api/venues
-   * Create a new venue (Admin action)
    */
   createVenue(venue: Omit<Venue, 'id'>): Observable<Venue> {
     this.isLoadingSignal.set(true);
@@ -93,7 +123,6 @@ export class VenueService {
 
   /**
    * PUT /api/venues/{id}
-   * Update an existing venue (Admin action)
    */
   updateVenue(id: number, venue: Partial<Venue>): Observable<Venue> {
     this.isLoadingSignal.set(true);
@@ -118,7 +147,6 @@ export class VenueService {
 
   /**
    * DELETE /api/venues/{id}
-   * Delete a venue (Admin action)
    */
   deleteVenue(id: number): Observable<void> {
     this.isLoadingSignal.set(true);

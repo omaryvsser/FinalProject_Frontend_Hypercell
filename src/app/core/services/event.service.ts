@@ -1,19 +1,9 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EventResponse, EventDetailResponse, PagedResponse } from '../models/event.model';
-
-
-
-export type SeatCategoryName = 'STANDARD' | 'VIP' | 'IMAX' ;
-
-
-export interface SeatCategoryPayload {
-  name: SeatCategoryName;
-  price: number;
-  totalSeats: number;
-}
+import { EventResponse, EventDetailResponse } from '../models/event.model';
+import { PaginatedResponse } from '../models/pagination.model';
 
 export interface EventPayload {
   title: string;
@@ -28,7 +18,6 @@ export interface EventPayload {
   venueId?: number | null;
   venueName?: string;
   imageUrl?: string;
-  seatCategories?: SeatCategoryPayload[];
 }
 
 @Injectable({
@@ -110,13 +99,19 @@ export class EventService {
   }
 
   /**
-   * GET /api/public/events
+   * GET /api/public/events?page={pageNumber}&size=5
+   * Server-side paginated public events
    */
-  getPublicEvents(page: number = 0, size: number = 100): Observable<PagedResponse<EventResponse>> {
+  getPublicEvents(page: number = 1, size: number = 5): Observable<PaginatedResponse<EventResponse>> {
     this.isLoadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.get<PagedResponse<EventResponse>>(`${this.apiUrl}/public/events?page=${page}&size=${size}`).pipe(
+    const pageIndex = Math.max(0, page - 1);
+    const params = new HttpParams()
+      .set('page', pageIndex.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedResponse<EventResponse>>(`${this.apiUrl}/public/events`, { params }).pipe(
       tap({
         next: (res) => {
           if (res?.content) {
@@ -134,14 +129,19 @@ export class EventService {
   }
 
   /**
-   * GET /api/v1/events
-   * Organizer specific event listing
+   * GET /api/v1/events?page={pageNumber}&size=5
+   * Server-side paginated organizer event listing
    */
-  getOrganizerEvents(page: number = 0, size: number = 100): Observable<PagedResponse<EventResponse>> {
+  getOrganizerEvents(page: number = 1, size: number = 5): Observable<PaginatedResponse<EventResponse>> {
     this.isLoadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.get<PagedResponse<EventResponse>>(`${this.apiUrl}/v1/events?page=${page}&size=${size}`).pipe(
+    const pageIndex = Math.max(0, page - 1);
+    const params = new HttpParams()
+      .set('page', pageIndex.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedResponse<EventResponse>>(`${this.apiUrl}/v1/events`, { params }).pipe(
       tap({
         next: (res) => {
           if (res?.content) {
@@ -201,7 +201,6 @@ export class EventService {
 
   /**
    * PATCH /api/v1/events/{id}/status
-   * Change event status (DRAFT, PUBLISHED, CANCELLED, COMPLETED)
    */
   patchEventStatus(id: number, status: 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED'): Observable<EventResponse> {
     this.isLoadingSignal.set(true);

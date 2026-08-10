@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [
     FormsModule,
     RouterLink,
@@ -27,38 +29,61 @@ export class Login {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  // Form Field Signals
+  // 1. Form State Signals
   readonly email = signal<string>('');
   readonly password = signal<string>('');
 
-  // Field Touch & Form Submission Signals
+  // 2. Field Touch & Form Submission Signals
   readonly emailTouched = signal<boolean>(false);
   readonly passwordTouched = signal<boolean>(false);
   readonly isSubmitted = signal<boolean>(false);
 
-  // UI State Signals
+  // 3. UI Control & Alert Signals
   readonly hidePassword = signal<boolean>(true);
   readonly isSubmitting = signal<boolean>(false);
   readonly loginMessage = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
 
-  // Computed Validation Signals
-  readonly emailEmpty = computed(() => this.email().trim().length === 0);
-  readonly emailInvalid = computed(() => {
-    if (this.emailEmpty()) return false;
-    return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email().trim());
+  // 4. Computed Signal Validation Rules
+  readonly emailError = computed<string | null>(() => {
+    const val = this.email().trim();
+    if (!val) {
+      return 'Email address is required';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(val)) {
+      return 'Please enter a valid email address';
+    }
+    return null;
   });
-  readonly passwordEmpty = computed(() => this.password().length === 0);
 
-  // Form Validity Signal
-  readonly isFormValid = computed(
-    () => !this.emailEmpty() && !this.emailInvalid() && !this.passwordEmpty()
+  readonly passwordError = computed<string | null>(() => {
+    const val = this.password();
+    if (!val) {
+      return 'Password is required';
+    }
+    return null;
+  });
+
+  // 5. Angular Material ErrorStateMatchers for Signals
+  readonly emailMatcher: ErrorStateMatcher = {
+    isErrorState: () => (this.isSubmitted() || this.emailTouched()) && this.emailError() !== null,
+  };
+
+  readonly passwordMatcher: ErrorStateMatcher = {
+    isErrorState: () => (this.isSubmitted() || this.passwordTouched()) && this.passwordError() !== null,
+  };
+
+  // 6. Computed Overall Form Validity Signal
+  readonly isFormValid = computed<boolean>(
+    () => this.emailError() === null && this.passwordError() === null
   );
 
   togglePasswordVisibility(): void {
     this.hidePassword.update((visible) => !visible);
   }
 
+  // 7. Signal-Based Form Submission Handler
   onSubmit(): void {
     this.isSubmitted.set(true);
 
