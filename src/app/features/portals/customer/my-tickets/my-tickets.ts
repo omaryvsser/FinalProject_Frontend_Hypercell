@@ -5,10 +5,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { QRCodeComponent } from 'angularx-qrcode';
 import { TicketService } from '../../../../core/services/ticket.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TicketDto } from '../../../../core/models/ticket.model';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 
 export interface TicketPass {
   id: string;
@@ -18,6 +20,7 @@ export interface TicketPass {
 
 export interface GroupedBooking {
   groupKey: string;
+  bookingId?: number;
   movieTitle: string;
   posterUrl?: string;
   cinemaName: string;
@@ -35,7 +38,9 @@ function groupTicketDtos(dtos: TicketDto[]): GroupedBooking[] {
   const map = new Map<string, GroupedBooking>();
 
   (dtos || []).forEach((dto, idx) => {
-    const key = `${dto.eventName || 'Event'}_${dto.bookingDate || ''}_${dto.seatCategoryName || 'STANDARD'}`;
+    const key = dto.bookingId
+      ? `booking_${dto.bookingId}`
+      : `${dto.eventName || 'Event'}_${dto.bookingDate || ''}_${dto.seatCategoryName || 'STANDARD'}`;
 
     let seatNum = `Seat #${idx + 1}`;
     if (dto.ticketNumber && dto.ticketNumber.includes('-')) {
@@ -59,7 +64,7 @@ function groupTicketDtos(dtos: TicketDto[]): GroupedBooking[] {
     if (map.has(key)) {
       const existing = map.get(key)!;
       existing.passes.push(pass);
-      existing.quantity = existing.passes.length;
+      existing.quantity = dto.bookingQuantity ?? existing.passes.length;
     } else {
       const dateObj = dto.bookingDate ? new Date(dto.bookingDate) : null;
       const formattedDate = dateObj
@@ -71,15 +76,22 @@ function groupTicketDtos(dtos: TicketDto[]): GroupedBooking[] {
 
       map.set(key, {
         groupKey: key,
+        bookingId: dto.bookingId,
         movieTitle: dto.eventName || 'Cinema Screening',
         posterUrl: undefined,
         cinemaName: 'Hypercell Cinema',
         seatCategory: dto.seatCategoryName || 'STANDARD',
         bookingDate: formattedDate,
         showtime: formattedTime,
-        quantity: 1,
-        totalPrice: (dto as any).price ?? 0,
-        status: dto.isBooked ? 'UPCOMING' : 'COMPLETED',
+        quantity: dto.bookingQuantity ?? 1,
+        totalPrice: dto.totalPrice ?? 0,
+        status: dto.bookingStatus === 'CANCELLED'
+          ? 'CANCELLED'
+          : dto.bookingStatus === 'COMPLETED'
+            ? 'COMPLETED'
+            : dto.isBooked
+              ? 'UPCOMING'
+              : 'COMPLETED',
         passes: [pass],
       });
     }
@@ -98,6 +110,7 @@ function groupTicketDtos(dtos: TicketDto[]): GroupedBooking[] {
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
     QRCodeComponent,
   ],
   templateUrl: './my-tickets.html',
@@ -107,12 +120,15 @@ export class MyTickets implements OnInit {
   private readonly ticketService = inject(TicketService);
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
 
   // Raw tickets from API
   readonly rawTickets = signal<TicketDto[]>([]);
   readonly isLoading = signal<boolean>(true);
   readonly errorMessage = signal<string | null>(null);
   readonly showSuccessBanner = signal<boolean>(false);
+  readonly cancellingBookingId = signal<number | null>(null);
+  readonly cancellationMessage = signal<string | null>(null);
 
   // Computed grouped bookings signal
   readonly groupedBookings = computed<GroupedBooking[]>(() =>
@@ -196,5 +212,42 @@ export class MyTickets implements OnInit {
 
   selectPassIndex(index: number): void {
     this.activePassIndex.set(index);
+  }
+
+  cancelBooking(booking: GroupedBooking): void {
+    if (!booking.bookingId) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Cancel booking?',
+        message: `Are you sure you want to cancel your booking for ${booking.movieTitle}?`,
+        confirmText: 'Cancel Booking',
+        cancelText: 'Keep Booking',
+        type: 'warning',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed || !booking.bookingId) return;
+
+      this.cancellingBookingId.set(booking.bookingId);
+      this.cancellationMessage.set(null);
+      this.errorMessage.set(null);
+
+      this.ticketService.cancelBooking(booking.bookingId).subscribe({
+        next: () => {
+          this.cancellationMessage.set('Booking cancelled successfully.');
+          this.cancellingBookingId.set(null);
+          this.loadTickets();
+        },
+        error: (err) => {
+          this.errorMessage.set(
+            err?.error?.message ??
+              (typeof err?.error === 'string' ? err.error : 'Unable to cancel this booking.')
+          );
+          this.cancellingBookingId.set(null);
+        },
+      });
+    });
   }
 }

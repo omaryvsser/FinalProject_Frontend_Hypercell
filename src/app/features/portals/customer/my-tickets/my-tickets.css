@@ -66,6 +66,28 @@
   font-size: 28px;
 }
 
+.cancellation-message,
+.booking-error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+.cancellation-message {
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid #22c55e;
+}
+
+.booking-error-message {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid #ef4444;
+}
+
 .banner-text p {
   margin: 2px 0 0;
   font-size: 0.9rem;
@@ -314,6 +336,12 @@
   background: transparent !important;
   border: 1px solid #475569 !important;
   color: #94a3b8 !important;
+}
+
+.btn-cancel-booking {
+  width: 100%;
+  color: #fca5a5 !important;
+  border-color: #ef4444 !important;
 }
 
 /* 🎨 Digital Passes Interactive Modal Overlay */

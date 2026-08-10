@@ -24,6 +24,20 @@
     </div>
   }
 
+  @if (cancellationMessage()) {
+    <div class="cancellation-message" role="status">
+      <mat-icon>check_circle</mat-icon>
+      {{ cancellationMessage() }}
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="booking-error-message" role="alert">
+      <mat-icon>error</mat-icon>
+      {{ errorMessage() }}
+    </div>
+  }
+
   <!-- Loading State -->
   @if (isLoading()) {
     <div class="loading-state" aria-live="polite">
@@ -110,6 +124,19 @@
                 <span class="material-symbols-outlined btn-icon">qr_code_2</span>
                 {{ booking.quantity > 1 ? 'View All ' + booking.quantity + ' Passes' : 'View Gate Pass' }}
               </button>
+
+              @if (booking.bookingId) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="btn-cancel-booking"
+                  [disabled]="cancellingBookingId() === booking.bookingId"
+                  (click)="cancelBooking(booking)"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                  {{ cancellingBookingId() === booking.bookingId ? 'Cancelling...' : 'Cancel Booking' }}
+                </button>
+              }
             </div>
           </div>
         }

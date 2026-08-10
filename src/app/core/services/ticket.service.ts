@@ -36,22 +36,40 @@ export class TicketService {
       )
     }).pipe(
       map(({ tickets, bookings }) => {
-        const ticketList = [...(tickets || [])];
+        const ticketList: TicketDto[] = (tickets || []).map((ticket) => {
+          const booking = (bookings || []).find(
+            (item) =>
+              item.eventTitle === ticket.eventName &&
+              item.seatCategoryName === ticket.seatCategoryName &&
+              item.createdAt === ticket.bookingDate
+          );
+
+          return booking
+            ? {
+                ...ticket,
+                bookingId: booking.bookingId,
+                bookingStatus: booking.status,
+                bookingQuantity: booking.quantity,
+                totalPrice: booking.totalPrice,
+              }
+            : ticket;
+        });
 
         if (bookings && bookings.length > 0) {
           bookings.forEach((b) => {
-            const ticketNum = `BK-${b.bookingId}`;
-            const exists = ticketList.some(
-              (t) => t.ticketNumber === ticketNum || t.id === b.bookingId
-            );
+            const exists = ticketList.some((ticket) => ticket.bookingId === b.bookingId);
             if (!exists) {
               ticketList.push({
                 id: b.bookingId,
-                ticketNumber: ticketNum,
+                ticketNumber: `BK-${b.bookingId}`,
                 eventName: b.eventTitle,
                 seatCategoryName: b.seatCategoryName,
                 isBooked: b.status !== 'CANCELLED',
-                bookingDate: b.createdAt
+                bookingDate: b.createdAt,
+                bookingId: b.bookingId,
+                bookingStatus: b.status,
+                bookingQuantity: b.quantity,
+                totalPrice: b.totalPrice,
               });
             }
           });
@@ -100,9 +118,10 @@ export class TicketService {
     this.isLoadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.patch<string>(
+    return this.http.patch(
       `${this.apiUrl}/bookings/${bookingId}/cancel`,
-      {}
+      {},
+      { responseType: 'text' }
     ).pipe(
       tap({
         next: () => this.isLoadingSignal.set(false),
