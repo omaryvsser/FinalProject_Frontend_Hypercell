@@ -5,13 +5,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TicketService } from '../../../../core/services/ticket.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TicketDto } from '../../../../core/models/ticket.model';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 
 /** UI-enriched ticket shape used by the template */
 export interface Ticket {
   id: string;
+  bookingId?: number;
   movieTitle: string;
   posterUrl?: string;
   cinemaName: string;
@@ -37,6 +40,7 @@ function ticketDtoToUi(dto: TicketDto, index: number): Ticket {
 
   return {
     id: dto.ticketNumber ?? `TKN-${dto.id}`,
+    bookingId: dto.bookingId,
     movieTitle: dto.eventName || 'Cinema Screening',
     posterUrl: undefined,
     cinemaName: 'Hypercell Cinema',
@@ -56,8 +60,14 @@ function ticketDtoToUi(dto: TicketDto, index: number): Ticket {
         minute: '2-digit',
       })
       : '—',
-    price: (dto as any).price ?? 0,
-    status: dto.isBooked ? 'UPCOMING' : 'COMPLETED',
+    price: dto.totalPrice ?? 0,
+    status: dto.bookingStatus === 'CANCELLED'
+      ? 'CANCELLED'
+      : dto.bookingStatus === 'COMPLETED'
+        ? 'COMPLETED'
+        : dto.isBooked
+          ? 'UPCOMING'
+          : 'COMPLETED',
   };
 }
 
@@ -71,6 +81,7 @@ function ticketDtoToUi(dto: TicketDto, index: number): Ticket {
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
   ],
   templateUrl: './my-tickets.html',
   styleUrl: './my-tickets.css',
@@ -79,12 +90,15 @@ export class MyTickets implements OnInit {
   private readonly ticketService = inject(TicketService);
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
 
   // Data & UI state signals
   readonly tickets = signal<Ticket[]>([]);
   readonly isLoading = signal<boolean>(true);
   readonly errorMessage = signal<string | null>(null);
   readonly showSuccessBanner = signal<boolean>(false);
+  readonly cancellingBookingId = signal<number | null>(null);
+  readonly cancellationMessage = signal<string | null>(null);
 
   // Computed sub-lists for active vs past tickets
   readonly activeTickets = computed(() =>
@@ -130,6 +144,49 @@ export class MyTickets implements OnInit {
         );
         this.isLoading.set(false);
       },
+    });
+  }
+
+  cancelBooking(ticket: Ticket): void {
+    if (!ticket.bookingId) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Cancel booking?',
+        message: `Are you sure you want to cancel your booking for ${ticket.movieTitle}?`,
+        confirmText: 'Cancel Booking',
+        cancelText: 'Keep Booking',
+        type: 'warning',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed || !ticket.bookingId) return;
+
+      this.cancellingBookingId.set(ticket.bookingId);
+      this.cancellationMessage.set(null);
+      this.errorMessage.set(null);
+
+      this.ticketService.cancelBooking(ticket.bookingId).subscribe({
+        next: () => {
+          this.tickets.update((tickets) =>
+            tickets.map((currentTicket) =>
+              currentTicket.bookingId === ticket.bookingId
+                ? { ...currentTicket, status: 'CANCELLED' }
+                : currentTicket
+            )
+          );
+          this.cancellationMessage.set('Booking cancelled successfully.');
+          this.cancellingBookingId.set(null);
+        },
+        error: (err) => {
+          this.errorMessage.set(
+            err?.error?.message ??
+              (typeof err?.error === 'string' ? err.error : 'Unable to cancel this booking.')
+          );
+          this.cancellingBookingId.set(null);
+        },
+      });
     });
   }
 }

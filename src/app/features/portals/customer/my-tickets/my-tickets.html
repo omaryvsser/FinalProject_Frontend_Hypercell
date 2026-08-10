@@ -24,6 +24,20 @@
     </div>
   }
 
+  @if (cancellationMessage()) {
+    <div class="cancellation-message" role="status">
+      <mat-icon>check_circle</mat-icon>
+      {{ cancellationMessage() }}
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="booking-error-message" role="alert">
+      <mat-icon>error</mat-icon>
+      {{ errorMessage() }}
+    </div>
+  }
+
   <!-- Loading State -->
   @if (isLoading()) {
     <div class="loading-state" aria-live="polite" aria-label="Loading your tickets">
@@ -106,6 +120,19 @@
                 <span class="material-symbols-outlined check-icon">check_circle</span>
                 CONFIRMED
               </span>
+
+              @if (ticket.bookingId) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="cancel-booking-button"
+                  [disabled]="cancellingBookingId() === ticket.bookingId"
+                  (click)="cancelBooking(ticket)"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                  {{ cancellingBookingId() === ticket.bookingId ? 'Cancelling...' : 'Cancel Booking' }}
+                </button>
+              }
             </div>
           </div>
         }

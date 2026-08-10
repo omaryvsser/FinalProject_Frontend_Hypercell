@@ -51,7 +51,10 @@ export class TicketService {
                 eventName: b.eventTitle,
                 seatCategoryName: b.seatCategoryName,
                 isBooked: b.status !== 'CANCELLED',
-                bookingDate: b.createdAt
+                bookingDate: b.createdAt,
+                bookingId: b.bookingId,
+                bookingStatus: b.status,
+                totalPrice: b.totalPrice,
               });
             }
           });
@@ -100,9 +103,10 @@ export class TicketService {
     this.isLoadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.patch<string>(
+    return this.http.patch(
       `${this.apiUrl}/bookings/${bookingId}/cancel`,
-      {}
+      {},
+      { responseType: 'text' }
     ).pipe(
       tap({
         next: () => this.isLoadingSignal.set(false),

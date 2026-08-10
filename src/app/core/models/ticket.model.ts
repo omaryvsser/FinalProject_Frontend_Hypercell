@@ -9,6 +9,9 @@ export interface TicketDto {
   seatCategoryName: string;
   isBooked: boolean;
   bookingDate: string | null;   // ISO datetime string
+  bookingId?: number;
+  bookingStatus?: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+  totalPrice?: number;
 }
 
 /**
