@@ -32,7 +32,7 @@ export class OrganizerTableComponent {
   viewAttendees = output<OrganizerMovie>();
   pageChange = output<number>();
 
-  readonly displayedColumns = ['title', 'venue', 'showtime', 'status', 'bookings', 'actions'];
+  readonly displayedColumns = ['title', 'venue', 'showtime', 'status', 'actions'];
 
   onEdit(movie: OrganizerMovie) {
     this.editMovie.emit(movie);

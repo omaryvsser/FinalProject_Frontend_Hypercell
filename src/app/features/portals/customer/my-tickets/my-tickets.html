@@ -3,13 +3,13 @@
     <div class="header-title-group">
       <span class="material-symbols-outlined header-icon">local_activity</span>
       <div>
-        <h1 id="my-tickets-heading">My Movie Tickets</h1>
-        <p class="header-subtitle">View and manage your upcoming cinema passes and booking codes</p>
+        <h1 id="my-tickets-heading">My Cinema Bookings</h1>
+        <p class="header-subtitle">View your aggregated reservations and scannable digital passes</p>
       </div>
     </div>
     @if (!isLoading()) {
       <span class="ticket-count-badge">
-        {{ activeTickets().length }} Active Pass{{ activeTickets().length === 1 ? '' : 'es' }}
+        {{ activeBookings().length }} Active Reservation{{ activeBookings().length === 1 ? '' : 's' }}
       </span>
     }
   </div>
@@ -19,144 +19,134 @@
       <span class="material-symbols-outlined success-icon">check_circle</span>
       <div class="banner-text">
         <strong>Booking Confirmed!</strong>
-        <p>Your ticket reservation has been successfully confirmed and added below.</p>
+        <p>Your ticket reservation has been successfully placed and added below.</p>
       </div>
     </div>
   }
 
   <!-- Loading State -->
   @if (isLoading()) {
-    <div class="loading-state" aria-live="polite" aria-label="Loading your tickets">
+    <div class="loading-state" aria-live="polite">
       <mat-spinner diameter="48" class="tickets-spinner"></mat-spinner>
-      <p class="loading-text">Fetching your cinema passes...</p>
+      <p class="loading-text">Fetching your cinema reservations...</p>
     </div>
   }
 
   @if (!isLoading()) {
 
-    <!-- ── Active / Upcoming Tickets ─────────────────────────────────────── -->
-    @if (activeTickets().length > 0) {
-      <div class="tickets-section-label">Upcoming</div>
+    <!-- ── Active / Upcoming Master Bookings ──────────────────────────────────────── -->
+    @if (activeBookings().length > 0) {
+      <div class="tickets-section-label">Active Reservations</div>
       <div class="tickets-list">
-        @for (ticket of activeTickets(); track ticket.id) {
-          <div class="ticket-card">
-            <!-- Left: Movie Poster Image -->
+        @for (booking of activeBookings(); track booking.groupKey) {
+          <div class="booking-master-card">
+            <!-- Left Poster Area -->
             <div class="ticket-poster-box">
-              @if (ticket.posterUrl) {
-                <img [src]="ticket.posterUrl" [alt]="ticket.movieTitle + ' poster'" class="ticket-poster-img" />
-              } @else {
-                <div class="poster-fallback-box">
-                  <span class="material-symbols-outlined fallback-icon">movie</span>
-                </div>
-              }
+              <div class="poster-fallback-box">
+                <span class="material-symbols-outlined fallback-icon">movie</span>
+              </div>
             </div>
 
-            <!-- Center: Ticket Information & Metadata -->
+            <!-- Center Info Area -->
             <div class="ticket-info-box">
               <div class="ticket-meta-top">
-                <span class="seat-category-pill">{{ ticket.seatCategory }}</span>
+                <span class="seat-category-pill">{{ booking.seatCategory }}</span>
+                <span class="quantity-badge">
+                  <span class="material-symbols-outlined qty-icon">confirmation_number</span>
+                  Quantity: {{ booking.quantity }}
+                </span>
                 <span class="status-badge upcoming">
-                  <span class="status-dot"></span>
-                  UPCOMING
+                  <span class="status-dot"></span> UPCOMING
                 </span>
               </div>
 
-              <h2 class="ticket-movie-title">{{ ticket.movieTitle }}</h2>
+              <h2 class="ticket-movie-title">{{ booking.movieTitle }}</h2>
 
               <div class="ticket-details-grid">
-                @if (ticket.cinemaName) {
-                  <div class="detail-item">
-                    <span class="material-symbols-outlined detail-icon">location_on</span>
-                    <span>{{ ticket.cinemaName }}</span>
-                  </div>
-                }
-
-                <!-- Seat Position -->
                 <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">event_seat</span>
-                  <span>{{ ticket.seatNumber }}</span>
+                  <span class="material-symbols-outlined detail-icon">location_on</span>
+                  <span>{{ booking.cinemaName }}</span>
                 </div>
-
-                <!-- Showtime -->
+                <div class="detail-item">
+                  <span class="material-symbols-outlined detail-icon">event</span>
+                  <span>{{ booking.bookingDate }}</span>
+                </div>
                 <div class="detail-item">
                   <span class="material-symbols-outlined detail-icon">schedule</span>
-                  <span>{{ ticket.showtime }}</span>
+                  <span>{{ booking.showtime }}</span>
                 </div>
-
-                <!-- Ticket Reference Code -->
                 <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">confirmation_number</span>
-                  <span class="ticket-id-code">{{ ticket.id }}</span>
+                  <span class="material-symbols-outlined detail-icon">event_seat</span>
+                  <span>
+                    {{ booking.passes.length > 1 ? 'Seats ' + booking.passes[0].seatNumber + ' – #' + booking.passes.length : booking.passes[0].seatNumber }}
+                  </span>
                 </div>
               </div>
-            </div> <!-- 🟢 Fixed missing closing tag -->
+            </div>
 
-            <!-- Right Side: Ticket Stub -->
+            <!-- Right Action & Preview Stub -->
             <div class="ticket-stub-side">
               <div class="stub-notch top"></div>
               <div class="stub-notch bottom"></div>
 
-              <span class="material-symbols-outlined stub-icon">payments</span>
-              @if (ticket.price > 0) {
-                <span class="price-caption">TOTAL PAID</span>
-                <span class="price-value">{{ ticket.price }} <span class="currency">EGP</span></span>
-              }
+              <div class="qr-code-wrapper" (click)="openPassesModal(booking, 0)">
+                <qrcode
+                  [qrdata]="booking.passes[0].ticketCode"
+                  [width]="95"
+                  [errorCorrectionLevel]="'M'"
+                  [elementType]="'svg'"
+                  [margin]="1"
+                  [colorDark]="'#0f172a'"
+                  [colorLight]="'#ffffff'"
+                ></qrcode>
+              </div>
 
-              <span class="payment-status-tag">
-                <span class="material-symbols-outlined check-icon">check_circle</span>
-                CONFIRMED
-              </span>
+              <button
+                mat-flat-button
+                type="button"
+                class="btn-view-passes"
+                (click)="openPassesModal(booking, 0)"
+              >
+                <span class="material-symbols-outlined btn-icon">qr_code_2</span>
+                {{ booking.quantity > 1 ? 'View All ' + booking.quantity + ' Passes' : 'View Gate Pass' }}
+              </button>
             </div>
           </div>
         }
       </div>
     }
 
-    <!-- ── Past / Completed Tickets ──────────────────────────────────────── -->
-    @if (pastTickets().length > 0) {
-      <div class="tickets-section-label past-label">Past</div>
+    <!-- ── Past / Completed Master Bookings ────────────────────────────────────── -->
+    @if (pastBookings().length > 0) {
+      <div class="tickets-section-label past-label">Past Reservations</div>
       <div class="tickets-list past-tickets">
-        @for (ticket of pastTickets(); track ticket.id) {
-          <div class="ticket-card past">
+        @for (booking of pastBookings(); track booking.groupKey) {
+          <div class="booking-master-card past">
             <div class="ticket-poster-box">
-              @if (ticket.posterUrl) {
-                <img [src]="ticket.posterUrl" [alt]="ticket.movieTitle + ' poster'" class="ticket-poster-img" />
-              } @else {
-                <div class="poster-fallback-box">
-                  <span class="material-symbols-outlined fallback-icon">movie</span>
-                </div>
-              }
+              <div class="poster-fallback-box">
+                <span class="material-symbols-outlined fallback-icon">movie</span>
+              </div>
             </div>
 
             <div class="ticket-info-box">
               <div class="ticket-meta-top">
-                <span class="seat-category-pill">{{ ticket.seatCategory }}</span>
-                <span class="status-badge" [class.cancelled]="ticket.status === 'CANCELLED'">
-                  <span class="status-dot"></span>
-                  {{ ticket.status }}
+                <span class="seat-category-pill">{{ booking.seatCategory }}</span>
+                <span class="quantity-badge past-qty">Quantity: {{ booking.quantity }}</span>
+                <span class="status-badge" [class.cancelled]="booking.status === 'CANCELLED'">
+                  <span class="status-dot"></span> {{ booking.status }}
                 </span>
               </div>
 
-              <h2 class="ticket-movie-title">{{ ticket.movieTitle }}</h2>
+              <h2 class="ticket-movie-title">{{ booking.movieTitle }}</h2>
 
               <div class="ticket-details-grid">
-                @if (ticket.cinemaName) {
-                  <div class="detail-item">
-                    <span class="material-symbols-outlined detail-icon">location_on</span>
-                    <span>{{ ticket.cinemaName }}</span>
-                  </div>
-                }
                 <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">event_seat</span>
-                  <span>{{ ticket.seatNumber }}</span>
+                  <span class="material-symbols-outlined detail-icon">location_on</span>
+                  <span>{{ booking.cinemaName }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">schedule</span>
-                  <span>{{ ticket.showtime }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">confirmation_number</span>
-                  <span class="ticket-id-code">{{ ticket.id }}</span>
+                  <span class="material-symbols-outlined detail-icon">event</span>
+                  <span>{{ booking.bookingDate }}</span>
                 </div>
               </div>
             </div>
@@ -165,28 +155,26 @@
               <div class="stub-notch top"></div>
               <div class="stub-notch bottom"></div>
 
-              <span class="material-symbols-outlined stub-icon">payments</span>
-              @if (ticket.price > 0) {
-                <span class="price-caption">TOTAL PAID</span>
-                <span class="price-value">{{ ticket.price }} <span class="currency">EGP</span></span>
-              }
-
-              <span class="payment-status-tag expired">
-                <span class="material-symbols-outlined check-icon">history</span>
-                {{ ticket.status }}
-              </span>
+              <button
+                mat-stroked-button
+                type="button"
+                class="btn-view-passes past-btn"
+                (click)="openPassesModal(booking, 0)"
+              >
+                View History Pass
+              </button>
             </div>
           </div>
         }
       </div>
     }
 
-    <!-- ── Empty State ────────────────────────────────────────────────────── -->
-    @if (activeTickets().length === 0 && pastTickets().length === 0) {
+    <!-- Empty State -->
+    @if (activeBookings().length === 0 && pastBookings().length === 0) {
       <div class="empty-tickets-card">
         <span class="material-symbols-outlined empty-icon">confirmation_number</span>
-        <h2>You Have No Upcoming Tickets</h2>
-        <p>You haven't booked any cinema passes yet. Discover blockbusters playing near you and reserve your seats!</p>
+        <h2>You Have No Active Bookings</h2>
+        <p>You haven't booked any cinema reservations yet. Browse movies playing near you and reserve your seats!</p>
         <a mat-flat-button class="btn-browse-movies" routerLink="/">
           <span class="material-symbols-outlined">movie</span>
           Browse Movies
@@ -194,5 +182,95 @@
       </div>
     }
 
+  }
+
+  <!-- ── 🎨 Digital Passes Interactive Modal Overlay ────────────────────────── -->
+  @if (selectedBookingForModal(); as b) {
+    <div class="pass-modal-backdrop" (click)="closePassesModal()">
+      <div class="pass-modal-card" (click)="$event.stopPropagation()">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="category-pill">{{ b.seatCategory }}</span>
+            <h3>{{ b.movieTitle }}</h3>
+            <p class="modal-subtitle">{{ b.cinemaName }} &bull; {{ b.bookingDate }} {{ b.showtime }}</p>
+          </div>
+          <button mat-icon-button type="button" class="btn-close-modal" (click)="closePassesModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Modal Pass Counter & Carousel Stepper -->
+        <div class="modal-stepper-bar">
+          <span class="pass-counter-text">
+            Digital Pass <strong>{{ activePassIndex() + 1 }}</strong> of <strong>{{ b.passes.length }}</strong>
+          </span>
+
+          @if (b.passes.length > 1) {
+            <div class="stepper-actions">
+              <button
+                mat-icon-button
+                type="button"
+                (click)="prevPass()"
+                [disabled]="activePassIndex() === 0"
+              >
+                <span class="material-symbols-outlined">chevron_left</span>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                (click)="nextPass()"
+                [disabled]="activePassIndex() === b.passes.length - 1"
+              >
+                <span class="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Active QR Code Showcase -->
+        <div class="modal-qr-showcase">
+          <div class="qr-code-modal-box">
+            <qrcode
+              [qrdata]="b.passes[activePassIndex()].ticketCode"
+              [width]="200"
+              [errorCorrectionLevel]="'H'"
+              [elementType]="'svg'"
+              [margin]="2"
+              [colorDark]="'#0f172a'"
+              [colorLight]="'#ffffff'"
+            ></qrcode>
+          </div>
+
+          <div class="pass-details-footer">
+            <div class="seat-badge-large">
+              <span class="material-symbols-outlined">event_seat</span>
+              <span>{{ b.passes[activePassIndex()].seatNumber }}</span>
+            </div>
+            <div class="ticket-code-display">
+              <span class="code-label">GATE PASS ID:</span>
+              <span class="code-val">{{ b.passes[activePassIndex()].ticketCode }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thumbnail Selector Bar for Multi-Tickets -->
+        @if (b.passes.length > 1) {
+          <div class="pass-thumbnails-strip">
+            @for (pass of b.passes; track pass.id; let idx = $index) {
+              <button
+                type="button"
+                class="thumb-pill"
+                [class.active]="activePassIndex() === idx"
+                (click)="selectPassIndex(idx)"
+              >
+                Pass #{{ idx + 1 }} ({{ pass.seatNumber }})
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
   }
 </section>

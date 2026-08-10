@@ -5,6 +5,7 @@
 export interface TicketDto {
   id: number;
   ticketNumber: string;
+  ticketCode?: string | null;
   eventName: string;
   seatCategoryName: string;
   isBooked: boolean;
