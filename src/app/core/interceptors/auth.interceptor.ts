@@ -4,27 +4,30 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
+/**
+ * Functional HTTP Interceptor attaching JWT Bearer tokens to protected outgoing API requests
+ * and handling 401/403 session expiration.
+ */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const authService = inject(AuthService);
   const token = authService.getToken();
 
-  // 1. Skip attaching token for public API endpoints (e.g. public Discover page catalog)
+  // Skip attaching authorization header for public catalog endpoints
   const isPublicEndpoint = req.url.includes('/public/');
 
-  // 2. Clone request and attach Bearer token if present and not a public endpoint
+  // Clone request and attach Authorization header if token exists
   const authReq = (token && !isPublicEndpoint)
     ? req.clone({ headers: req.headers.set('Authorization', `Bearer ${token}`) })
     : req;
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // 3. Check if the failed request was an authentication API call
       const isAuthApi = req.url.includes('/v1/auth/');
 
-      // 4. Handle expired/unauthorized sessions for protected resources
+      // Redirect to login upon session expiration or unauthorized response
       if (!isAuthApi && (error.status === 401 || error.status === 403)) {
-        authService.logout(); // Updates tokenSignal & clears localStorage
+        authService.logout();
         router.navigate(['/login']);
       }
 

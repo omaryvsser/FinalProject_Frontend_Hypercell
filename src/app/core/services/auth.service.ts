@@ -37,17 +37,20 @@ export interface UserSession {
   role: UserRole | null;
 }
 
+/**
+ * Authentication service handling JWT token storage, decoding, login, registration, and user sessions.
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly TOKEN_KEY = 'jwt';
 
-  // 1. Reactive state signals
+  // Reactive state signals
   private readonly tokenSignal = signal<string | null>(this.getToken());
   private readonly errorSignal = signal<string | null>(null);
   private readonly loadingSignal = signal<boolean>(false);
 
-  // 2. Public computed signals
+  /** Public reactive session computed signal */
   readonly currentUser = computed<UserSession | null>(() => {
     const token = this.tokenSignal();
     if (!token) return null;
@@ -69,7 +72,7 @@ export class AuthService {
   readonly authError = this.errorSignal.asReadonly();
   readonly isLoading = this.loadingSignal.asReadonly();
 
-  /** POST /api/v1/auth/login */
+  /** Authenticates user credentials via POST /api/v1/auth/login */
   login(credentials: LoginRequest): Observable<AuthResponse> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
@@ -85,14 +88,14 @@ export class AuthService {
         },
         error: (err: HttpErrorResponse) => {
           this.loadingSignal.set(false);
-          const errorMsg = this.extractErrorMessage(err, 'Login failed. Please check your credentials and try again.');
+          const errorMsg = this.extractErrorMessage(err, 'Login failed. Please check credentials.');
           this.errorSignal.set(errorMsg);
         }
       })
     );
   }
 
-  /** POST /api/v1/auth/register */
+  /** Registers a new account via POST /api/v1/auth/register */
   register(payload: RegisterRequest): Observable<AuthResponse> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
@@ -115,39 +118,41 @@ export class AuthService {
     );
   }
 
+  /** Clears any active authentication errors */
   clearError(): void {
     this.errorSignal.set(null);
   }
 
-  /** Persist JWT to localStorage & trigger state update */
+  /** Persists JWT token to localStorage & updates state signal */
   storeToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
     this.tokenSignal.set(token);
   }
 
-  /** Retrieve raw JWT string */
+  /** Retrieves raw JWT string from localStorage */
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  /** Clear session data & update state */
+  /** Clears active session and logs out user */
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     this.tokenSignal.set(null);
     this.errorSignal.set(null);
   }
 
-  /** Returns true when a valid JWT is present */
+  /** Checks if user is authenticated */
   isLoggedIn(): boolean {
     return !!this.currentUser();
   }
 
-  /** Decode raw JWT string without external libraries */
+  /** Decodes JWT payload */
   decodeToken(): JwtPayload | null {
     const token = this.getToken();
     return token ? this.decodeTokenString(token) : null;
   }
 
+  /** Helper method to parse Base64 JWT string */
   private decodeTokenString(token: string): JwtPayload | null {
     try {
       const base64Url = token.split('.')[1];
@@ -164,6 +169,7 @@ export class AuthService {
     }
   }
 
+  /** Retrieves numeric user ID from active JWT session */
   getUserIdFromToken(): number | null {
     const payload = this.decodeToken();
     return payload ? this.getUserIdFromPayload(payload) : null;
@@ -176,6 +182,7 @@ export class AuthService {
     return Number.isFinite(userId) ? userId : null;
   }
 
+  /** Retrieves user role enum from active JWT session */
   getRoleFromToken(): UserRole | null {
     const payload = this.decodeToken();
     return payload ? this.getRoleFromPayload(payload) : null;
@@ -189,21 +196,11 @@ export class AuthService {
   }
 
   private extractErrorMessage(err: HttpErrorResponse, fallback: string): string {
-    if (err.error?.message) {
-      return err.error.message;
-    }
-    if (typeof err.error === 'string') {
-      return err.error;
-    }
-    if (err.status === 400) {
-      return 'Invalid request details provided.';
-    }
-    if (err.status === 401) {
-      return 'Invalid credentials. Please check your email and password.';
-    }
-    if (err.status === 403) {
-      return 'Access denied.';
-    }
+    if (err.error?.message) return err.error.message;
+    if (typeof err.error === 'string') return err.error;
+    if (err.status === 400) return 'Invalid request details provided.';
+    if (err.status === 401) return 'Invalid credentials. Please check your email and password.';
+    if (err.status === 403) return 'Access denied.';
     return fallback;
   }
 }
