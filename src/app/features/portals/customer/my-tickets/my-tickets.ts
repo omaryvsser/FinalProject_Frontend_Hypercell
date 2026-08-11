@@ -111,7 +111,7 @@ function groupTicketDtos(dtos: TicketDto[]): GroupedBooking[] {
     MatIconModule,
     MatProgressSpinnerModule,
     MatDialogModule,
-    QRCodeComponent,
+    // QRCodeComponent,
   ],
   templateUrl: './my-tickets.html',
   styleUrl: './my-tickets.css',

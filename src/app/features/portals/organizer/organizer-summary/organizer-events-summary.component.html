@@ -1,0 +1,85 @@
+<!-- Added/Updated for Organizer Summary: Isolated Summary View Component -->
+<div class="container my-4">
+
+  <h3 class="mb-4 fw-bold">Ticket and Booking Report</h3>
+
+  <!-- Event Selector Dropdown -->
+  <div class="card p-3 mb-4 shadow-sm border-0 bg-light">
+    <label for="eventSelect" class="form-label fw-bold">Select Event\Movie</label>
+    <select 
+      id="eventSelect" 
+      class="form-select" 
+      (change)="onSelectEvent(+($any($event.target).value))"
+    >
+      <option value="" disabled selected>--  select from your events  --</option>
+      <option *ngFor="let ev of eventsList" [value]="ev.id">
+        {{ ev.title }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoadingStats" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Details & Buyers List Section -->
+  <div *ngIf="organizerStats && !isLoadingStats" class="summary-section">
+    
+    <!-- Quick Stats Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <div class="card p-3 border-start border-4 border-primary shadow-sm">
+          <span class="text-muted small">Total Tickets Sold</span>
+          <h3 class="text-primary m-0 fw-bold">{{ organizerStats?.totalTicketsSold }} Tickets</h3>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-3 border-start border-4 border-success shadow-sm">
+          <span class="text-muted small">Total Revenue</span>
+          <h3 class="text-success m-0 fw-bold">{{ organizerStats?.totalRevenue }} EGP</h3> 
+        </div>
+      </div>
+    </div>
+
+    <!-- Buyers Table Card -->
+    <div class="card shadow-sm p-3 border-0">
+      <h5 class="mb-3 fw-bold text-secondary">Bookings and Buyers List</h5>
+      
+      <div *ngIf="organizerStats.bookings.length === 0" class="alert alert-warning mb-0">
+        No bookings found for this movie yet.
+      </div>
+
+      <div *ngIf="organizerStats.bookings.length > 0" class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Booking ID</th>
+              <th>Buyer Name</th>
+              <th>Email</th>
+              <th>Category</th>
+              <th>Seats Booked</th>
+              <th>Total Price</th>
+              <th>Booking Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of organizerStats.bookings">
+              <td>#{{ b.bookingId }}</td>
+              <td>{{ b.userName }}</td>
+              <td>{{ b.userEmail }}</td>
+              <td><span class="badge bg-info text-dark">{{ b.categoryName }}</span></td>
+              <td>{{ b.seatsBooked }}</td>
+              <td class="fw-bold">{{ b.totalPrice }} EGP</td>
+              <td>{{ b.bookingDate | date:'medium' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>

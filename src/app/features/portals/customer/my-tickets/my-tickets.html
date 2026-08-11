@@ -104,7 +104,7 @@
               <div class="stub-notch bottom"></div>
 
               <div class="qr-code-wrapper" (click)="openPassesModal(booking, 0)">
-                <qrcode
+                <!-- <qrcode
                   [qrdata]="booking.passes[0].ticketCode"
                   [width]="95"
                   [errorCorrectionLevel]="'M'"
@@ -112,7 +112,7 @@
                   [margin]="1"
                   [colorDark]="'#0f172a'"
                   [colorLight]="'#ffffff'"
-                ></qrcode>
+                ></qrcode> -->
               </div>
 
               <button
@@ -259,7 +259,7 @@
         <!-- Active QR Code Showcase -->
         <div class="modal-qr-showcase">
           <div class="qr-code-modal-box">
-            <qrcode
+            <!-- <qrcode
               [qrdata]="b.passes[activePassIndex()].ticketCode"
               [width]="200"
               [errorCorrectionLevel]="'H'"
@@ -267,7 +267,7 @@
               [margin]="2"
               [colorDark]="'#0f172a'"
               [colorLight]="'#ffffff'"
-            ></qrcode>
+            ></qrcode> -->
           </div>
 
           <div class="pass-details-footer">

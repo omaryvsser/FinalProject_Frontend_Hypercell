@@ -1,9 +1,14 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guards';
 import { roleGuard } from './core/guards/role.guards';
-
+import { OrganizerEventsSummaryComponent } from './features/portals/organizer/organizer-summary/organizer-events-summary.component';
 export const routes: Routes = [
   // ─── Public Routes ─────────────────────────────────────────────────────────
+// added for organizer summary
+  {
+    path: 'organizer/summary',
+    component: OrganizerEventsSummaryComponent
+  },
   {
     path: '',
     loadComponent: () =>
