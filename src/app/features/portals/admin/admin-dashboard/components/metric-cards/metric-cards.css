@@ -115,3 +115,16 @@
 .metric-subtext {
   color: #64748b;
 }
+
+@media (max-width: 540px) {
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.85rem;
+  }
+  .metric-card {
+    padding: 1rem;
+  }
+  .metric-value {
+    font-size: 1.4rem;
+  }
+}

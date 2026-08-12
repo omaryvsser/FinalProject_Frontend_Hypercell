@@ -247,3 +247,29 @@
 .movie-card-placeholder:hover .arrow-icon {
   transform: translateX(3px);
 }
+
+/* Mobile responsive card adjustments */
+@media (max-width: 576px) {
+  .card-content-area {
+    padding: 12px;
+  }
+  .card-title {
+    font-size: 0.98rem;
+    margin-bottom: 6px;
+  }
+  .card-action-bar {
+    gap: 6px;
+    padding-top: 10px;
+  }
+  .card-details-btn,
+  .card-book-btn {
+    height: 36px !important;
+    font-size: 0.76rem !important;
+    padding: 0 6px !important;
+  }
+  .badge-popular, .badge-rating {
+    top: 8px;
+    padding: 3px 6px;
+    font-size: 0.65rem;
+  }
+}

@@ -2,17 +2,18 @@
   <div class="navbar-container">
     <!-- Left Navigation: Logo, Discover & My Tickets -->
     <div class="navbar-left">
-      <a class="brand-logo" [routerLink]="'/'">
+      <a class="brand-logo" [routerLink]="'/'" (click)="closeMobileMenu()">
         <span class="material-symbols-outlined brand-icon">theaters</span>
         <span class="brand-text">Cine<span class="brand-accent">Tick</span></span>
       </a>
 
-      <nav class="left-nav" aria-label="Main Navigation">
+      <nav class="left-nav desktop-only" aria-label="Main Navigation">
         <a
           class="nav-link"
           [routerLink]="'/'"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
+          (click)="closeMobileMenu()"
         >
           <span class="material-symbols-outlined nav-icon">movie</span>
           Discover
@@ -22,6 +23,7 @@
           class="nav-link"
           [routerLink]="'/my-tickets'"
           routerLinkActive="active"
+          (click)="closeMobileMenu()"
         >
           <span class="material-symbols-outlined nav-icon">local_activity</span>
           My Tickets
@@ -29,17 +31,17 @@
       </nav>
     </div>
 
-    <!-- Right Navigation: Role-Based Controls -->
-    <div class="navbar-right">
+    <!-- Right Navigation: Role-Based Controls (Desktop) -->
+    <div class="navbar-right desktop-only">
       <nav class="role-nav" aria-label="User Portal Navigation">
         @switch (currentUserRole()) {
           @case ('GUEST') {
-            <a class="btn-guest-login" [routerLink]="'/login'">Login</a>
-            <a class="btn-guest-register" [routerLink]="'/register'">Register</a>
+            <a class="btn-guest-login" [routerLink]="'/login'" (click)="closeMobileMenu()">Login</a>
+            <a class="btn-guest-register" [routerLink]="'/register'" (click)="closeMobileMenu()">Register</a>
           }
 
           @case ('CUSTOMER') {
-            <a class="nav-link" [routerLink]="'/'" routerLinkActive="active">
+            <a class="nav-link" [routerLink]="'/'" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="material-symbols-outlined nav-icon">person</span>
               Hi, {{ currentUser()?.name || 'User' }}
             </a>
@@ -50,11 +52,11 @@
           }
 
           @case ('ORGANIZER') {
-            <a class="nav-link" [routerLink]="'/organizer'" routerLinkActive="active">
+            <a class="nav-link" [routerLink]="'/organizer'" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="material-symbols-outlined nav-icon">dashboard</span>
               Organizer Portal
             </a>
-            <a class="nav-link" [routerLink]="'/'" routerLinkActive="active">
+            <a class="nav-link" [routerLink]="'/'" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="material-symbols-outlined nav-icon">person</span>
               Hi, {{ currentUser()?.name || 'User' }}
             </a>
@@ -65,11 +67,11 @@
           }
 
           @case ('ADMIN') {
-            <a class="nav-link" [routerLink]="'/admin'" routerLinkActive="active">
+            <a class="nav-link" [routerLink]="'/admin'" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="material-symbols-outlined nav-icon">admin_panel_settings</span>
               Admin Dashboard
             </a>
-            <a class="nav-link" [routerLink]="'/'" routerLinkActive="active">
+            <a class="nav-link" [routerLink]="'/'" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="material-symbols-outlined nav-icon">person</span>
               Hi, {{ currentUser()?.name || 'User' }}
             </a>
@@ -81,5 +83,71 @@
         }
       </nav>
     </div>
+
+    <!-- Mobile Hamburger Menu Button -->
+    <button
+      type="button"
+      class="mobile-toggle-btn"
+      (click)="toggleMobileMenu()"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-label="Toggle navigation menu"
+    >
+      <span class="material-symbols-outlined">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
+    </button>
   </div>
+
+  <!-- Mobile Collapsible Menu Drawer -->
+  @if (mobileMenuOpen()) {
+    <div class="mobile-nav-drawer">
+      <nav class="mobile-nav-list" aria-label="Mobile Navigation">
+        <a class="mobile-nav-link" [routerLink]="'/'" routerLinkActive="active" (click)="closeMobileMenu()">
+          <span class="material-symbols-outlined">movie</span>
+          Discover
+        </a>
+        <a class="mobile-nav-link" [routerLink]="'/my-tickets'" routerLinkActive="active" (click)="closeMobileMenu()">
+          <span class="material-symbols-outlined">local_activity</span>
+          My Tickets
+        </a>
+
+        @switch (currentUserRole()) {
+          @case ('GUEST') {
+            <div class="mobile-auth-actions">
+              <a class="btn-guest-login full-width" [routerLink]="'/login'" (click)="closeMobileMenu()">Login</a>
+              <a class="btn-guest-register full-width" [routerLink]="'/register'" (click)="closeMobileMenu()">Register</a>
+            </div>
+          }
+          @case ('CUSTOMER') {
+            <div class="mobile-user-profile">
+              <span class="user-greeting"><span class="material-symbols-outlined">person</span> Hi, {{ currentUser()?.name || 'User' }}</span>
+              <button type="button" class="btn-nav-action logout full-width" (click)="logout()">
+                <span class="material-symbols-outlined">logout</span> Logout
+              </button>
+            </div>
+          }
+          @case ('ORGANIZER') {
+            <a class="mobile-nav-link portal-link" [routerLink]="'/organizer'" (click)="closeMobileMenu()">
+              <span class="material-symbols-outlined">dashboard</span> Organizer Portal
+            </a>
+            <div class="mobile-user-profile">
+              <span class="user-greeting"><span class="material-symbols-outlined">person</span> Hi, {{ currentUser()?.name || 'User' }}</span>
+              <button type="button" class="btn-nav-action logout full-width" (click)="logout()">
+                <span class="material-symbols-outlined">logout</span> Logout
+              </button>
+            </div>
+          }
+          @case ('ADMIN') {
+            <a class="mobile-nav-link portal-link" [routerLink]="'/admin'" (click)="closeMobileMenu()">
+              <span class="material-symbols-outlined">admin_panel_settings</span> Admin Dashboard
+            </a>
+            <div class="mobile-user-profile">
+              <span class="user-greeting"><span class="material-symbols-outlined">person</span> Hi, {{ currentUser()?.name || 'User' }}</span>
+              <button type="button" class="btn-nav-action logout full-width" (click)="logout()">
+                <span class="material-symbols-outlined">logout</span> Logout
+              </button>
+            </div>
+          }
+        }
+      </nav>
+    </div>
+  }
 </header>

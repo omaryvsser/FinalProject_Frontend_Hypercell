@@ -159,3 +159,16 @@
   font-size: 0.9rem;
   text-align: center;
 }
+
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 20px 12px;
+  }
+  .auth-card {
+    padding: 24px 16px !important;
+    border-radius: 16px !important;
+  }
+  .auth-title {
+    font-size: 1.35rem !important;
+  }
+}

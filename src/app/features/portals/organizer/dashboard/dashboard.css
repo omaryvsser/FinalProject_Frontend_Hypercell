@@ -1,8 +1,3 @@
-/* ==========================================================================
-   Organizer Dashboard Component Styles (Smart Parent Component Container)
-   Theme: Deep Dark Slate (#0f172a) & Electric Baby Blue (#38bdf8) Accent
-   ========================================================================== */
-
 :host {
   display: block;
   min-height: 100vh;
@@ -34,4 +29,15 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .organizer-dashboard {
+    padding: 1rem 0.85rem 2rem 0.85rem;
+    gap: 1.25rem;
+  }
+  .workspace-panel {
+    padding: 1rem;
+    border-radius: 12px;
+  }
 }

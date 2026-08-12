@@ -50,146 +50,204 @@
 
     <!-- ── Active / Upcoming Master Bookings ──────────────────────────────────────── -->
     @if (activeBookings().length > 0) {
-      <div class="tickets-section-label">Active Reservations</div>
+      <div class="tickets-section-label">
+        <span class="material-symbols-outlined label-icon">confirmation_number</span>
+        Active Reservations
+      </div>
       <div class="tickets-list">
         @for (booking of activeBookings(); track booking.groupKey) {
           <div class="booking-master-card">
-            <!-- Left Poster Area -->
-            <div class="ticket-poster-box">
-              <div class="poster-fallback-box">
-                <span class="material-symbols-outlined fallback-icon">movie</span>
-              </div>
-            </div>
+            <!-- Glowing Top Status Bar -->
+            <div class="ticket-top-accent-bar upcoming-accent"></div>
 
-            <!-- Center Info Area -->
-            <div class="ticket-info-box">
-              <div class="ticket-meta-top">
-                <span class="seat-category-pill">{{ booking.seatCategory }}</span>
-                <span class="quantity-badge">
-                  <span class="material-symbols-outlined qty-icon">confirmation_number</span>
-                  Quantity: {{ booking.quantity }}
-                </span>
-                <span class="status-badge upcoming">
-                  <span class="status-dot"></span> UPCOMING
-                </span>
+            <div class="card-inner-layout">
+              <!-- Left Poster / Branding Emblem -->
+              <div class="ticket-poster-box">
+                <div class="poster-fallback-box">
+                  <span class="material-symbols-outlined fallback-icon">theaters</span>
+                  <span class="cinema-brand-tag">CineTick</span>
+                </div>
               </div>
 
-              <h2 class="ticket-movie-title">{{ booking.movieTitle }}</h2>
-
-              <div class="ticket-details-grid">
-                <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">location_on</span>
-                  <span>{{ booking.cinemaName }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">event</span>
-                  <span>{{ booking.bookingDate }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">schedule</span>
-                  <span>{{ booking.showtime }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">event_seat</span>
-                  <span>
-                    {{ booking.passes.length > 1 ? 'Seats ' + booking.passes[0].seatNumber + ' – #' + booking.passes.length : booking.passes[0].seatNumber }}
+              <!-- Center Structured Info Area -->
+              <div class="ticket-info-box">
+                <!-- Meta Top Badges -->
+                <div class="ticket-meta-top">
+                  <span class="seat-category-pill">{{ booking.seatCategory }}</span>
+                  <span class="quantity-badge">
+                    <span class="material-symbols-outlined qty-icon">confirmation_number</span>
+                    {{ booking.quantity }} {{ booking.quantity === 1 ? 'Ticket' : 'Tickets' }}
+                  </span>
+                  @if (booking.bookingId) {
+                    <span class="booking-ref-badge">
+                      REF #BKG-{{ booking.bookingId }}
+                    </span>
+                  }
+                  <span class="status-badge upcoming">
+                    <span class="status-dot"></span> UPCOMING
                   </span>
                 </div>
+
+                <!-- Movie Title -->
+                <h2 class="ticket-movie-title">{{ booking.movieTitle }}</h2>
+
+                <!-- Structured 4-Cell Metadata Grid -->
+                <div class="ticket-details-grid">
+                  <div class="detail-tile">
+                    <span class="material-symbols-outlined detail-icon">location_on</span>
+                    <div class="tile-text">
+                      <span class="tile-label">THEATER / VENUE</span>
+                      <span class="tile-val">{{ booking.cinemaName }}</span>
+                    </div>
+                  </div>
+
+                  <div class="detail-tile">
+                    <span class="material-symbols-outlined detail-icon">event</span>
+                    <div class="tile-text">
+                      <span class="tile-label">SCREENING DATE</span>
+                      <span class="tile-val">{{ booking.bookingDate }}</span>
+                    </div>
+                  </div>
+
+                  <div class="detail-tile">
+                    <span class="material-symbols-outlined detail-icon">schedule</span>
+                    <div class="tile-text">
+                      <span class="tile-label">SHOWTIME</span>
+                      <span class="tile-val">{{ booking.showtime }}</span>
+                    </div>
+                  </div>
+
+                  <div class="detail-tile">
+                    <span class="material-symbols-outlined detail-icon">event_seat</span>
+                    <div class="tile-text">
+                      <span class="tile-label">SEAT ALLOCATION</span>
+                      <span class="tile-val">
+                        {{ booking.passes.length > 1 ? 'Seats ' + booking.passes[0].seatNumber + ' – #' + booking.passes.length : booking.passes[0].seatNumber }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <!-- Right Action & Preview Stub -->
-            <div class="ticket-stub-side">
-              <div class="stub-notch top"></div>
-              <div class="stub-notch bottom"></div>
+              <!-- Right Perforated Action & Preview Stub -->
+              <div class="ticket-stub-side">
+                <div class="stub-notch top"></div>
+                <div class="stub-notch bottom"></div>
 
-              <div class="qr-code-wrapper" (click)="openPassesModal(booking, 0)">
-                <qrcode
-                  [qrdata]="booking.passes[0].ticketCode"
-                  [width]="95"
-                  [errorCorrectionLevel]="'M'"
-                  [elementType]="'svg'"
-                  [margin]="1"
-                  [colorDark]="'#0f172a'"
-                  [colorLight]="'#ffffff'"
-                ></qrcode>
-              </div>
+                <span class="stub-pass-label">DIGITAL GATE PASS</span>
 
-              <button
-                mat-flat-button
-                type="button"
-                class="btn-view-passes"
-                (click)="openPassesModal(booking, 0)"
-              >
-                <span class="material-symbols-outlined btn-icon">qr_code_2</span>
-                {{ booking.quantity > 1 ? 'View All ' + booking.quantity + ' Passes' : 'View Gate Pass' }}
-              </button>
+                <div class="qr-code-wrapper" (click)="openPassesModal(booking, 0)" title="Click to open digital pass">
+                  <qrcode
+                    [qrdata]="booking.passes[0].ticketCode"
+                    [width]="90"
+                    [elementType]="'svg'"
+                    [margin]="1"
+                    [colorDark]="'#0f172a'"
+                    [colorLight]="'#ffffff'"
+                  ></qrcode>
+                </div>
 
-              @if (booking.bookingId) {
                 <button
-                  mat-stroked-button
+                  mat-flat-button
                   type="button"
-                  class="btn-cancel-booking"
-                  [disabled]="cancellingBookingId() === booking.bookingId"
-                  (click)="cancelBooking(booking)"
+                  class="btn-view-passes"
+                  (click)="openPassesModal(booking, 0)"
                 >
-                  <mat-icon>delete_outline</mat-icon>
-                  {{ cancellingBookingId() === booking.bookingId ? 'Cancelling...' : 'Cancel Booking' }}
+                  <span class="material-symbols-outlined btn-icon">qr_code_2</span>
+                  {{ booking.quantity > 1 ? 'View All ' + booking.quantity + ' Passes' : 'View Gate Pass' }}
                 </button>
-              }
+
+                @if (booking.bookingId) {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="btn-cancel-booking"
+                    [disabled]="cancellingBookingId() === booking.bookingId"
+                    (click)="cancelBooking(booking)"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                    {{ cancellingBookingId() === booking.bookingId ? 'Cancelling...' : 'Cancel Booking' }}
+                  </button>
+                }
+              </div>
             </div>
           </div>
         }
       </div>
     }
 
-    <!-- ── Past / Completed Master Bookings ────────────────────────────────────── -->
+    <!-- ── Past / Completed / Cancelled Master Bookings ────────────────────────────────────── -->
     @if (pastBookings().length > 0) {
-      <div class="tickets-section-label past-label">Past Reservations</div>
+      <div class="tickets-section-label past-label">
+        <span class="material-symbols-outlined label-icon">history</span>
+        Past & Cancelled Reservations
+      </div>
       <div class="tickets-list past-tickets">
         @for (booking of pastBookings(); track booking.groupKey) {
-          <div class="booking-master-card past">
-            <div class="ticket-poster-box">
-              <div class="poster-fallback-box">
-                <span class="material-symbols-outlined fallback-icon">movie</span>
-              </div>
-            </div>
+          <div class="booking-master-card past" [class.cancelled-card]="booking.status === 'CANCELLED'">
+            <!-- Top Status Accent Line -->
+            <div
+              class="ticket-top-accent-bar"
+              [class.cancelled-accent]="booking.status === 'CANCELLED'"
+              [class.completed-accent]="booking.status !== 'CANCELLED'"
+            ></div>
 
-            <div class="ticket-info-box">
-              <div class="ticket-meta-top">
-                <span class="seat-category-pill">{{ booking.seatCategory }}</span>
-                <span class="quantity-badge past-qty">Quantity: {{ booking.quantity }}</span>
-                <span class="status-badge" [class.cancelled]="booking.status === 'CANCELLED'">
-                  <span class="status-dot"></span> {{ booking.status }}
-                </span>
-              </div>
-
-              <h2 class="ticket-movie-title">{{ booking.movieTitle }}</h2>
-
-              <div class="ticket-details-grid">
-                <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">location_on</span>
-                  <span>{{ booking.cinemaName }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="material-symbols-outlined detail-icon">event</span>
-                  <span>{{ booking.bookingDate }}</span>
+            <div class="card-inner-layout">
+              <div class="ticket-poster-box">
+                <div class="poster-fallback-box">
+                  <span class="material-symbols-outlined fallback-icon">movie</span>
+                  <span class="cinema-brand-tag">CineTick</span>
                 </div>
               </div>
-            </div>
 
-            <div class="ticket-stub-side">
-              <div class="stub-notch top"></div>
-              <div class="stub-notch bottom"></div>
+              <div class="ticket-info-box">
+                <div class="ticket-meta-top">
+                  <span class="seat-category-pill past-pill">{{ booking.seatCategory }}</span>
+                  <span class="quantity-badge past-qty">{{ booking.quantity }} Ticket{{ booking.quantity === 1 ? '' : 's' }}</span>
+                  <span
+                    class="status-badge"
+                    [class.cancelled]="booking.status === 'CANCELLED'"
+                    [class.completed]="booking.status === 'COMPLETED'"
+                  >
+                    <span class="status-dot"></span> {{ booking.status }}
+                  </span>
+                </div>
 
-              <button
-                mat-stroked-button
-                type="button"
-                class="btn-view-passes past-btn"
-                (click)="openPassesModal(booking, 0)"
-              >
-                View History Pass
-              </button>
+                <h2 class="ticket-movie-title">{{ booking.movieTitle }}</h2>
+
+                <div class="ticket-details-grid">
+                  <div class="detail-tile">
+                    <span class="material-symbols-outlined detail-icon">location_on</span>
+                    <div class="tile-text">
+                      <span class="tile-label">THEATER / VENUE</span>
+                      <span class="tile-val">{{ booking.cinemaName }}</span>
+                    </div>
+                  </div>
+
+                  <div class="detail-tile">
+                    <span class="material-symbols-outlined detail-icon">event</span>
+                    <div class="tile-text">
+                      <span class="tile-label">SCREENING DATE</span>
+                      <span class="tile-val">{{ booking.bookingDate }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ticket-stub-side">
+                <div class="stub-notch top"></div>
+                <div class="stub-notch bottom"></div>
+
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="btn-view-passes past-btn"
+                  (click)="openPassesModal(booking, 0)"
+                >
+                  <span class="material-symbols-outlined btn-icon">history</span>
+                  View Pass History
+                </button>
+              </div>
             </div>
           </div>
         }
@@ -211,7 +269,7 @@
 
   }
 
-  <!-- ── 🎨 Digital Passes Interactive Modal Overlay ────────────────────────── -->
+  <!-- ── Digital Passes Interactive Modal Overlay ────────────────────────── -->
   @if (selectedBookingForModal(); as b) {
     <div class="pass-modal-backdrop" (click)="closePassesModal()">
       <div class="pass-modal-card" (click)="$event.stopPropagation()">
@@ -262,7 +320,6 @@
             <qrcode
               [qrdata]="b.passes[activePassIndex()].ticketCode"
               [width]="200"
-              [errorCorrectionLevel]="'H'"
               [elementType]="'svg'"
               [margin]="2"
               [colorDark]="'#0f172a'"

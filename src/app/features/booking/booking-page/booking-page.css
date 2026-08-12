@@ -306,3 +306,52 @@
   background: #334155 !important;
   color: #94a3b8 !important;
 }
+
+/* Responsive Media Queries */
+@media (max-width: 600px) {
+  .booking-container {
+    padding: 20px 12px;
+  }
+
+  .booking-card {
+    padding: 20px 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .booking-title {
+    font-size: 1.35rem !important;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  .category-card {
+    padding: 12px;
+  }
+
+  .category-name {
+    font-size: 0.95rem;
+  }
+
+  .category-price {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ticket-counter-box {
+    padding: 10px 12px;
+  }
+
+  .summary-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .price-info {
+    text-align: left;
+  }
+}

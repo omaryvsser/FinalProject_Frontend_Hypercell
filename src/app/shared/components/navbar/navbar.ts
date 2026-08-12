@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service'; // Adjust path if needed
@@ -16,6 +16,9 @@ export class Navbar {
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
+  // Mobile drawer state signal
+  readonly mobileMenuOpen = signal<boolean>(false);
+
   // Expose auth state directly to template
   readonly currentUser = this.authService.currentUser;
   readonly isLoggedIn = this.authService.isLoggedIn;
@@ -27,7 +30,16 @@ export class Navbar {
     return (user.role as UserRole) || 'CUSTOMER';
   });
 
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update((open) => !open);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
+  }
+
   logout(): void {
+    this.closeMobileMenu();
     this.authService.logout();
     this.router.navigate(['/login']);
   }
