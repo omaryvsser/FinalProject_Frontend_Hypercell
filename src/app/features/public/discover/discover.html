@@ -18,18 +18,19 @@
           <input
             matInput
             type="text"
-            [value]="searchQuery()"
-            (input)="searchQuery.set($any($event.target).value)"
+            id="discover-search"
+            [formField]="searchForm.query"
             placeholder="e.g. Interstellar, Dune, Vox Cinema..."
           />
           <mat-icon matPrefix class="search-icon">search</mat-icon>
-          @if (searchQuery()) {
+          @if (searchModel().query) {
             <button mat-icon-button matSuffix (click)="clearSearch()" type="button" aria-label="Clear search">
               <mat-icon class="clear-icon">close</mat-icon>
             </button>
           }
         </mat-form-field>
       </div>
+
     </div>
   </header>
 

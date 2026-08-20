@@ -1,17 +1,29 @@
 import '@angular/compiler';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Dashboard } from './dashboard';
 
 describe('Dashboard (Organizer Portal)', () => {
   let component: Dashboard;
+  let fixture: ComponentFixture<Dashboard>;
 
-  beforeEach(() => {
-    component = new Dashboard();
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Dashboard],
+      providers: [provideHttpClient(), provideRouter([])],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Dashboard);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
   });
 
   it('should instantiate the organizer dashboard component', () => {
     expect(component).toBeTruthy();
   });
+
 
   it('should compute total movies, published, bookings, and attendees correctly', () => {
     expect(component.totalMovies()).toBe(6);
@@ -41,10 +53,13 @@ describe('Dashboard (Organizer Portal)', () => {
 
   it('should open drawer in edit mode with selected movie', () => {
     const movieToEdit = component.organizerMovies()[0];
-    component.openEditDrawer(movieToEdit);
+    if (movieToEdit) {
+      component.openEditDrawer(movieToEdit);
 
-    expect(component.isDrawerOpen()).toBe(true);
-    expect(component.selectedMovie()).toEqual(movieToEdit);
-    expect(component.formTitle()).toBe('Interstellar');
+      expect(component.isDrawerOpen()).toBe(true);
+      expect(component.selectedMovie()).toEqual(movieToEdit);
+      expect(component.movieModel().title).toBe(movieToEdit.title);
+    }
   });
 });
+

@@ -1,58 +1,60 @@
 <div class="drawer-wrapper" [class.open]="isOpen()">
+  <!-- Backdrop -->
   <div class="drawer-backdrop" (click)="onClose()"></div>
 
-  <aside class="drawer-panel wide-panel">
+  <!-- Drawer Main Panel -->
+  <aside class="drawer-panel">
     <!-- Header -->
     <header class="drawer-header">
-      <div>
+      <div class="drawer-title-group">
         <h2 class="drawer-title">
-          {{ selectedMovie() ? 'Edit Organizer Movie' : 'Add New Organizer Movie' }}
+          {{ selectedMovie() ? 'Edit Movie Details' : 'Add New Movie' }}
         </h2>
         <p class="drawer-subtitle">
-          Configure showtime, venue, poster, and publishing status
+          Configure cinema event, pricing tiers, and schedule details
         </p>
       </div>
+
       <button type="button" class="btn-close-drawer" (click)="onClose()" aria-label="Close drawer">
         <span class="material-symbols-outlined">close</span>
       </button>
     </header>
 
-    <!-- Drawer Form Body -->
+    <!-- Body (Scrollable Form) -->
     <div class="drawer-body">
-      <form (ngSubmit)="onSubmit()" class="drawer-form">
-
-        <!-- Section 1: Basic Information & Poster -->
+      <form (submit)="$event.preventDefault(); onSubmit()">
+        <!-- Section 1: Basic Information -->
         <div class="form-section">
           <h3 class="section-title">
             <span class="material-symbols-outlined icon">movie</span>
-            Basic Movie Details & Poster
+            Basic Movie Details
           </h3>
 
-          <!-- Movie Title -->
           <div class="form-group">
             <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
               <mat-label>Movie Title *</mat-label>
               <input
                 matInput
+                id="org-movie-title"
                 type="text"
-                [(ngModel)]="formTitle"
-                name="title"
-                placeholder="e.g. The Godfather"
-                required
+                placeholder="e.g. Dune: Part Two"
+                [formField]="movieForm().title"
               />
+              @if (movieForm().title().touched() && movieForm().title().invalid()) {
+                <mat-error>{{ movieForm().title().errors()[0]?.message || 'Movie title is required' }}</mat-error>
+              }
             </mat-form-field>
           </div>
 
-          <!-- Description / Synopsis -->
           <div class="form-group">
             <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-              <mat-label>Description / Synopsis</mat-label>
+              <mat-label>Description</mat-label>
               <textarea
                 matInput
+                id="org-movie-description"
                 rows="3"
-                [(ngModel)]="formDescription"
-                name="description"
-                placeholder="Enter movie synopsis..."
+                placeholder="Enter an engaging synopsis..."
+                [formField]="movieForm().description"
               ></textarea>
             </mat-form-field>
           </div>
@@ -71,61 +73,54 @@
               <mat-label>Image Web URL</mat-label>
               <input
                 matInput
-                type="url"
-                [(ngModel)]="formImageUrl"
-                name="imageUrl"
+                id="org-movie-image-url"
+                type="text"
+                [formField]="movieForm().imageUrl"
                 placeholder="https://images.example.com/poster.jpg"
               />
             </mat-form-field>
           </div>
 
           <!-- Poster Image Preview -->
-          @if (formImageUrl()) {
+          @if (movieModel()().imageUrl) {
             <div class="form-group preview-group">
               <label class="form-label">Poster Preview</label>
               <div class="poster-preview-wrapper">
-                <img [src]="formImageUrl()" alt="Poster preview" class="poster-preview-img" />
+                <img [src]="movieModel()().imageUrl" alt="Poster preview" class="poster-preview-img" />
               </div>
             </div>
           }
 
           <div class="form-row">
-            <!-- Category / Genre -->
             <div class="form-group col-half">
               <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-                <mat-label>Category / Genre *</mat-label>
+                <mat-label>Category / Genre</mat-label>
                 <input
                   matInput
+                  id="org-movie-category"
                   type="text"
-                  [(ngModel)]="formCategory"
-                  name="category"
-                  placeholder="e.g. Drama, Action, Sci-Fi"
-                  required
+                  placeholder="e.g. Science Fiction, Action"
+                  [formField]="movieForm().category"
                 />
               </mat-form-field>
             </div>
 
-            <!-- Publishing Status -->
             <div class="form-group col-half">
               <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-                <mat-label>Publishing Status *</mat-label>
+                <mat-label>Status</mat-label>
                 <mat-select
-                  id="movie-status"
-                  [(ngModel)]="formStatus"
-                  name="status"
-                  required
+                  id="org-movie-status"
+                  [formField]="movieForm().status"
                 >
-                  <mat-option value="DRAFT">DRAFT</mat-option>
-                  <mat-option value="PUBLISHED">PUBLISHED</mat-option>
-                  <mat-option value="COMPLETED">COMPLETED</mat-option>
-                  <mat-option value="CANCELLED">CANCELLED</mat-option>
+                  <mat-option value="DRAFT">Draft</mat-option>
+                  <mat-option value="PUBLISHED">Published</mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
           </div>
         </div>
 
-        <!-- Section 2: Metadata & Specs -->
+        <!-- Section 2: Credits & Metadata -->
         <div class="form-section">
           <h3 class="section-title">
             <span class="material-symbols-outlined icon">info</span>
@@ -133,138 +128,141 @@
           </h3>
 
           <div class="form-row">
-            <!-- Director -->
             <div class="form-group col-third">
               <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
                 <mat-label>Director</mat-label>
                 <input
                   matInput
+                  id="org-movie-director"
                   type="text"
-                  [(ngModel)]="formDirector"
-                  name="director"
-                  placeholder="e.g. C. Nolan"
+                  placeholder="e.g. Denis Villeneuve"
+                  [formField]="movieForm().director"
                 />
               </mat-form-field>
             </div>
 
-            <!-- Duration (Minutes) -->
             <div class="form-group col-third">
               <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-                <mat-label>Duration (Min)</mat-label>
+                <mat-label>Duration (Minutes)</mat-label>
                 <input
                   matInput
+                  id="org-movie-duration"
                   type="number"
-                  min="1"
-                  [(ngModel)]="formDurationMinutes"
-                  name="durationMinutes"
-                  placeholder="148"
+                  placeholder="166"
+                  [formField]="movieForm().durationMinutes"
                 />
+                @if (movieForm().durationMinutes().touched() && movieForm().durationMinutes().invalid()) {
+                  <mat-error>{{ movieForm().durationMinutes().errors()[0]?.message || 'Duration must be at least 1 min' }}</mat-error>
+                }
               </mat-form-field>
             </div>
 
-            <!-- Language -->
             <div class="form-group col-third">
               <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
                 <mat-label>Language</mat-label>
                 <input
                   matInput
+                  id="org-movie-language"
                   type="text"
-                  [(ngModel)]="formLanguage"
-                  name="language"
-                  placeholder="e.g. English"
+                  placeholder="e.g. English, Arabic Subtitles"
+                  [formField]="movieForm().language"
                 />
               </mat-form-field>
             </div>
           </div>
         </div>
 
-        <!-- Section 3: Schedule & Cinema -->
+        <!-- Section 3: Cinema Venue & Schedule -->
         <div class="form-section">
           <h3 class="section-title">
             <span class="material-symbols-outlined icon">calendar_month</span>
             Schedule & Cinema
           </h3>
 
-          <div class="form-row">
-            <!-- Start Date & Time -->
-            <div class="form-group col-half">
-              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-                <mat-label>Start Date & Time *</mat-label>
-                <input
-                  matInput
-                  type="datetime-local"
-                  [(ngModel)]="formStartDate"
-                  name="startDate"
-                  required
-                />
-              </mat-form-field>
-            </div>
-
-            <!-- End Date & Time -->
-            <div class="form-group col-half">
-              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-                <mat-label>End Date & Time *</mat-label>
-                <input
-                  matInput
-                  type="datetime-local"
-                  [(ngModel)]="formEndDate"
-                  name="endDate"
-                  required
-                />
-              </mat-form-field>
-            </div>
-          </div>
-
           <div class="form-group">
             <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-              <mat-label>Cinema Venue Location *</mat-label>
+              <mat-label>Cinema / Venue Location *</mat-label>
               <mat-select
-                id="movie-venue"
-                [(ngModel)]="formVenueId"
-                name="venueId"
-                required
+                id="org-movie-venue"
+                [formField]="movieForm().venueId"
               >
-                <mat-option [value]="null" disabled>Select a cinema venue...</mat-option>
                 @for (venue of venues(); track venue.id) {
                   <mat-option [value]="venue.id">
-                    {{ venue.name }} {{ venue.capacity ? '(Cap: ' + venue.capacity + ')' : '' }}
+                    {{ venue.name }} (Capacity: {{ venue.capacity }})
                   </mat-option>
                 }
               </mat-select>
+              @if (movieForm().venueId().touched() && movieForm().venueId().invalid()) {
+                <mat-error>{{ movieForm().venueId().errors()[0]?.message || 'Cinema is required' }}</mat-error>
+              }
             </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-half">
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>Start Time *</mat-label>
+                <input
+                  matInput
+                  id="org-movie-start-date"
+                  type="datetime-local"
+                  [formField]="movieForm().startDate"
+                />
+                @if (movieForm().startDate().touched() && movieForm().startDate().invalid()) {
+                  <mat-error>{{ movieForm().startDate().errors()[0]?.message || 'Start time is required' }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="form-group col-half">
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>End Time *</mat-label>
+                <input
+                  matInput
+                  id="org-movie-end-date"
+                  type="datetime-local"
+                  [formField]="movieForm().endDate"
+                />
+                @if (movieForm().endDate().touched() && movieForm().endDate().invalid()) {
+                  <mat-error>{{ movieForm().endDate().errors()[0]?.message || 'End time is required' }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
           </div>
         </div>
 
-        <!-- Section 4: Seat Categories & Ticket Pricing -->
+        <!-- Section 4: Seat Categories / Pricing Tiers -->
         <div class="form-section">
-          <div class="section-header-row">
+          <div class="section-title-row">
             <h3 class="section-title">
               <span class="material-symbols-outlined icon">confirmation_number</span>
-              Seat Categories & Pricing *
+              Seat Categories & Pricing
             </h3>
-            <button
-              type="button"
-              class="btn-add-category"
-              (click)="addSeatCategory()"
-            >
-              <span class="material-symbols-outlined btn-icon">add</span>
-              Add Category
+            <button type="button" class="btn-add-tier" (click)="addSeatCategory()">
+              <span class="material-symbols-outlined">add</span>
+              Add Tier
             </button>
           </div>
 
-          <div class="seat-categories-container">
-            @for (cat of seatCategories(); track $index) {
-              <div class="seat-category-card">
-                <div class="form-row category-row">
-                  <!-- Category Enum Selector -->
-                  <div class="form-group col-third">
+          <div class="tier-list">
+            @for (cat of seatCategories(); track $index; let i = $index) {
+              <div class="tier-card">
+                <div class="tier-header">
+                  <span class="tier-badge">Tier {{ i + 1 }}</span>
+                  @if (seatCategories().length > 1) {
+                    <button type="button" class="btn-remove-tier" (click)="removeSeatCategory(i)" aria-label="Remove tier">
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                  }
+                </div>
+
+                <div class="tier-fields-grid">
+                  <div class="form-group">
                     <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-                      <mat-label>Category Tier</mat-label>
+                      <mat-label>Category Type</mat-label>
                       <mat-select
-                        [id]="'cat-name-' + $index"
-                        [(ngModel)]="cat.name"
-                        [name]="'catName_' + $index"
-                        required
+                        [value]="cat.name"
+                        (selectionChange)="cat.name = $event.value"
                       >
                         @for (opt of categoryOptions; track opt) {
                           <mat-option [value]="opt">{{ opt }}</mat-option>
@@ -273,49 +271,33 @@
                     </mat-form-field>
                   </div>
 
-                  <!-- Price (EGP) -->
-                  <div class="form-group col-third">
+                  <div class="form-group">
                     <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
                       <mat-label>Price (EGP)</mat-label>
                       <input
                         matInput
                         type="number"
+                        placeholder="120"
                         min="0"
-                        step="0.01"
-                        [(ngModel)]="cat.price"
-                        [name]="'catPrice_' + $index"
-                        placeholder="100.00"
-                        required
+                        [value]="cat.price"
+                        (input)="cat.price = +$any($event.target).value"
                       />
                     </mat-form-field>
                   </div>
 
-                  <!-- Total Capacity -->
-                  <div class="form-group col-third">
+                  <div class="form-group">
                     <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
                       <mat-label>Total Seats</mat-label>
                       <input
                         matInput
                         type="number"
-                        min="1"
-                        [(ngModel)]="cat.totalSeats"
-                        [name]="'catSeats_' + $index"
                         placeholder="50"
-                        required
+                        min="1"
+                        [value]="cat.totalSeats"
+                        (input)="cat.totalSeats = +$any($event.target).value"
                       />
                     </mat-form-field>
                   </div>
-
-                  <!-- Delete Button -->
-                  <button
-                    type="button"
-                    class="btn-remove-category"
-                    (click)="removeSeatCategory($index)"
-                    [disabled]="seatCategories().length === 1"
-                    title="Remove Category Tier"
-                  >
-                    <span class="material-symbols-outlined">delete</span>
-                  </button>
                 </div>
               </div>
             }
@@ -325,7 +307,7 @@
       </form>
     </div>
 
-    <!-- Footer Action Buttons -->
+    <!-- Footer Controls -->
     <footer class="drawer-footer">
       <button type="button" class="btn-cancel" (click)="onClose()">
         Cancel

@@ -37,7 +37,7 @@
 
       <form
         class="movie-form"
-        [formGroup]="eventForm"
+        [formRoot]="eventForm"
         (ngSubmit)="onSubmit()"
         novalidate
       >
@@ -48,13 +48,13 @@
           <input
             matInput
             type="text"
-            formControlName="title"
-            maxlength="255"
+            id="event-title"
+            [formField]="eventForm.title"
             placeholder="Enter the movie title"
           >
 
-          @if (isSubmitted() && eventForm.get('title')?.hasError('required')) {
-            <mat-error>Movie title is required</mat-error>
+          @if ((isSubmitted() || eventForm.title().touched()) && eventForm.title().invalid()) {
+            <mat-error>{{ eventForm.title().errors()[0]?.message || 'Movie title is required' }}</mat-error>
           }
         </mat-form-field>
 
@@ -64,14 +64,14 @@
 
           <textarea
             matInput
-            formControlName="description"
-            maxlength="2000"
+            id="event-description"
+            [formField]="eventForm.description"
             rows="5"
             placeholder="Enter a short movie description"
           ></textarea>
 
           <mat-hint align="end">
-            {{ eventForm.get('description')?.value?.length || 0 }}/2000
+            {{ eventModel().description.length || 0 }}/2000
           </mat-hint>
         </mat-form-field>
 
@@ -80,7 +80,7 @@
           <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Genre</mat-label>
 
-            <mat-select formControlName="category">
+            <mat-select id="event-category" [formField]="eventForm.category">
               @for (categoryOption of categories; track categoryOption) {
                 <mat-option [value]="categoryOption">
                   {{ categoryOption }}
@@ -88,8 +88,8 @@
               }
             </mat-select>
 
-            @if (isSubmitted() && eventForm.get('category')?.hasError('required')) {
-              <mat-error>Genre is required</mat-error>
+            @if ((isSubmitted() || eventForm.category().touched()) && eventForm.category().invalid()) {
+              <mat-error>{{ eventForm.category().errors()[0]?.message || 'Genre is required' }}</mat-error>
             }
           </mat-form-field>
 
@@ -97,7 +97,7 @@
           <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Status</mat-label>
 
-            <mat-select formControlName="status">
+            <mat-select id="event-status" [formField]="eventForm.status">
               <mat-option value="DRAFT">Draft</mat-option>
               <mat-option value="PUBLISHED">Published</mat-option>
             </mat-select>
@@ -113,8 +113,8 @@
             <input
               matInput
               type="text"
-              formControlName="director"
-              maxlength="150"
+              id="event-director"
+              [formField]="eventForm.director"
               placeholder="e.g. Christopher Nolan"
             >
           </mat-form-field>
@@ -126,13 +126,13 @@
             <input
               matInput
               type="number"
-              formControlName="durationMinutes"
-              min="1"
+              id="event-duration"
+              [formField]="eventForm.durationMinutes"
               placeholder="e.g. 148"
             >
 
-            @if (isSubmitted() && eventForm.get('durationMinutes')?.hasError('min')) {
-              <mat-error>Duration must be at least 1 minute</mat-error>
+            @if ((isSubmitted() || eventForm.durationMinutes().touched()) && eventForm.durationMinutes().invalid()) {
+              <mat-error>{{ eventForm.durationMinutes().errors()[0]?.message || 'Duration must be at least 1 minute' }}</mat-error>
             }
           </mat-form-field>
 
@@ -143,12 +143,13 @@
             <input
               matInput
               type="text"
-              formControlName="language"
-              maxlength="100"
+              id="event-language"
+              [formField]="eventForm.language"
               placeholder="e.g. English / Arabic Subtitles"
             >
           </mat-form-field>
         </div>
+
 
         <div class="form-row">
           <!-- Start Date -->
@@ -158,11 +159,12 @@
             <input
               matInput
               type="datetime-local"
-              formControlName="startDate"
+              id="event-start-date"
+              [formField]="eventForm.startDate"
             >
 
-            @if (isSubmitted() && eventForm.get('startDate')?.hasError('required')) {
-              <mat-error>Start date is required</mat-error>
+            @if ((isSubmitted() || eventForm.startDate().touched()) && eventForm.startDate().invalid()) {
+              <mat-error>{{ eventForm.startDate().errors()[0]?.message || 'Start date is required' }}</mat-error>
             }
           </mat-form-field>
 
@@ -173,11 +175,12 @@
             <input
               matInput
               type="datetime-local"
-              formControlName="endDate"
+              id="event-end-date"
+              [formField]="eventForm.endDate"
             >
 
-            @if (isSubmitted() && eventForm.get('endDate')?.hasError('required')) {
-              <mat-error>End date is required</mat-error>
+            @if ((isSubmitted() || eventForm.endDate().touched()) && eventForm.endDate().invalid()) {
+              <mat-error>{{ eventForm.endDate().errors()[0]?.message || 'End date is required' }}</mat-error>
             }
           </mat-form-field>
         </div>
@@ -186,7 +189,7 @@
         <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Cinema</mat-label>
 
-          <mat-select formControlName="venueId">
+          <mat-select id="event-venue-id" [formField]="eventForm.venueId">
             @for (venue of venues; track venue.id) {
               <mat-option [value]="venue.id">
                 {{ venue.name }}
@@ -194,8 +197,8 @@
             }
           </mat-select>
 
-          @if (isSubmitted() && eventForm.get('venueId')?.hasError('required')) {
-            <mat-error>Cinema is required</mat-error>
+          @if ((isSubmitted() || eventForm.venueId().touched()) && eventForm.venueId().invalid()) {
+            <mat-error>{{ eventForm.venueId().errors()[0]?.message || 'Cinema is required' }}</mat-error>
           }
         </mat-form-field>
 
@@ -217,3 +220,4 @@
     </mat-card-content>
   </mat-card>
 </section>
+

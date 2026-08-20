@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { form, FormField } from '@angular/forms/signals';
 import { MovieCardComponent } from '../../../shared/components/movie-card/movie-card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
@@ -58,25 +59,25 @@ const FALLBACK_MOVIES: Movie[] = [
     rating: '8.5',
     showtime: 'Friday, 8:00 PM',
     cinemaName: 'Cairo Opera House Main Hall',
-    imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600&auto=format&fit=crop',
-    posterUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600&auto=format&fit=crop',
-    isPopular: true,
+    imageUrl: 'https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?q=80&w=600&auto=format&fit=crop',
+    posterUrl: 'https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?q=80&w=600&auto=format&fit=crop',
+    isPopular: false,
   },
   {
     id: 4,
-    title: 'The Blue Elephant 2',
-    genre: 'Horror / Mystery',
-    duration: '2h 10m',
-    rating: '8.2',
+    title: 'Whiplash',
+    genre: 'Drama / Music',
+    duration: '1h 47m',
+    rating: '8.5',
     showtime: 'Saturday, 9:00 PM',
-    cinemaName: 'Zawya Cinema Downtown',
-    imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
-    posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
-    isPopular: true,
+    cinemaName: 'Zamalek Cinema',
+    imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600&auto=format&fit=crop',
+    posterUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=600&auto=format&fit=crop',
+    isPopular: false,
   },
   {
     id: 5,
-    title: 'Voy! Voy! Voy!',
+    title: 'The Grand Budapest Hotel',
     genre: 'Comedy / Drama',
     duration: '1h 55m',
     rating: '8.0',
@@ -93,6 +94,7 @@ const FALLBACK_MOVIES: Movie[] = [
   standalone: true,
   imports: [
     CommonModule,
+    FormField,
     MovieCardComponent,
     MatChipsModule,
     MatIconModule,
@@ -106,8 +108,13 @@ const FALLBACK_MOVIES: Movie[] = [
 export class Discover implements OnInit {
   private readonly eventService = inject(EventService);
 
-  // Search & filter state
-  readonly searchQuery = signal<string>('');
+  // Search & filter Signal Forms state
+  readonly searchModel = signal({
+    query: '',
+  });
+
+  readonly searchForm = form(this.searchModel);
+
   readonly selectedGenre = signal<string>('All');
 
   // Data & UI state signals
@@ -126,7 +133,7 @@ export class Discover implements OnInit {
 
   readonly filteredMovies = computed(() => {
     const genre = this.selectedGenre();
-    const query = this.searchQuery().toLowerCase().trim();
+    const query = this.searchModel().query.toLowerCase().trim();
 
     return this.movies().filter((movie) => {
       const matchesGenre =
@@ -180,6 +187,7 @@ export class Discover implements OnInit {
   }
 
   clearSearch(): void {
-    this.searchQuery.set('');
+    this.searchModel.set({ query: '' });
   }
 }
+

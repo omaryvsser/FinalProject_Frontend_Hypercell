@@ -1,5 +1,6 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { form, required, email, min } from '@angular/forms/signals';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AdminHeaderComponent } from './components/admin-header/admin-header';
 import { MetricCardsComponent } from './components/metric-cards/metric-cards';
@@ -126,30 +127,68 @@ export class AdminDashboardComponent implements OnInit {
   /** Loading indicator state during API transactions */
   isLoading = signal<boolean>(false);
 
-  // --- Slide-Over Drawer Form Signals / Data Bindings ---
-  // User / Organizer form bindings
-  formName = signal<string>('');
-  formEmail = signal<string>('');
-  formRole = signal<'ADMIN' | 'ORGANIZER' | 'CUSTOMER'>('CUSTOMER');
-  formCompany = signal<string>('');
+  // --- Slide-Over Drawer Signal Forms Models & Schemas ---
+  // 1. User Signal Form
+  readonly userModel = signal({
+    name: '',
+    email: '',
+    role: 'CUSTOMER' as 'ADMIN' | 'ORGANIZER' | 'CUSTOMER',
+  });
+  readonly userForm = form(this.userModel, (schema) => {
+    required(schema.name, { message: 'Full name is required' });
+    required(schema.email, { message: 'Email address is required' });
+    email(schema.email, { message: 'Please enter a valid email address' });
+    required(schema.role, { message: 'Role is required' });
+  });
 
-  // Venue form bindings
-  formVenueName = signal<string>('');
-  formAddress = signal<string>('');
-  formCapacity = signal<number>(100);
+  // 2. Organizer Signal Form
+  readonly organizerModel = signal({
+    name: '',
+    email: '',
+    company: '',
+  });
+  readonly organizerForm = form(this.organizerModel, (schema) => {
+    required(schema.name, { message: 'Organizer contact name is required' });
+    required(schema.email, { message: 'Contact email is required' });
+    email(schema.email, { message: 'Please enter a valid email address' });
+    required(schema.company, { message: 'Company is required' });
+  });
 
-  // Movie / Event form bindings
-  formTitle = signal<string>('');
-  formDescription = signal<string>('');
-  formImageUrl = signal<string>('');
-  formGenre = signal<string>('Action');
-  formStatus = signal<'DRAFT' | 'PUBLISHED'>('PUBLISHED');
-  formDirector = signal<string>('');
-  formDurationMinutes = signal<number | string>(120);
-  formLanguage = signal<string>('English');
-  formStartDate = signal<string>('');
-  formEndDate = signal<string>('');
-  formVenueId = signal<number>(1);
+  // 3. Venue Signal Form
+  readonly venueModel = signal({
+    name: '',
+    address: '',
+    capacity: 100,
+  });
+  readonly venueForm = form(this.venueModel, (schema) => {
+    required(schema.name, { message: 'Venue name is required' });
+    required(schema.address, { message: 'Street address is required' });
+    required(schema.capacity, { message: 'Seat capacity is required' });
+    min(schema.capacity, 10, { message: 'Capacity must be at least 10 seats' });
+  });
+
+  // 4. Movie Signal Form
+  readonly movieModel = signal({
+    title: '',
+    description: '',
+    imageUrl: '',
+    genre: 'Action',
+    status: 'PUBLISHED' as 'DRAFT' | 'PUBLISHED',
+    director: '',
+    durationMinutes: 120,
+    language: 'English',
+    startDate: '',
+    endDate: '',
+    venueId: 1,
+  });
+  readonly movieForm = form(this.movieModel, (schema) => {
+    required(schema.title, { message: 'Movie title is required' });
+    required(schema.genre, { message: 'Genre is required' });
+    required(schema.startDate, { message: 'Start time is required' });
+    required(schema.endDate, { message: 'End time is required' });
+    required(schema.venueId, { message: 'Cinema is required' });
+    min(schema.durationMinutes, 1, { message: 'Duration must be at least 1 minute' });
+  });
 
   /**
    * Component Lifecycle Initialization
@@ -338,25 +377,35 @@ export class AdminDashboardComponent implements OnInit {
    * Resets all drawer form input signals to their default initial values.
    */
   resetFormFields() {
-    this.formName.set('');
-    this.formEmail.set('');
-    this.formRole.set('CUSTOMER');
-    this.formCompany.set('');
-    this.formVenueName.set('');
-    this.formAddress.set('');
-    this.formCapacity.set(100);
-    this.formTitle.set('');
-    this.formDescription.set('');
-    this.formImageUrl.set('');
-    this.formGenre.set('Action');
-    this.formStatus.set('PUBLISHED');
-    this.formDirector.set('');
-    this.formDurationMinutes.set(120);
-    this.formLanguage.set('English');
-    this.formStartDate.set('');
-    this.formEndDate.set('');
+    this.userModel.set({
+      name: '',
+      email: '',
+      role: 'CUSTOMER',
+    });
+    this.organizerModel.set({
+      name: '',
+      email: '',
+      company: '',
+    });
+    this.venueModel.set({
+      name: '',
+      address: '',
+      capacity: 100,
+    });
     const firstVenue = this.venues().length > 0 ? Number(this.venues()[0].id) : 1;
-    this.formVenueId.set(firstVenue);
+    this.movieModel.set({
+      title: '',
+      description: '',
+      imageUrl: '',
+      genre: 'Action',
+      status: 'PUBLISHED',
+      director: '',
+      durationMinutes: 120,
+      language: 'English',
+      startDate: '',
+      endDate: '',
+      venueId: firstVenue,
+    });
   }
 
   /**
@@ -366,32 +415,40 @@ export class AdminDashboardComponent implements OnInit {
   populateFormFields(item: any) {
     switch (this.activeTab()) {
       case 'USERS':
-        this.formName.set(item.name || '');
-        this.formEmail.set(item.email || '');
-        this.formRole.set(item.role || 'CUSTOMER');
+        this.userModel.set({
+          name: item.name || '',
+          email: item.email || '',
+          role: item.role || 'CUSTOMER',
+        });
         break;
       case 'ORGANIZERS':
-        this.formName.set(item.name || '');
-        this.formEmail.set(item.email || '');
-        this.formCompany.set(item.company || '');
+        this.organizerModel.set({
+          name: item.name || '',
+          email: item.email || '',
+          company: item.company || '',
+        });
         break;
       case 'VENUES':
-        this.formVenueName.set(item.name || '');
-        this.formAddress.set(item.address || '');
-        this.formCapacity.set(item.capacity || 100);
+        this.venueModel.set({
+          name: item.name || '',
+          address: item.address || '',
+          capacity: item.capacity || 100,
+        });
         break;
       case 'MOVIES':
-        this.formTitle.set(item.title || '');
-        this.formDescription.set(item.description || '');
-        this.formImageUrl.set(item.imageUrl || '');
-        this.formGenre.set(item.genre || 'Action');
-        this.formStatus.set(item.status || 'PUBLISHED');
-        this.formDirector.set(item.director || '');
-        this.formDurationMinutes.set(item.durationMinutes || item.duration || 120);
-        this.formLanguage.set(item.language || 'English');
-        this.formStartDate.set(item.startDate || '');
-        this.formEndDate.set(item.endDate || '');
-        this.formVenueId.set(item.venueId ? Number(item.venueId) : (this.venues().length > 0 ? Number(this.venues()[0].id) : 1));
+        this.movieModel.set({
+          title: item.title || '',
+          description: item.description || '',
+          imageUrl: item.imageUrl || '',
+          genre: item.genre || 'Action',
+          status: item.status || 'PUBLISHED',
+          director: item.director || '',
+          durationMinutes: Number(item.durationMinutes || item.duration || 120),
+          language: item.language || 'English',
+          startDate: item.startDate || '',
+          endDate: item.endDate || '',
+          venueId: item.venueId ? Number(item.venueId) : (this.venues().length > 0 ? Number(this.venues()[0].id) : 1),
+        });
         break;
     }
   }
@@ -405,10 +462,15 @@ export class AdminDashboardComponent implements OnInit {
     const tab = this.activeTab();
 
     if (tab === 'VENUES') {
+      this.venueForm().markAsTouched();
+      if (this.venueForm().invalid()) {
+        return;
+      }
+      const val = this.venueModel();
       const payload = {
-        name: this.formVenueName(),
-        address: this.formAddress(),
-        capacity: Number(this.formCapacity()),
+        name: val.name.trim(),
+        address: val.address.trim(),
+        capacity: Number(val.capacity),
       };
       if (selected && selected.id) {
         // Update existing venue
@@ -430,10 +492,14 @@ export class AdminDashboardComponent implements OnInit {
         });
       }
     } else if (tab === 'USERS') {
+      this.userForm().markAsTouched();
+      if (this.userForm().invalid()) {
+        return;
+      }
       if (selected && selected.id) {
         // Update user role
         const targetRoleId = Number(selected.id);
-        const requestedRole = this.formRole() as UserRole;
+        const requestedRole = this.userModel().role as UserRole;
         this.userService.updateUserRole(targetRoleId, requestedRole).subscribe({
           next: (updatedDto) => {
             const targetRole = (updatedDto?.role || requestedRole) as 'ADMIN' | 'ORGANIZER' | 'CUSTOMER';
@@ -448,26 +514,37 @@ export class AdminDashboardComponent implements OnInit {
       } else {
         this.closeDrawer();
       }
+    } else if (tab === 'ORGANIZERS') {
+      this.organizerForm().markAsTouched();
+      if (this.organizerForm().invalid()) {
+        return;
+      }
+      this.closeDrawer();
     } else if (tab === 'MOVIES') {
-      const sDate = this.formStartDate();
-      const eDate = this.formEndDate();
+      this.movieForm().markAsTouched();
+      if (this.movieForm().invalid()) {
+        return;
+      }
+      const val = this.movieModel();
+      const sDate = val.startDate;
+      const eDate = val.endDate;
 
-      let imgUrl = this.formImageUrl().trim();
+      let imgUrl = val.imageUrl.trim();
       if (!imgUrl) {
         imgUrl = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba';
       }
 
       const payload = {
-        title: this.formTitle().trim(),
-        description: this.formDescription() ? this.formDescription().trim() : '',
-        category: this.formGenre() || 'Action',
+        title: val.title.trim(),
+        description: val.description ? val.description.trim() : '',
+        category: val.genre || 'Action',
         startDate: sDate ? (sDate.length === 16 ? `${sDate}:00` : sDate) : '2026-08-25T20:00:00',
         endDate: eDate ? (eDate.length === 16 ? `${eDate}:00` : eDate) : '2026-08-25T22:00:00',
-        status: this.formStatus() || 'PUBLISHED',
-        venueId: Number(this.formVenueId()) || 1,
-        director: this.formDirector() ? this.formDirector().trim() : undefined,
-        durationMinutes: Number(this.formDurationMinutes()) || 120,
-        language: this.formLanguage() ? this.formLanguage().trim() : undefined,
+        status: val.status || 'PUBLISHED',
+        venueId: Number(val.venueId) || 1,
+        director: val.director ? val.director.trim() : undefined,
+        durationMinutes: Number(val.durationMinutes) || 120,
+        language: val.language ? val.language.trim() : undefined,
         imageUrl: imgUrl
       };
 
@@ -503,6 +580,7 @@ export class AdminDashboardComponent implements OnInit {
       this.closeDrawer();
     }
   }
+
 
   /**
    * Directly updates a specific user's role (ADMIN, ORGANIZER, CUSTOMER).

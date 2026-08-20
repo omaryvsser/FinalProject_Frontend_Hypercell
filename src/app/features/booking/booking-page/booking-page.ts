@@ -1,13 +1,12 @@
 import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { form, required, email, minLength, FormField, FormRoot } from '@angular/forms/signals';
 import { BookingService } from '../../../core/services/booking.service';
 import { EventService } from '../../../core/services/event.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SeatCategoryResponse } from '../../../core/models/event.model';
 import { BookingCreateRequest } from '../../../core/models/booking.model';
-import { FormsModule,ReactiveFormsModule } from '@angular/forms';
-
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -27,9 +26,8 @@ const DEFAULT_CATEGORIES: SeatCategoryResponse[] = [
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
-    FormsModule,
-    ReactiveFormsModule,
+    FormField,
+    FormRoot,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -37,6 +35,7 @@ const DEFAULT_CATEGORIES: SeatCategoryResponse[] = [
     MatIconModule,
     MatProgressSpinnerModule,
   ],
+
   templateUrl: './booking-page.html',
   styleUrl: './booking-page.css',
 })
@@ -53,43 +52,34 @@ export class BookingPage implements OnInit {
   readonly cinemaName = signal<string>('Hypercell Cinema');
   readonly isLoadingDetails = signal<boolean>(false);
 
-  // --- Task 1: Seat Categories & Selection Signals ---
+  // --- Seat Categories & Selection Signals ---
   readonly seatCategories = signal<SeatCategoryResponse[]>([]);
   readonly selectedCategory = signal<SeatCategoryResponse | null>(null);
   readonly quantity = signal<number>(1);
   readonly totalPrice = computed(() => (this.selectedCategory()?.price || 0) * this.quantity());
 
-  // --- Customer Form Signals ---
-  readonly customerName = signal<string>('');
-  readonly customerEmail = signal<string>('');
-  readonly customerPhone = signal<string>('');
+  // --- Customer Signal Form Model & Schema ---
+  readonly customerModel = signal({
+    name: '',
+    email: '',
+    phone: '',
+  });
 
-  readonly nameTouched = signal<boolean>(false);
-  readonly emailTouched = signal<boolean>(false);
-  readonly phoneTouched = signal<boolean>(false);
+  readonly customerForm = form(this.customerModel, (schema) => {
+    required(schema.name, { message: 'Name is required' });
+    required(schema.email, { message: 'Email is required' });
+    email(schema.email, { message: 'Please enter a valid email' });
+    required(schema.phone, { message: 'Phone number is required' });
+    minLength(schema.phone, 8, { message: 'Enter a valid phone number' });
+  });
 
   readonly isSubmitting = signal<boolean>(false);
   readonly bookingError = signal<string | null>(null);
 
-  // --- Form Validation Signals ---
-  readonly nameEmpty = computed(() => this.customerName().trim().length === 0);
-  readonly emailInvalid = computed(() => {
-    const email = this.customerEmail().trim();
-    if (!email) return true;
-    return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  });
-  readonly phoneInvalid = computed(() => {
-    const phone = this.customerPhone().trim();
-    if (!phone) return true;
-    return phone.length < 8;
-  });
-
   readonly isFormValid = computed(() => {
     return (
       this.selectedCategory() !== null &&
-      !this.nameEmpty() &&
-      !this.emailInvalid() &&
-      !this.phoneInvalid() &&
+      this.customerForm().valid() &&
       this.quantity() > 0
     );
   });
@@ -97,8 +87,11 @@ export class BookingPage implements OnInit {
   ngOnInit(): void {
     const user = this.authService.currentUser();
     if (user) {
-      if (user.name) this.customerName.set(user.name);
-      if (user.email) this.customerEmail.set(user.email);
+      this.customerModel.update(m => ({
+        ...m,
+        name: user.name || m.name,
+        email: user.email || m.email,
+      }));
     }
 
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -107,6 +100,7 @@ export class BookingPage implements OnInit {
 
     this.loadEventDetails(parsedId);
   }
+
 
   private loadEventDetails(id: number): void {
     this.isLoadingDetails.set(true);
@@ -166,19 +160,10 @@ export class BookingPage implements OnInit {
   }
 
   onSubmitBooking(): void {
-
-    this.nameTouched.set(true);
-    this.emailTouched.set(true);
-    this.phoneTouched.set(true);
-    console.log('Form state:', {
-      category: this.selectedCategory(),
-      nameEmpty: this.nameEmpty(),
-      emailInvalid: this.emailInvalid(),
-      phoneInvalid: this.phoneInvalid(),
-      isValid: this.isFormValid()
-    });
+    this.customerForm().markAsTouched();
 
     if (!this.isFormValid()) return;
+
 
     const selectedCat = this.selectedCategory();
     if (!selectedCat) return;

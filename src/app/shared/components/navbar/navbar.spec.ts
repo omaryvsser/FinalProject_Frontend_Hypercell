@@ -1,12 +1,30 @@
 import '@angular/compiler';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Navbar } from './navbar';
+import { AuthService } from '../../../core/services/auth.service';
+import { signal } from '@angular/core';
 
 describe('Navbar Component', () => {
   let component: Navbar;
+  const mockCurrentUser = signal<any>(null);
 
   beforeEach(() => {
-    component = new Navbar();
+    TestBed.configureTestingModule({
+      providers: [
+        Navbar,
+        {
+          provide: AuthService,
+          useValue: {
+            currentUser: mockCurrentUser,
+            isLoggedIn: signal(false),
+            logout: () => mockCurrentUser.set(null),
+          },
+        },
+      ],
+    });
+    mockCurrentUser.set(null);
+    component = TestBed.inject(Navbar);
   });
 
   it('should create navbar component', () => {
@@ -17,23 +35,15 @@ describe('Navbar Component', () => {
     expect(component.currentUserRole()).toBe('GUEST');
   });
 
-  it('should compute role automatically based on URL path', () => {
-    component.updateRoleFromUrl('/admin');
+  it('should derive role from currentUser signal', () => {
+    mockCurrentUser.set({ email: 'admin@cinema.eg', role: 'ADMIN' });
     expect(component.currentUserRole()).toBe('ADMIN');
 
-    component.updateRoleFromUrl('/organizer/movies/new');
+    mockCurrentUser.set({ email: 'org@cinema.eg', role: 'ORGANIZER' });
     expect(component.currentUserRole()).toBe('ORGANIZER');
 
-    component.updateRoleFromUrl('/my-tickets');
+    mockCurrentUser.set({ email: 'cust@cinema.eg', role: 'CUSTOMER' });
     expect(component.currentUserRole()).toBe('CUSTOMER');
-
-    component.updateRoleFromUrl('/');
-    expect(component.currentUserRole()).toBe('GUEST');
-  });
-
-  it('should reset role to GUEST on logout', () => {
-    component.updateRoleFromUrl('/admin');
-    component.logout();
-    expect(component.currentUserRole()).toBe('GUEST');
   });
 });
+

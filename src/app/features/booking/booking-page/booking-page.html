@@ -76,20 +76,19 @@
       </div>
 
       <!-- 3. Customer Input Form -->
-        <form class="booking-form" (ngSubmit)="onSubmitBooking()" novalidate>
+      <form class="booking-form" [formRoot]="customerForm" (ngSubmit)="onSubmitBooking()" novalidate>
         <mat-form-field appearance="outline" floatLabel="always" class="full-width">
           <mat-label>Full Name</mat-label>
           <input
             matInput
             type="text"
-            [value]="customerName()"
-            (input)="customerName.set($any($event.target).value)"
-            (blur)="nameTouched.set(true)"
+            id="booking-name"
+            [formField]="customerForm.name"
             placeholder="Your Full Name"
           >
           <mat-icon matPrefix class="input-icon">person</mat-icon>
-          @if (nameTouched() && nameEmpty()) {
-            <mat-error>Name is required</mat-error>
+          @if (customerForm.name().touched() && customerForm.name().invalid()) {
+            <mat-error>{{ customerForm.name().errors()[0]?.message || 'Name is required' }}</mat-error>
           }
         </mat-form-field>
 
@@ -98,14 +97,13 @@
           <input
             matInput
             type="email"
-            [value]="customerEmail()"
-            (input)="customerEmail.set($any($event.target).value)"
-            (blur)="emailTouched.set(true)"
+            id="booking-email"
+            [formField]="customerForm.email"
             placeholder="name@example.com"
           >
           <mat-icon matPrefix class="input-icon">email</mat-icon>
-          @if (emailTouched() && emailInvalid()) {
-            <mat-error>Please enter a valid email</mat-error>
+          @if (customerForm.email().touched() && customerForm.email().invalid()) {
+            <mat-error>{{ customerForm.email().errors()[0]?.message || 'Please enter a valid email' }}</mat-error>
           }
         </mat-form-field>
 
@@ -114,14 +112,13 @@
           <input
             matInput
             type="tel"
-            [value]="customerPhone()"
-            (input)="customerPhone.set($any($event.target).value)"
-            (blur)="phoneTouched.set(true)"
+            id="booking-phone"
+            [formField]="customerForm.phone"
             placeholder="01xxxxxxxxx"
           >
           <mat-icon matPrefix class="input-icon">phone</mat-icon>
-          @if (phoneTouched() && phoneInvalid()) {
-            <mat-error>Enter a valid phone number</mat-error>
+          @if (customerForm.phone().touched() && customerForm.phone().invalid()) {
+            <mat-error>{{ customerForm.phone().errors()[0]?.message || 'Enter a valid phone number' }}</mat-error>
           }
         </mat-form-field>
 
@@ -143,7 +140,6 @@
           class="submit-booking-btn"
           type="submit"
           [disabled]="!selectedCategory() || !isFormValid() || isSubmitting()"
-
         >
           @if (isSubmitting()) {
             <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
@@ -153,6 +149,7 @@
           }
         </button>
       </form>
+
     </mat-card-content>
   </mat-card>
 </div>

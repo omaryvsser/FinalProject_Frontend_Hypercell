@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { CanActivateFn } from '@angular/router';
 
-import { rolesGuard } from './roles-guard';
+import { roleGuard } from './roles-guard';
 
-describe('rolesGuard', () => {
+describe('roleGuard', () => {
   const executeGuard: CanActivateFn = (...guardParameters) =>
-    TestBed.runInInjectionContext(() => rolesGuard(...guardParameters));
+    TestBed.runInInjectionContext(() => roleGuard(...guardParameters));
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
@@ -15,3 +15,4 @@ describe('rolesGuard', () => {
     expect(executeGuard).toBeTruthy();
   });
 });
+

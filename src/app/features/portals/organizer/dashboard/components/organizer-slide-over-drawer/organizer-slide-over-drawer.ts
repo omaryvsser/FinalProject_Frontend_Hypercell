@@ -1,6 +1,6 @@
-import { Component, input, model, output, signal } from '@angular/core';
+import { Component, input, output, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormField } from '@angular/forms/signals';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -17,7 +17,7 @@ export interface SeatCategoryInput {
 @Component({
   selector: 'app-organizer-slide-over-drawer',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatSelectModule, MatFormFieldModule, MatInputModule],
+  imports: [CommonModule, FormField, MatSelectModule, MatFormFieldModule, MatInputModule],
   templateUrl: './organizer-slide-over-drawer.html',
   styleUrl: './organizer-slide-over-drawer.css',
 })
@@ -27,18 +27,9 @@ export class OrganizerSlideOverDrawerComponent {
   selectedMovie = input<any>(null);
   venues = input<Venue[]>([]);
 
-  // --- Two-Way Model Signals ---
-  formTitle = model<string>('');
-  formDescription = model<string>('');
-  formImageUrl = model<string>('');
-  formCategory = model<string>('');
-  formDirector = model<string>('');
-  formDurationMinutes = model<number | null>(null);
-  formLanguage = model<string>('');
-  formVenueId = model<number | null>(null);
-  formStartDate = model<string>('');
-  formEndDate = model<string>('');
-  formStatus = model<'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED'>('DRAFT');
+  // Signal Form inputs
+  movieForm = input.required<any>();
+  movieModel = input.required<WritableSignal<any>>();
 
   // --- Seat Categories State ---
   readonly categoryOptions: SeatCategoryName[] = ['STANDARD', 'VIP', 'IMAX'];
@@ -77,7 +68,7 @@ export class OrganizerSlideOverDrawerComponent {
 
       reader.onload = () => {
         const base64DataUrl = reader.result as string;
-        this.formImageUrl.set(base64DataUrl);
+        this.movieModel().update((m: any) => ({ ...m, imageUrl: base64DataUrl }));
       };
 
       reader.readAsDataURL(file);
@@ -92,3 +83,4 @@ export class OrganizerSlideOverDrawerComponent {
     this.saveMovie.emit();
   }
 }
+

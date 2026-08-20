@@ -1,5 +1,6 @@
-import { Component, signal, computed, inject, OnInit,ViewChild } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { form, required, min } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
@@ -42,27 +43,39 @@ export class Dashboard implements OnInit {
   totalServerPages = signal<number>(1);
   totalServerElements = signal<number>(0);
 
+  organizerEmail = signal<string>('ciff-organizer@cinema.eg');
+  organizerMovies = signal<OrganizerMovie[]>([]);
+
+  // --- Drawer State ---
   isDrawerOpen = signal<boolean>(false);
   selectedMovie = signal<OrganizerMovie | null>(null);
-
-  organizerEmail = signal<string>('organizer@cinema.eg');
-  organizerMovies = signal<OrganizerMovie[]>([]);
 
   // --- Venue Signals ---
   venues = signal<Venue[]>([]);
 
-  // --- Drawer Form Signals ---
-  formTitle = signal<string>('');
-  formDescription = signal<string>('');
-  formImageUrl = signal<string>('');
-  formCategory = signal<string>('');
-  formDirector = signal<string>('');
-  formDurationMinutes = signal<number | null>(null);
-  formLanguage = signal<string>('');
-  formVenueId = signal<number | null>(null);
-  formStartDate = signal<string>('');
-  formEndDate = signal<string>('');
-  formStatus = signal<'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED'>('DRAFT');
+  // --- Signal Form Model & Schema ---
+  readonly movieModel = signal({
+    title: '',
+    description: '',
+    imageUrl: '',
+    category: 'Science Fiction',
+    director: '',
+    durationMinutes: null as number | null,
+    language: '',
+    venueId: null as number | null,
+    startDate: '2026-08-20T20:00:00',
+    endDate: '2026-08-20T22:00:00',
+    status: 'DRAFT' as 'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED',
+  });
+
+  readonly movieForm = form(this.movieModel, (schema) => {
+    required(schema.title, { message: 'Movie title is required' });
+    required(schema.category, { message: 'Category is required' });
+    required(schema.startDate, { message: 'Start date is required' });
+    required(schema.endDate, { message: 'End date is required' });
+    required(schema.venueId, { message: 'Cinema venue is required' });
+    min(schema.durationMinutes, 1, { message: 'Duration must be at least 1 minute' });
+  });
 
   ngOnInit(): void {
     this.loadEventsFromBackend(1);
@@ -73,8 +86,8 @@ export class Dashboard implements OnInit {
     this.venueService.getVenues().subscribe({
       next: (venueList) => {
         this.venues.set(venueList);
-        if (venueList.length > 0) {
-          this.formVenueId.set(venueList[0].id);
+        if (venueList.length > 0 && !this.movieModel().venueId) {
+          this.movieModel.update((m) => ({ ...m, venueId: venueList[0].id }));
         }
       },
       error: (err) => {
@@ -115,33 +128,35 @@ export class Dashboard implements OnInit {
   }
 
   saveDrawerMovie(): void {
-    const title = this.formTitle().trim();
+    this.movieForm().markAsTouched();
+    const val = this.movieModel();
+    const title = val.title.trim();
 
-    if (!title) {
-      this.showErrorDialog('Validation Required', 'Please enter a Movie Title before saving!');
+    if (!title || this.movieForm().invalid()) {
+      this.showErrorDialog('Validation Required', 'Please enter all required movie details before saving!');
       return;
     }
 
     // --- Dates formatting ---
-    let rawDate = (this.formStartDate() || '').trim();
+    let rawDate = (val.startDate || '').trim();
     if (rawDate && !rawDate.includes('T')) rawDate = rawDate.replace(' ', 'T');
     if (rawDate && rawDate.length === 16) rawDate += ':00';
 
-    let endDateVal = (this.formEndDate() || rawDate).trim();
+    let endDateVal = (val.endDate || rawDate).trim();
     if (endDateVal && !endDateVal.includes('T')) endDateVal = endDateVal.replace(' ', 'T');
     if (endDateVal && endDateVal.length === 16) endDateVal += ':00';
 
-    const currentStatus = this.formStatus();
+    const currentStatus = val.status;
     const validStatus: 'DRAFT' | 'PUBLISHED' =
       currentStatus === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT';
 
-    const selectedVenueId = this.formVenueId();
+    const selectedVenueId = val.venueId;
     if (!selectedVenueId) {
       this.showErrorDialog('Validation Required', 'Please select a cinema venue');
       return;
     }
 
-    let finalImageUrl = this.formImageUrl().trim();
+    let finalImageUrl = val.imageUrl.trim();
     if (!finalImageUrl) {
       finalImageUrl = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba';
     }
@@ -157,16 +172,16 @@ export class Dashboard implements OnInit {
 
     const payload: EventPayload = {
       title: title,
-      description: this.formDescription().trim() || `Movie screening for ${title}`,
-      category: this.formCategory().trim() || 'General',
+      description: val.description.trim() || `Movie screening for ${title}`,
+      category: val.category.trim() || 'General',
       startDate: rawDate,
       endDate: endDateVal,
       status: validStatus,
       venueId: selectedVenueId,
       imageUrl: finalImageUrl,
-      director: this.formDirector().trim() || undefined,
-      durationMinutes: this.formDurationMinutes() ? Number(this.formDurationMinutes()) : undefined,
-      language: this.formLanguage().trim() || undefined,
+      director: val.director.trim() || undefined,
+      durationMinutes: val.durationMinutes ? Number(val.durationMinutes) : undefined,
+      language: val.language.trim() || undefined,
 
       // 🟢 CRITICAL MISSING LINK: Send categories to Spring Boot!
       seatCategories: seatCategoriesPayload
@@ -187,7 +202,7 @@ export class Dashboard implements OnInit {
       });
     } else {
       this.eventService.createEvent(payload).subscribe({
-        next: (createdMovie) => {
+        next: () => {
           this.loadEventsFromBackend(this.currentPage());
           this.closeDrawer();
         },
@@ -301,32 +316,37 @@ export class Dashboard implements OnInit {
 
 
   resetFormFields(): void {
-    this.formTitle.set('');
-    this.formDescription.set('');
-    this.formImageUrl.set('');
-    this.formCategory.set('Science Fiction');
-    this.formDirector.set('');
-    this.formDurationMinutes.set(null);
-    this.formLanguage.set('');
-    this.formVenueId.set(this.venues().length > 0 ? this.venues()[0].id : null);
-    this.formStartDate.set('2026-08-20T20:00:00');
-    this.formEndDate.set('2026-08-20T22:00:00');
-    this.formStatus.set('DRAFT');
+    this.movieModel.set({
+      title: '',
+      description: '',
+      imageUrl: '',
+      category: 'Science Fiction',
+      director: '',
+      durationMinutes: null,
+      language: '',
+      venueId: this.venues().length > 0 ? this.venues()[0].id : null,
+      startDate: '2026-08-20T20:00:00',
+      endDate: '2026-08-20T22:00:00',
+      status: 'DRAFT',
+    });
   }
 
   populateFormFields(movie: any): void {
-    this.formTitle.set(movie.title || '');
-    this.formDescription.set(movie.description || '');
-    this.formImageUrl.set(movie.imageUrl || '');
-    this.formCategory.set(movie.category || '');
-    this.formDirector.set(movie.director || '');
-    this.formDurationMinutes.set(movie.durationMinutes || null);
-    this.formLanguage.set(movie.language || '');
-    this.formVenueId.set(movie.venueId || (this.venues().length > 0 ? this.venues()[0].id : null));
-    this.formStartDate.set(movie.startDate || '');
-    this.formEndDate.set(movie.endDate || movie.startDate || '');
-    this.formStatus.set(movie.status || 'DRAFT');
+    this.movieModel.set({
+      title: movie.title || '',
+      description: movie.description || '',
+      imageUrl: movie.imageUrl || '',
+      category: movie.category || '',
+      director: movie.director || '',
+      durationMinutes: movie.durationMinutes || null,
+      language: movie.language || '',
+      venueId: movie.venueId || (this.venues().length > 0 ? this.venues()[0].id : null),
+      startDate: movie.startDate || '',
+      endDate: movie.endDate || movie.startDate || '',
+      status: movie.status || 'DRAFT',
+    });
   }
+
 
   viewAttendees(movie: OrganizerMovie): void {
     if (this.router) {

@@ -19,25 +19,22 @@
         </div>
       }
 
-      <form (ngSubmit)="onSubmit()" novalidate class="auth-form">
+      <form [formRoot]="loginForm" (ngSubmit)="onSubmit()" novalidate class="auth-form">
         <!-- Email Field -->
         <mat-form-field appearance="outline" floatLabel="always" class="full-width">
           <mat-label>Email Address</mat-label>
           <input
             matInput
             type="email"
-            name="email"
-            [ngModel]="email()"
-            (ngModelChange)="email.set($event)"
-            (blur)="emailTouched.set(true)"
-            [errorStateMatcher]="emailMatcher"
+            id="login-email"
+            [formField]="loginForm.email"
             placeholder="hypercell@hypercell.com"
             autocomplete="email"
           >
           <mat-icon matPrefix class="input-icon">email</mat-icon>
 
-          @if ((isSubmitted() || emailTouched()) && emailError(); as err) {
-            <mat-error>{{ err }}</mat-error>
+          @if ((isSubmitted() || loginForm.email().touched()) && loginForm.email().invalid()) {
+            <mat-error>{{ loginForm.email().errors()[0]?.message || 'Valid email address is required' }}</mat-error>
           }
         </mat-form-field>
 
@@ -46,12 +43,9 @@
           <mat-label>Password</mat-label>
           <input
             matInput
+            id="login-password"
             [type]="hidePassword() ? 'password' : 'text'"
-            name="password"
-            [ngModel]="password()"
-            (ngModelChange)="password.set($event)"
-            (blur)="passwordTouched.set(true)"
-            [errorStateMatcher]="passwordMatcher"
+            [formField]="loginForm.password"
             placeholder="Enter your password"
             autocomplete="current-password"
           >
@@ -67,8 +61,8 @@
             <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
 
-          @if ((isSubmitted() || passwordTouched()) && passwordError(); as err) {
-            <mat-error>{{ err }}</mat-error>
+          @if ((isSubmitted() || loginForm.password().touched()) && loginForm.password().invalid()) {
+            <mat-error>{{ loginForm.password().errors()[0]?.message || 'Password is required' }}</mat-error>
           }
         </mat-form-field>
 
@@ -95,3 +89,4 @@
     </mat-card-content>
   </mat-card>
 </div>
+

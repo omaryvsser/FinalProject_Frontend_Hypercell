@@ -38,8 +38,8 @@
         <td mat-cell *matCellDef="let row">
           <mat-form-field appearance="outline" class="role-select-field" subscriptSizing="dynamic">
             <mat-select
-              [ngModel]="row.role"
-              (ngModelChange)="onRoleUpdate(row, $event)"
+              [value]="row.role"
+              (selectionChange)="onRoleUpdate(row, $event.value)"
               [disabled]="isCurrentUser(row.email)"
               aria-label="User role"
             >
@@ -48,6 +48,7 @@
               <mat-option value="CUSTOMER">CUSTOMER</mat-option>
             </mat-select>
           </mat-form-field>
+
         </td>
       </ng-container>
 

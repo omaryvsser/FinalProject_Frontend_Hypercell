@@ -19,24 +19,21 @@
         </div>
       }
 
-      <form (ngSubmit)="onSubmit()" novalidate class="auth-form">
+      <form [formRoot]="registerForm" (ngSubmit)="onSubmit()" novalidate class="auth-form">
         <!-- Full Name Field -->
         <mat-form-field appearance="outline" floatLabel="always" class="full-width">
           <mat-label>Full Name</mat-label>
           <input
             matInput
             type="text"
-            name="name"
-            [ngModel]="name()"
-            (ngModelChange)="name.set($event)"
-            (blur)="nameTouched.set(true)"
-            [errorStateMatcher]="nameMatcher"
+            id="register-name"
+            [formField]="registerForm.name"
             placeholder="Your Name"
           >
           <mat-icon matPrefix class="input-icon">person</mat-icon>
 
-          @if ((isSubmitted() || nameTouched()) && nameError(); as err) {
-            <mat-error>{{ err }}</mat-error>
+          @if ((isSubmitted() || registerForm.name().touched()) && registerForm.name().invalid()) {
+            <mat-error>{{ registerForm.name().errors()[0]?.message || 'Full name is required' }}</mat-error>
           }
         </mat-form-field>
 
@@ -46,17 +43,14 @@
           <input
             matInput
             type="email"
-            name="email"
-            [ngModel]="email()"
-            (ngModelChange)="email.set($event)"
-            (blur)="emailTouched.set(true)"
-            [errorStateMatcher]="emailMatcher"
+            id="register-email"
+            [formField]="registerForm.email"
             placeholder="hypercell@hypercell.com"
           >
           <mat-icon matPrefix class="input-icon">email</mat-icon>
 
-          @if ((isSubmitted() || emailTouched()) && emailError(); as err) {
-            <mat-error>{{ err }}</mat-error>
+          @if ((isSubmitted() || registerForm.email().touched()) && registerForm.email().invalid()) {
+            <mat-error>{{ registerForm.email().errors()[0]?.message || 'Valid email address is required' }}</mat-error>
           }
         </mat-form-field>
 
@@ -65,12 +59,9 @@
           <mat-label>Enter Password</mat-label>
           <input
             matInput
+            id="register-password"
             [type]="hidePassword() ? 'password' : 'text'"
-            name="password"
-            [ngModel]="password()"
-            (ngModelChange)="password.set($event)"
-            (blur)="passwordTouched.set(true)"
-            [errorStateMatcher]="passwordMatcher"
+            [formField]="registerForm.password"
             placeholder="At least 8 characters"
           >
           <mat-icon matPrefix class="input-icon">lock</mat-icon>
@@ -85,8 +76,8 @@
             <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
 
-          @if ((isSubmitted() || passwordTouched()) && passwordError(); as err) {
-            <mat-error>{{ err }}</mat-error>
+          @if ((isSubmitted() || registerForm.password().touched()) && registerForm.password().invalid()) {
+            <mat-error>{{ registerForm.password().errors()[0]?.message || 'Password is required' }}</mat-error>
           }
         </mat-form-field>
 
@@ -95,12 +86,9 @@
           <mat-label>Re-enter Password</mat-label>
           <input
             matInput
+            id="register-confirm-password"
             [type]="hideConfirmPassword() ? 'password' : 'text'"
-            name="confirmPassword"
-            [ngModel]="confirmPassword()"
-            (ngModelChange)="confirmPassword.set($event)"
-            (blur)="confirmPasswordTouched.set(true)"
-            [errorStateMatcher]="confirmPasswordMatcher"
+            [formField]="registerForm.confirmPassword"
             placeholder="Confirm your password"
           >
           <mat-icon matPrefix class="input-icon">lock_reset</mat-icon>
@@ -115,8 +103,8 @@
             <mat-icon>{{ hideConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
 
-          @if ((isSubmitted() || confirmPasswordTouched()) && confirmPasswordError(); as err) {
-            <mat-error>{{ err }}</mat-error>
+          @if ((isSubmitted() || registerForm.confirmPassword().touched()) && registerForm.confirmPassword().invalid()) {
+            <mat-error>{{ registerForm.confirmPassword().errors()[0]?.message || 'Please re-enter your password' }}</mat-error>
           }
         </mat-form-field>
 
@@ -143,3 +131,4 @@
     </mat-card-content>
   </mat-card>
 </div>
+

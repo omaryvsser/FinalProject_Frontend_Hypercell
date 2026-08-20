@@ -43,18 +43,10 @@
     [isOpen]="isDrawerOpen()"
     [selectedMovie]="selectedMovie()"
     [venues]="venues()"
-    [(formTitle)]="formTitle"
-    [(formDescription)]="formDescription"
-    [(formImageUrl)]="formImageUrl"
-    [(formCategory)]="formCategory"
-    [(formDirector)]="formDirector"
-    [(formDurationMinutes)]="formDurationMinutes"
-    [(formLanguage)]="formLanguage"
-    [(formVenueId)]="formVenueId"
-    [(formStartDate)]="formStartDate"
-    [(formEndDate)]="formEndDate"
-    [(formStatus)]="formStatus"
+    [movieForm]="movieForm"
+    [movieModel]="movieModel"
     (closeDrawer)="closeDrawer()"
     (saveMovie)="saveDrawerMovie()">
   </app-organizer-slide-over-drawer>
 </div>
+

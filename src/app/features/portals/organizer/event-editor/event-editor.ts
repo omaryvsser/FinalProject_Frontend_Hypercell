@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, required, min, maxLength, validate, FormField, FormRoot } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,13 +9,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EventService } from '../../../../core/services/event.service';
 
-type MovieStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
+export type MovieStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
 
 @Component({
   selector: 'app-event-editor',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    FormField,
+    FormRoot,
     RouterLink,
     MatButtonModule,
     MatCardModule,
@@ -31,7 +32,6 @@ export class EventEditor implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private eventService = inject(EventService);
-  private fb = inject(FormBuilder);
 
   readonly movieId = signal<number | null>(null);
   readonly isEditMode = computed(() => this.movieId() !== null);
@@ -56,18 +56,41 @@ export class EventEditor implements OnInit {
     { id: 2, name: 'Al Manara Arts Center' },
   ];
 
-  // Reactive Form Group setup
-  readonly eventForm: FormGroup = this.fb.group({
-    title: ['', [Validators.required, Validators.maxLength(255)]],
-    description: ['', [Validators.maxLength(2000)]],
-    category: ['', [Validators.required]],
-    startDate: ['', [Validators.required]],
-    endDate: ['', [Validators.required]],
-    status: ['DRAFT', [Validators.required]],
-    venueId: [null as number | null, [Validators.required]],
-    director: ['', [Validators.maxLength(150)]],
-    durationMinutes: [null as number | null, [Validators.min(1)]],
-    language: ['', [Validators.maxLength(100)]],
+  // 1. Signal Forms Model Setup
+  readonly eventModel = signal({
+    title: '',
+    description: '',
+    category: '',
+    startDate: '',
+    endDate: '',
+    status: 'DRAFT' as MovieStatus,
+    venueId: null as number | null,
+    director: '',
+    durationMinutes: null as number | null,
+    language: '',
+  });
+
+  // 2. Signal Form Schema Setup
+  readonly eventForm = form(this.eventModel, (schema) => {
+    required(schema.title, { message: 'Movie title is required' });
+    maxLength(schema.title, 255, { message: 'Title cannot exceed 255 characters' });
+    maxLength(schema.description, 2000, { message: 'Description cannot exceed 2000 characters' });
+    required(schema.category, { message: 'Genre is required' });
+    required(schema.startDate, { message: 'Start date is required' });
+    required(schema.endDate, { message: 'End date is required' });
+    required(schema.status, { message: 'Status is required' });
+    required(schema.venueId, { message: 'Cinema is required' });
+    maxLength(schema.director, 150, { message: 'Director cannot exceed 150 characters' });
+    min(schema.durationMinutes, 1, { message: 'Duration must be at least 1 minute' });
+    maxLength(schema.language, 100, { message: 'Language cannot exceed 100 characters' });
+    validate(schema.endDate, ({ value, valueOf }) => {
+      const start = valueOf(schema.startDate);
+      const end = value();
+      if (start && end && end <= start) {
+        return { kind: 'dateRange', message: 'End date must be later than the start date' };
+      }
+      return undefined;
+    });
   });
 
   ngOnInit(): void {
@@ -85,13 +108,13 @@ export class EventEditor implements OnInit {
   private loadMovieForEditing(movieId: number): void {
     this.eventService.getEventById(movieId).subscribe({
       next: (movie: any) => {
-        this.eventForm.patchValue({
+        this.eventModel.set({
           title: movie.title ?? '',
           description: movie.description ?? '',
           category: movie.category ?? '',
           startDate: movie.startDate ? movie.startDate.substring(0, 16) : '',
           endDate: movie.endDate ? movie.endDate.substring(0, 16) : '',
-          status: movie.status ?? 'DRAFT',
+          status: (movie.status ?? 'DRAFT') as MovieStatus,
           venueId: movie.venueId ?? null,
           director: movie.director ?? '',
           durationMinutes: movie.durationMinutes ?? null,
@@ -106,23 +129,22 @@ export class EventEditor implements OnInit {
   }
 
   onSubmit(): void {
-    console.log(' onSubmit() WAS CALLED!');
     this.isSubmitted.set(true);
+    this.eventForm().markAsTouched();
     this.saveMessage.set(null);
     this.errorMessage.set(null);
 
-    if (this.eventForm.invalid) {
-      console.warn(' Form validation failed! Request cancelled.');
+    if (this.eventForm().invalid()) {
+      console.warn('Form validation failed! Request cancelled.');
       return;
     }
 
-    const formValues = this.eventForm.value;
+    const formValues = this.eventModel();
     if (formValues.startDate && formValues.endDate && formValues.endDate <= formValues.startDate) {
       this.errorMessage.set('End date must be later than the start date');
       return;
     }
 
-    console.log(' Sending request to backend...');
     this.isSaving.set(true);
 
     const moviePayload = {
@@ -132,7 +154,7 @@ export class EventEditor implements OnInit {
       startDate: formValues.startDate.length === 16 ? `${formValues.startDate}:00` : formValues.startDate,
       endDate: formValues.endDate.length === 16 ? `${formValues.endDate}:00` : formValues.endDate,
       status: formValues.status,
-      venueId: formValues.venueId,
+      venueId: formValues.venueId!,
       director: formValues.director ? formValues.director.trim() : undefined,
       durationMinutes: formValues.durationMinutes ? Number(formValues.durationMinutes) : undefined,
       language: formValues.language ? formValues.language.trim() : undefined,
@@ -165,3 +187,4 @@ export class EventEditor implements OnInit {
     });
   }
 }
+
