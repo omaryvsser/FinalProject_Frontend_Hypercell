@@ -76,7 +76,7 @@
       </div>
 
       <!-- 3. Customer Input Form -->
-      <form class="booking-form" [formRoot]="customerForm" (ngSubmit)="onSubmitBooking()" novalidate>
+      <form class="booking-form" [formRoot]="customerForm" (submit)="$event.preventDefault(); onSubmitBooking()" novalidate>
         <mat-form-field appearance="outline" floatLabel="always" class="full-width">
           <mat-label>Full Name</mat-label>
           <input
@@ -139,6 +139,7 @@
           mat-raised-button
           class="submit-booking-btn"
           type="submit"
+          (click)="confirmBooking()"
           [disabled]="!selectedCategory() || !isFormValid() || isSubmitting()"
         >
           @if (isSubmitting()) {
@@ -149,6 +150,7 @@
           }
         </button>
       </form>
+
 
     </mat-card-content>
   </mat-card>

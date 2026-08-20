@@ -19,7 +19,7 @@
         </div>
       }
 
-      <form [formRoot]="loginForm" (ngSubmit)="onSubmit()" novalidate class="auth-form">
+      <form [formRoot]="loginForm" (submit)="$event.preventDefault(); onSubmit()" novalidate class="auth-form">
         <!-- Email Field -->
         <mat-form-field appearance="outline" floatLabel="always" class="full-width">
           <mat-label>Email Address</mat-label>
@@ -71,6 +71,7 @@
           mat-raised-button
           class="auth-submit-btn"
           type="submit"
+          (click)="onSubmit()"
           [disabled]="isSubmitting()"
         >
           @if (isSubmitting()) {
@@ -79,6 +80,7 @@
             <span>Sign In</span>
           }
         </button>
+
 
         <!-- Centered Router Link -->
         <div class="auth-footer-text">

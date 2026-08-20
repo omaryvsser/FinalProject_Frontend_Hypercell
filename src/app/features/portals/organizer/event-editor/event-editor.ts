@@ -70,28 +70,36 @@ export class EventEditor implements OnInit {
     language: '',
   });
 
-  // 2. Signal Form Schema Setup
-  readonly eventForm = form(this.eventModel, (schema) => {
-    required(schema.title, { message: 'Movie title is required' });
-    maxLength(schema.title, 255, { message: 'Title cannot exceed 255 characters' });
-    maxLength(schema.description, 2000, { message: 'Description cannot exceed 2000 characters' });
-    required(schema.category, { message: 'Genre is required' });
-    required(schema.startDate, { message: 'Start date is required' });
-    required(schema.endDate, { message: 'End date is required' });
-    required(schema.status, { message: 'Status is required' });
-    required(schema.venueId, { message: 'Cinema is required' });
-    maxLength(schema.director, 150, { message: 'Director cannot exceed 150 characters' });
-    min(schema.durationMinutes, 1, { message: 'Duration must be at least 1 minute' });
-    maxLength(schema.language, 100, { message: 'Language cannot exceed 100 characters' });
-    validate(schema.endDate, ({ value, valueOf }) => {
-      const start = valueOf(schema.startDate);
-      const end = value();
-      if (start && end && end <= start) {
-        return { kind: 'dateRange', message: 'End date must be later than the start date' };
-      }
-      return undefined;
-    });
-  });
+  // 2. Signal Form Schema with Validators
+  readonly eventForm = form(
+    this.eventModel,
+    (schema) => {
+      required(schema.title, { message: 'Movie title is required' });
+      maxLength(schema.title, 255);
+      maxLength(schema.description, 2000);
+      required(schema.category, { message: 'Genre is required' });
+      required(schema.startDate, { message: 'Start date is required' });
+      required(schema.endDate, { message: 'End date is required' });
+      required(schema.venueId, { message: 'Cinema / Venue is required' });
+      min(schema.durationMinutes, 1, { message: 'Duration must be at least 1 minute' });
+      validate(schema.endDate, ({ value, valueOf }) => {
+        const start = valueOf(schema.startDate);
+        const end = value();
+        if (start && end && end <= start) {
+          return { kind: 'invalidRange', message: 'End date must be strictly after start date' };
+        }
+        return undefined;
+      });
+    },
+    {
+      submission: {
+        action: async () => {
+          this.onSubmit();
+        },
+      },
+    }
+  );
+
 
   ngOnInit(): void {
     const idParameter = this.route.snapshot.paramMap.get('id');

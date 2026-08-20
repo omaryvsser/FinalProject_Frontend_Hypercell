@@ -36,11 +36,23 @@ export class Login {
   });
 
   // 2. Signal Form Schema with Validators
-  readonly loginForm = form(this.loginModel, (schema) => {
-    required(schema.email, { message: 'Email address is required' });
-    email(schema.email, { message: 'Please enter a valid email address' });
-    required(schema.password, { message: 'Password is required' });
-  });
+  readonly loginForm = form(
+    this.loginModel,
+    (schema) => {
+      required(schema.email, { message: 'Email address is required' });
+      email(schema.email, { message: 'Please enter a valid email address' });
+      required(schema.password, { message: 'Password is required' });
+    },
+    {
+      submission: {
+        action: async () => {
+          this.onSubmit();
+        },
+      },
+    }
+  );
+
+
 
   // 3. UI Control & Alert Signals
   readonly isSubmitted = signal<boolean>(false);

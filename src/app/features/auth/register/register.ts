@@ -37,22 +37,34 @@ export class Register {
   });
 
   // 2. Signal Form Schema with Validators
-  readonly registerForm = form(this.registerModel, (schema) => {
-    required(schema.name, { message: 'Full name is required' });
-    required(schema.email, { message: 'Email address is required' });
-    email(schema.email, { message: 'Please enter a valid email address' });
-    required(schema.password, { message: 'Password is required' });
-    minLength(schema.password, 8, { message: 'Password must be at least 8 characters long' });
-    required(schema.confirmPassword, { message: 'Please re-enter your password' });
-    validate(schema.confirmPassword, ({ value, valueOf }) => {
-      const pwd = valueOf(schema.password);
-      const conf = value();
-      if (conf && pwd && conf !== pwd) {
-        return { kind: 'mismatch', message: 'Passwords do not match' };
-      }
-      return undefined;
-    });
-  });
+  readonly registerForm = form(
+    this.registerModel,
+    (schema) => {
+      required(schema.name, { message: 'Full name is required' });
+      required(schema.email, { message: 'Email address is required' });
+      email(schema.email, { message: 'Please enter a valid email address' });
+      required(schema.password, { message: 'Password is required' });
+      minLength(schema.password, 8, { message: 'Password must be at least 8 characters long' });
+      required(schema.confirmPassword, { message: 'Please re-enter your password' });
+      validate(schema.confirmPassword, ({ value, valueOf }) => {
+        const pwd = valueOf(schema.password);
+        const conf = value();
+        if (conf && pwd && conf !== pwd) {
+          return { kind: 'mismatch', message: 'Passwords do not match' };
+        }
+        return undefined;
+      });
+    },
+    {
+      submission: {
+        action: async () => {
+          this.onSubmit();
+        },
+      },
+    }
+  );
+
+
 
   // 3. UI Control & Alert Signals
   readonly isSubmitted = signal<boolean>(false);

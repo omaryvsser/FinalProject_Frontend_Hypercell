@@ -65,13 +65,24 @@ export class BookingPage implements OnInit {
     phone: '',
   });
 
-  readonly customerForm = form(this.customerModel, (schema) => {
-    required(schema.name, { message: 'Name is required' });
-    required(schema.email, { message: 'Email is required' });
-    email(schema.email, { message: 'Please enter a valid email' });
-    required(schema.phone, { message: 'Phone number is required' });
-    minLength(schema.phone, 8, { message: 'Enter a valid phone number' });
-  });
+  readonly customerForm = form(
+    this.customerModel,
+    (schema) => {
+      required(schema.name, { message: 'Name is required' });
+      required(schema.email, { message: 'Email is required' });
+      email(schema.email, { message: 'Please enter a valid email' });
+      required(schema.phone, { message: 'Phone number is required' });
+      minLength(schema.phone, 8, { message: 'Enter a valid phone number' });
+    },
+    {
+      submission: {
+        action: async () => {
+          this.onSubmitBooking();
+        },
+      },
+    }
+  );
+
 
   readonly isSubmitting = signal<boolean>(false);
   readonly bookingError = signal<string | null>(null);
@@ -160,10 +171,13 @@ export class BookingPage implements OnInit {
   }
 
   onSubmitBooking(): void {
+    if (this.isSubmitting()) return;
+
     this.customerForm().markAsTouched();
 
-    if (!this.isFormValid()) return;
-
+    if (!this.isFormValid()) {
+      return;
+    }
 
     const selectedCat = this.selectedCategory();
     if (!selectedCat) return;
@@ -221,3 +235,4 @@ export class BookingPage implements OnInit {
     });
   }
 }
+
