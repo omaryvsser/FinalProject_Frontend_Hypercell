@@ -5,7 +5,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AdminHeaderComponent } from './components/admin-header/admin-header';
 import { MetricCardsComponent } from './components/metric-cards/metric-cards';
 import { AdminTabsComponent } from './components/admin-tabs/admin-tabs';
-import { DynamicTableComponent } from './components/dynamic-table/dynamic-table';
+import { DataTableComponent, TableColumn, TableAction } from '../../../../shared/components/data-table/data-table';
 import { SlideOverDrawerComponent } from './components/slide-over-drawer/slide-over-drawer';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { UserService } from '../../../../core/services/user.service';
@@ -15,6 +15,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { UserDto, UserRole } from '../../../../core/models/user.model';
 import { EventResponse } from '../../../../core/models/event.model';
 import { PaginatedResponse } from '../../../../core/models/pagination.model';
+
 
 /**
  * Union type representing the currently active management tab in the Admin Dashboard.
@@ -85,7 +86,7 @@ export interface MovieItem {
     AdminHeaderComponent,
     MetricCardsComponent,
     AdminTabsComponent,
-    DynamicTableComponent,
+    DataTableComponent,
     SlideOverDrawerComponent
   ],
   templateUrl: './admin-dashboard.html',
@@ -119,6 +120,12 @@ export class AdminDashboardComponent implements OnInit {
   /** Currently logged-in administrator's email address */
   currentUserEmail = signal<string>('');
 
+  // --- Total Count Signals across Entire Backend Datasets ---
+  totalUsersCount = signal<number>(0);
+  totalOrganizersCount = signal<number>(0);
+  totalVenuesCount = signal<number>(0);
+  totalMoviesCount = signal<number>(0);
+
   // --- Dynamic Backend Data Signals ---
   users = signal<UserItem[]>([]);
   organizers = signal<OrganizerItem[]>([]);
@@ -127,7 +134,72 @@ export class AdminDashboardComponent implements OnInit {
   /** Loading indicator state during API transactions */
   isLoading = signal<boolean>(false);
 
-  // --- Slide-Over Drawer Signal Forms Models & Schemas ---
+  // --- Reusable DataTable Column Definitions ---
+  readonly userColumns: TableColumn<UserItem>[] = [
+    { key: 'name', header: 'Name', type: 'user' },
+    { key: 'email', header: 'Email Address' },
+    { key: 'role', header: 'Role', type: 'roleSelect' },
+    { key: 'joinedDate', header: 'Joined Date' },
+  ];
+
+  readonly organizerColumns: TableColumn<OrganizerItem>[] = [
+    { key: 'name', header: 'Name' },
+    { key: 'email', header: 'Email Address' },
+    { key: 'company', header: 'Company / Organization', type: 'badge' },
+    { key: 'joinedDate', header: 'Joined Date' },
+  ];
+
+  readonly venueColumns: TableColumn<VenueItem>[] = [
+    { key: 'name', header: 'Venue Name' },
+    { key: 'address', header: 'Address' },
+    { key: 'capacity', header: 'Total Capacity', type: 'capacity' },
+  ];
+
+  readonly movieColumns: TableColumn<MovieItem>[] = [
+    { key: 'title', header: 'Movie Title' },
+    { key: 'genre', header: 'Genre', type: 'badge' },
+    { key: 'duration', header: 'Duration' },
+    { key: 'rating', header: 'Age Rating', type: 'rating' },
+    { key: 'releaseDate', header: 'Release Date' },
+  ];
+
+  readonly tableColumns = computed<TableColumn[]>(() => {
+    switch (this.activeTab()) {
+      case 'USERS': return this.userColumns;
+      case 'ORGANIZERS': return this.organizerColumns;
+      case 'VENUES': return this.venueColumns;
+      case 'MOVIES': return this.movieColumns;
+    }
+  });
+
+  readonly tableActions = computed<TableAction[]>(() => {
+    const tab = this.activeTab();
+    return [
+      {
+        id: 'edit',
+        label: `Edit ${this.singularTabLabel().toLowerCase()}`,
+        icon: 'edit',
+        cssClass: 'edit',
+      },
+      {
+        id: 'delete',
+        label: `Delete ${this.singularTabLabel().toLowerCase()}`,
+        icon: 'delete',
+        cssClass: 'delete',
+        disabled: (row: any) => tab === 'USERS' && this.isCurrentUser(row.email),
+      },
+    ];
+  });
+
+  readonly currentTableData = computed<any[]>(() => {
+    switch (this.activeTab()) {
+      case 'USERS': return this.users();
+      case 'ORGANIZERS': return this.organizers();
+      case 'VENUES': return this.venues();
+      case 'MOVIES': return this.movies();
+    }
+  });
+
   // 1. User Signal Form
   readonly userModel = signal({
     name: '',
@@ -192,20 +264,48 @@ export class AdminDashboardComponent implements OnInit {
 
   /**
    * Component Lifecycle Initialization
-   * Retrieves logged-in admin email and fetches initial page data.
+   * Retrieves logged-in admin email, loads total counts, and fetches initial page data.
    */
   ngOnInit(): void {
     const user = this.authService.currentUser();
     if (user && user.email) {
       this.currentUserEmail.set(user.email);
     }
+    this.loadAllTotals();
     this.loadAdminData(1);
+  }
+
+  /**
+   * Fetches full backend dataset totals for all 4 entity types for tab counters and metric cards.
+   */
+  loadAllTotals(): void {
+    this.userService.getAllUsers().subscribe({
+      next: (userList) => {
+        const list = userList || [];
+        this.totalUsersCount.set(list.length);
+        this.totalOrganizersCount.set(list.filter((u) => u.role === 'ORGANIZER').length);
+      },
+      error: () => {},
+    });
+
+    this.venueService.getPaginatedVenues(1, 1).subscribe({
+      next: (res) => {
+        this.totalVenuesCount.set(res.totalElements || (res.content?.length ?? 0));
+      },
+      error: () => {},
+    });
+
+    this.eventService.getOrganizerEvents(1, 1).subscribe({
+      next: (res) => {
+        this.totalMoviesCount.set(res.totalElements || (res.content?.length ?? 0));
+      },
+      error: () => {},
+    });
   }
 
   /**
    * Fetches page-by-page server-side paginated data from REST API Endpoints (page size = 5).
    * Maps backend entities into UI interfaces for Users, Organizers, Venues, or Movies.
-   *
    */
   loadAdminData(page: number = this.currentPage()): void {
     this.isLoading.set(true);
@@ -237,9 +337,12 @@ export class AdminDashboardComponent implements OnInit {
             }));
           this.organizers.set(mappedOrgs);
 
-          // Update server pagination metrics
+          // Update server pagination metrics and total count
           this.totalServerPages.set(res.totalPages || 1);
-          this.totalServerElements.set(res.totalElements || 0);
+          this.totalServerElements.set(res.totalElements || mappedUsers.length);
+          if (currentTab === 'USERS' && res.totalElements != null) {
+            this.totalUsersCount.set(res.totalElements);
+          }
           this.isLoading.set(false);
         },
         error: () => this.isLoading.set(false),
@@ -256,7 +359,10 @@ export class AdminDashboardComponent implements OnInit {
           }));
           this.venues.set(mappedVenues);
           this.totalServerPages.set(res.totalPages || 1);
-          this.totalServerElements.set(res.totalElements || 0);
+          this.totalServerElements.set(res.totalElements || mappedVenues.length);
+          if (res.totalElements != null) {
+            this.totalVenuesCount.set(res.totalElements);
+          }
           this.isLoading.set(false);
         },
         error: () => this.isLoading.set(false),
@@ -276,7 +382,10 @@ export class AdminDashboardComponent implements OnInit {
           }));
           this.movies.set(mappedMovies);
           this.totalServerPages.set(res.totalPages || 1);
-          this.totalServerElements.set(res.totalElements || 0);
+          this.totalServerElements.set(res.totalElements || mappedMovies.length);
+          if (res.totalElements != null) {
+            this.totalMoviesCount.set(res.totalElements);
+          }
           this.isLoading.set(false);
         },
         error: () => this.isLoading.set(false),
@@ -284,22 +393,12 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
-  // --- Computed Metrics & Dashboard Summaries ---
-  /** Count of users on current page */
-  totalUsersCount = computed(() => this.users().length);
-  /** Count of active organizers on current page */
-  activeOrganizersCount = computed(() => this.organizers().length);
-  /** Count of registered venues on current page */
-  registeredVenuesCount = computed(() => this.venues().length);
-  /** Count of movies on current page */
-  totalMoviesCount = computed(() => this.movies().length);
-
-  /** Total elements count returned by server or fallback to local user count */
-  totalItems = computed(() => this.totalServerElements() || this.totalUsersCount());
+  /** Total elements count returned by server or fallback to local active list length */
+  totalItems = computed(() => this.totalServerElements() || this.currentTableData().length);
   /** Total pagination pages count guaranteed to be at least 1 */
   totalPages = computed(() => Math.max(1, this.totalServerPages()));
 
-  // Server-side paginated content accessors for child table component
+  // Server-side paginated content accessors
   paginatedUsers = computed(() => this.users());
   paginatedOrganizers = computed(() => this.organizers());
   paginatedVenues = computed(() => this.venues());
@@ -320,6 +419,7 @@ export class AdminDashboardComponent implements OnInit {
       case 'MOVIES': return 'Movie';
     }
   });
+
 
   // --- User Interface Actions & Handlers ---
 
@@ -476,6 +576,7 @@ export class AdminDashboardComponent implements OnInit {
         // Update existing venue
         this.venueService.updateVenue(Number(selected.id), payload).subscribe({
           next: () => {
+            this.loadAllTotals();
             this.loadAdminData();
             this.closeDrawer();
           },
@@ -485,6 +586,7 @@ export class AdminDashboardComponent implements OnInit {
         // Create new venue
         this.venueService.createVenue(payload).subscribe({
           next: () => {
+            this.loadAllTotals();
             this.loadAdminData();
             this.closeDrawer();
           },
@@ -507,6 +609,7 @@ export class AdminDashboardComponent implements OnInit {
               current.map((u) => (u.id === String(targetRoleId) ? { ...u, role: targetRole } : u))
             );
             this.syncOrganizersSignal();
+            this.loadAllTotals();
             this.closeDrawer();
           },
           error: (err) => this.showErrorDialog('Role Update Failed', err?.error?.message || 'Failed to update user role.'),
@@ -552,6 +655,7 @@ export class AdminDashboardComponent implements OnInit {
         // Update existing movie event
         this.eventService.updateEvent(Number(selected.id), payload).subscribe({
           next: () => {
+            this.loadAllTotals();
             this.loadAdminData();
             this.closeDrawer();
           },
@@ -570,6 +674,7 @@ export class AdminDashboardComponent implements OnInit {
               releaseDate: created.startDate ? created.startDate.split('T')[0] : '2026-08-25',
             };
             this.movies.update((current) => [newMovie, ...current]);
+            this.loadAllTotals();
             this.loadAdminData();
             this.closeDrawer();
           },
@@ -581,12 +686,12 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
-
   /**
    * Directly updates a specific user's role (ADMIN, ORGANIZER, CUSTOMER).
    * Prevents self-role modifications for the currently logged-in administrator.
    */
-  updateUserRole(user: UserItem, newRole: 'ADMIN' | 'CUSTOMER' | 'ORGANIZER') {
+  updateUserRole(user: UserItem, newRole: 'ADMIN' | 'CUSTOMER' | 'ORGANIZER' | string) {
+
     // Prevent logged in admin from changing their own role
     if (user.email === this.currentUserEmail()) {
       return;
@@ -603,6 +708,7 @@ export class AdminDashboardComponent implements OnInit {
           )
         );
         this.syncOrganizersSignal();
+        this.loadAllTotals();
       },
       error: (err) => this.showErrorDialog('Role Update Failed', err?.error?.message || 'Failed to update user role.'),
     });
@@ -634,7 +740,10 @@ export class AdminDashboardComponent implements OnInit {
       dialogRef.afterClosed().subscribe((confirmed) => {
         if (confirmed) {
           this.userService.deleteUser(numId).subscribe({
-            next: () => this.loadAdminData(),
+            next: () => {
+              this.loadAllTotals();
+              this.loadAdminData();
+            },
             error: (err) => this.showErrorDialog('Deletion Failed', err?.error?.message || 'Failed to delete user.'),
           });
         }
@@ -654,7 +763,10 @@ export class AdminDashboardComponent implements OnInit {
       dialogRef.afterClosed().subscribe((confirmed) => {
         if (confirmed) {
           this.venueService.deleteVenue(numId).subscribe({
-            next: () => this.loadAdminData(),
+            next: () => {
+              this.loadAllTotals();
+              this.loadAdminData();
+            },
             error: (err) => this.showErrorDialog('Deletion Failed', err?.error?.message || 'Failed to delete venue.'),
           });
         }
@@ -674,13 +786,17 @@ export class AdminDashboardComponent implements OnInit {
       dialogRef.afterClosed().subscribe((confirmed) => {
         if (confirmed) {
           this.eventService.deleteEvent(numId).subscribe({
-            next: () => this.loadAdminData(),
+            next: () => {
+              this.loadAllTotals();
+              this.loadAdminData();
+            },
             error: (err) => this.showErrorDialog('Deletion Failed', err?.error?.message || 'Failed to delete event.'),
           });
         }
       });
     }
   }
+
 
   /**
    * Helper function checking whether an email belongs to the currently logged-in admin user.

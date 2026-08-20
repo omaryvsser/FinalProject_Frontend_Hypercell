@@ -3,8 +3,8 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table';
 
 type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED';
 
@@ -58,13 +58,14 @@ const TEMPORARY_BOOKINGS: Record<number, MovieBookingData> = {
 
 @Component({
   selector: 'app-attendees',
+  standalone: true,
   imports: [
     CommonModule,
     RouterLink,
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    MatTableModule,
+    DataTableComponent,
   ],
   templateUrl: './attendees.html',
   styleUrl: './attendees.css',
@@ -84,15 +85,16 @@ export class Attendees implements OnInit {
   readonly movieTitle = signal<string>('Selected Movie');
   readonly bookings = signal<AttendeeBooking[]>([]);
 
-  readonly displayedColumns = [
-    'bookingId',
-    'attendee',
-    'seatCategory',
-    'quantity',
-    'totalPrice',
-    'status',
-    'bookedAt',
+  readonly tableColumns: TableColumn<AttendeeBooking>[] = [
+    { key: 'bookingId', header: 'Booking', format: (val) => `#${val}` },
+    { key: 'customerName', header: 'Attendee', type: 'attendee' },
+    { key: 'seatCategory', header: 'Seat' },
+    { key: 'quantity', header: 'Tickets' },
+    { key: 'totalPrice', header: 'Total', type: 'currency' },
+    { key: 'status', header: 'Status', type: 'bookingStatus' },
+    { key: 'bookedAt', header: 'Booked At', type: 'date' },
   ];
+
 
   readonly totalBookings = computed(
     () => this.bookings().length

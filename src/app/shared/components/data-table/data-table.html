@@ -1,0 +1,175 @@
+<div class="table-container">
+  @if (totalItems() === 0) {
+    <div class="empty-state">
+      <div class="empty-box">
+        <span class="material-symbols-outlined empty-icon">{{ emptyIcon() }}</span>
+        <p>{{ emptyMessage() }}</p>
+      </div>
+    </div>
+  } @else {
+    <table mat-table [dataSource]="data()" class="data-table">
+      @for (col of columns(); track col.key) {
+        <ng-container [matColumnDef]="col.key">
+          <th mat-header-cell *matHeaderCellDef [class.text-right]="col.align === 'right'" [class.text-center]="col.align === 'center'">
+            {{ col.header }}
+          </th>
+          <td mat-cell *matCellDef="let row" [class.text-right]="col.align === 'right'" [class.text-center]="col.align === 'center'">
+            @switch (col.type) {
+              @case ('user') {
+                <div class="cell-name">
+                  {{ getCellValue(row, col) }}
+                  @if (isCurrentUser(row.email)) {
+                    <span class="badge-you">(You)</span>
+                  }
+                </div>
+              }
+              @case ('movieTitle') {
+                <div class="cell-title-block">
+                  <span class="cell-name">{{ row.title }}</span>
+                  @if (row.category) {
+                    <span class="company-tag">{{ row.category }}</span>
+                  }
+                </div>
+              }
+              @case ('venuePill') {
+                <span class="venue-pill">{{ getCellValue(row, col) }}</span>
+              }
+              @case ('roleSelect') {
+                <mat-form-field appearance="outline" class="role-select-field" subscriptSizing="dynamic">
+                  <mat-select
+                    [value]="row.role"
+                    (selectionChange)="onRoleUpdate(row, $event.value)"
+                    [disabled]="isCurrentUser(row.email)"
+                    aria-label="User role"
+                  >
+                    <mat-option value="ADMIN">ADMIN</mat-option>
+                    <mat-option value="ORGANIZER">ORGANIZER</mat-option>
+                    <mat-option value="CUSTOMER">CUSTOMER</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              }
+              @case ('badge') {
+                <span class="company-tag">{{ getCellValue(row, col) }}</span>
+              }
+              @case ('capacity') {
+                <span class="capacity-badge">{{ getCellValue(row, col) }} Seats</span>
+              }
+              @case ('rating') {
+                <span class="capacity-badge blue">{{ getCellValue(row, col) }}</span>
+              }
+              @case ('status') {
+                <span
+                  class="status-badge"
+                  [class.published]="row.status === 'PUBLISHED'"
+                  [class.draft]="row.status === 'DRAFT'"
+                  [class.completed]="row.status === 'COMPLETED'"
+                  [class.cancelled]="row.status === 'CANCELLED'"
+                >
+                  {{ row.status }}
+                </span>
+              }
+              @case ('bookingStatus') {
+                <span
+                  class="booking-status"
+                  [attr.data-status]="row.status"
+                >
+                  {{ row.status }}
+                </span>
+              }
+              @case ('attendee') {
+                <div class="attendee-cell">
+                  <span class="attendee-name">{{ row.customerName || row.name }}</span>
+                  <span class="attendee-email">{{ row.customerEmail || row.email }}</span>
+                </div>
+              }
+              @case ('date') {
+                <span class="cell-text-muted">{{ getCellValue(row, col) | date: 'medium' }}</span>
+              }
+              @case ('currency') {
+                <span class="cell-price">{{ getCellValue(row, col) | currency: 'EGP':'code':'1.0-2' }}</span>
+              }
+              @default {
+                <span [class.cell-text-muted]="col.key === 'email' || col.key === 'address' || col.key === 'joinedDate' || col.key === 'duration' || col.key === 'releaseDate'"
+                      [class.cell-name]="col.key === 'name' || col.key === 'title'">
+                  {{ getCellValue(row, col) }}
+                </span>
+              }
+            }
+          </td>
+        </ng-container>
+      }
+
+      <!-- Actions Column -->
+      @if (actions().length > 0) {
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Actions</th>
+          <td mat-cell *matCellDef="let row" class="text-right">
+            <div class="actions-group">
+              @for (action of actions(); track action.id) {
+                @if (!action.hidden || !action.hidden(row)) {
+                  <button
+                    type="button"
+                    class="btn-icon-action"
+                    [ngClass]="action.cssClass || action.id"
+                    [title]="action.label || action.id"
+                    [disabled]="action.disabled ? action.disabled(row) : false"
+                    [class.disabled-btn]="action.disabled ? action.disabled(row) : false"
+                    (click)="onAction(action, row)"
+                  >
+                    <span class="material-symbols-outlined action-icon">{{ action.icon }}</span>
+                  </button>
+                }
+              }
+            </div>
+          </td>
+        </ng-container>
+      }
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumnKeys()"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumnKeys()"
+        [class.highlight-row]="isCurrentUser(row.email)"
+      ></tr>
+    </table>
+  }
+</div>
+
+@if (showPagination()) {
+  <div class="pagination-bar">
+    <div class="pagination-controls">
+      <button
+        type="button"
+        class="btn-page nav"
+        [disabled]="currentPage() === 1"
+        (click)="onGoToPage(currentPage() - 1)"
+      >
+        <span class="material-symbols-outlined page-icon">chevron_left</span>
+        Previous
+      </button>
+
+      <div class="page-pills">
+        @for (page of pagesArray(); track page) {
+          <button
+            type="button"
+            class="btn-page pill"
+            [class.active]="currentPage() === page"
+            (click)="onGoToPage(page)"
+          >
+            {{ page }}
+          </button>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="btn-page nav"
+        [disabled]="currentPage() === totalPages() || totalPages() === 0"
+        (click)="onGoToPage(currentPage() + 1)"
+      >
+        Next
+        <span class="material-symbols-outlined page-icon">chevron_right</span>
+      </button>
+    </div>
+  </div>
+}

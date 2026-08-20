@@ -7,13 +7,29 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { OrganizerHeaderComponent } from './components/organizer-header/organizer-header';
 import { OrganizerMetricCardsComponent } from './components/organizer-metric-cards/organizer-metric-cards';
 import { OrganizerTabsComponent, OrganizerTabType } from './components/organizer-tabs/organizer-tabs';
-import { OrganizerTableComponent, OrganizerMovie } from './components/organizer-table/organizer-table';
+import { DataTableComponent, TableColumn, TableAction } from '../../../../shared/components/data-table/data-table';
 import { OrganizerSlideOverDrawerComponent } from './components/organizer-slide-over-drawer/organizer-slide-over-drawer';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { EventService, EventPayload } from '../../../../core/services/event.service';
 import { VenueService, Venue } from '../../../../core/services/venue.service';
 import { EventResponse } from '../../../../core/models/event.model';
 import { PaginatedResponse } from '../../../../core/models/pagination.model';
+
+export interface OrganizerMovie {
+  id: number;
+  title: string;
+  category: string;
+  startDate: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED';
+  venueId?: number;
+  venueName: string;
+  bookings: number;
+  attendees: number;
+  imageUrl?: string;
+  director?: string;
+  durationMinutes?: number | null;
+  language?: string;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -24,13 +40,14 @@ import { PaginatedResponse } from '../../../../core/models/pagination.model';
     OrganizerHeaderComponent,
     OrganizerMetricCardsComponent,
     OrganizerTabsComponent,
-    OrganizerTableComponent,
+    DataTableComponent,
     OrganizerSlideOverDrawerComponent
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard implements OnInit {
+
   private router = inject(Router);
   private eventService = inject(EventService);
   private venueService = inject(VenueService);
@@ -45,6 +62,28 @@ export class Dashboard implements OnInit {
 
   organizerEmail = signal<string>('ciff-organizer@cinema.eg');
   organizerMovies = signal<OrganizerMovie[]>([]);
+
+  // --- Total Catalog Metrics across Full Dataset ---
+  totalMoviesCount = signal<number>(0);
+  totalPublishedCount = signal<number>(0);
+  totalDraftCount = signal<number>(0);
+  totalCompletedCount = signal<number>(0);
+  totalBookingsCount = signal<number>(0);
+  totalAttendeesCount = signal<number>(0);
+
+  // --- Table Columns & Actions Configurations ---
+  readonly tableColumns: TableColumn<OrganizerMovie>[] = [
+    { key: 'title', header: 'Movie Title', type: 'movieTitle' },
+    { key: 'venueName', header: 'Cinema Venue', type: 'venuePill' },
+    { key: 'startDate', header: 'Showtime & Date', type: 'date' },
+    { key: 'status', header: 'Status', type: 'status' },
+  ];
+
+  readonly tableActions: TableAction<OrganizerMovie>[] = [
+    { id: 'edit', label: 'Edit Movie', icon: 'edit', cssClass: 'edit' },
+    { id: 'attendees', label: 'View Bookings / Attendees', icon: 'groups', cssClass: 'attendees' },
+    { id: 'delete', label: 'Delete Movie', icon: 'delete', cssClass: 'delete' },
+  ];
 
   // --- Drawer State ---
   isDrawerOpen = signal<boolean>(false);
@@ -78,8 +117,24 @@ export class Dashboard implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loadCatalogTotals();
     this.loadEventsFromBackend(1);
     this.loadVenues();
+  }
+
+  loadCatalogTotals(): void {
+    this.eventService.getOrganizerEvents(1, 1000).subscribe({
+      next: (res) => {
+        const allEvents = res.content || [];
+        this.totalMoviesCount.set(res.totalElements || allEvents.length);
+        this.totalPublishedCount.set(allEvents.filter((e: any) => e.status === 'PUBLISHED').length);
+        this.totalDraftCount.set(allEvents.filter((e: any) => e.status === 'DRAFT').length);
+        this.totalCompletedCount.set(allEvents.filter((e: any) => e.status === 'COMPLETED').length);
+        this.totalBookingsCount.set(allEvents.reduce((sum: number, e: any) => sum + (e.bookingsCount || 0), 0));
+        this.totalAttendeesCount.set(allEvents.reduce((sum: number, e: any) => sum + (e.attendeesCount || 0), 0));
+      },
+      error: () => {},
+    });
   }
 
   loadVenues(): void {
@@ -119,7 +174,10 @@ export class Dashboard implements OnInit {
 
         this.organizerMovies.set(mappedMovies);
         this.totalServerPages.set(res.totalPages || 1);
-        this.totalServerElements.set(res.totalElements || 0);
+        this.totalServerElements.set(res.totalElements || mappedMovies.length);
+        if (res.totalElements != null) {
+          this.totalMoviesCount.set(res.totalElements);
+        }
       },
       error: (err) => {
         console.error('Failed to load organizer events:', err);
@@ -192,6 +250,7 @@ export class Dashboard implements OnInit {
     if (currentSelected && currentSelected.id) {
       this.eventService.updateEvent(currentSelected.id, payload).subscribe({
         next: () => {
+          this.loadCatalogTotals();
           this.loadEventsFromBackend(this.currentPage());
           this.closeDrawer();
         },
@@ -203,6 +262,7 @@ export class Dashboard implements OnInit {
     } else {
       this.eventService.createEvent(payload).subscribe({
         next: () => {
+          this.loadCatalogTotals();
           this.loadEventsFromBackend(this.currentPage());
           this.closeDrawer();
         },
@@ -217,14 +277,14 @@ export class Dashboard implements OnInit {
     }
   }
 
-  // --- Computed Metrics ---
-  totalMovies = computed(() => this.totalServerElements() || this.organizerMovies().length);
-  publishedMovies = computed(() => this.organizerMovies().filter((m) => m.status === 'PUBLISHED').length);
-  draftMovies = computed(() => this.organizerMovies().filter((m) => m.status === 'DRAFT').length);
-  completedMovies = computed(() => this.organizerMovies().filter((m) => m.status === 'COMPLETED').length);
+  // --- Computed Metrics & Dashboard Summaries ---
+  totalMovies = computed(() => this.totalMoviesCount() || this.totalServerElements() || this.organizerMovies().length);
+  publishedMovies = computed(() => this.totalPublishedCount());
+  draftMovies = computed(() => this.totalDraftCount());
+  completedMovies = computed(() => this.totalCompletedCount());
 
-  totalBookings = computed(() => this.organizerMovies().reduce((total, m) => total + (m.bookings || 0), 0));
-  totalAttendees = computed(() => this.organizerMovies().reduce((total, m) => total + (m.attendees || 0), 0));
+  totalBookings = computed(() => this.totalBookingsCount());
+  totalAttendees = computed(() => this.totalAttendeesCount());
 
   // --- Filtered Movies ---
   filteredMovies = computed(() => {
@@ -235,13 +295,14 @@ export class Dashboard implements OnInit {
 
   totalPages = computed(() => Math.max(1, this.totalServerPages()));
 
-  // Server-side paginated items (no frontend array slicing)
+  // Server-side paginated items
   paginatedMovies = computed(() => this.filteredMovies());
 
   pagesArray = computed(() => {
     const total = this.totalPages();
     return Array.from({ length: total }, (_, i) => i + 1);
   });
+
 
   // --- Actions ---
 
@@ -348,6 +409,12 @@ export class Dashboard implements OnInit {
   }
 
 
+  handleTableAction(evt: { action: string; row: OrganizerMovie }): void {
+    if (evt.action === 'attendees') {
+      this.viewAttendees(evt.row);
+    }
+  }
+
   viewAttendees(movie: OrganizerMovie): void {
     if (this.router) {
       this.router.navigate(['/organizer/movies', movie.id, 'attendees']);
@@ -371,6 +438,7 @@ export class Dashboard implements OnInit {
         this.eventService.deleteEvent(movie.id!).subscribe({
           next: () => {
             console.log(`Movie with ID ${movie.id} deleted successfully from database.`);
+            this.loadCatalogTotals();
             this.loadEventsFromBackend(this.currentPage());
           },
           error: (err) => {
@@ -381,6 +449,7 @@ export class Dashboard implements OnInit {
       }
     });
   }
+
 
   private showErrorDialog(title: string, message: string): void {
     this.dialog.open(ConfirmDialogComponent, {

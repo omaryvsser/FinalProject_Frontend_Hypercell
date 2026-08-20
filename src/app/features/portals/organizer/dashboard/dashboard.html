@@ -23,18 +23,23 @@
       (addClick)="openAddDrawer()"
     ></app-organizer-tabs>
 
-    <!-- Data Table Container & Pagination -->
-    <app-organizer-table
-      [movies]="paginatedMovies()"
+    <!-- Reusable Data Table Container & Pagination -->
+    <app-data-table
+      [data]="paginatedMovies()"
+      [columns]="tableColumns"
+      [actions]="tableActions"
+      emptyMessage="No organizer movies found."
+      emptyIcon="movie_off"
       [totalItems]="filteredMovies().length"
       [currentPage]="currentPage()"
       [totalPages]="totalPages()"
       [pagesArray]="pagesArray()"
-      (editMovie)="openEditDrawer($event)"
-      (deleteMovie)="deleteMovie($event)"
-      (viewAttendees)="viewAttendees($event)"
+      (actionClick)="handleTableAction($event)"
+      (edit)="openEditDrawer($event)"
+      (delete)="deleteMovie($event)"
       (pageChange)="goToPage($event)"
-    ></app-organizer-table>
+    ></app-data-table>
+
   </section>
 
   <!-- Slide-Over Right Drawer Component -->

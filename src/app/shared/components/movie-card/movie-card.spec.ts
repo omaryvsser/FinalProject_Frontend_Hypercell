@@ -1,5 +1,8 @@
+import '@angular/compiler';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { MovieCard } from './movie-card';
 
 describe('MovieCard', () => {
@@ -9,6 +12,7 @@ describe('MovieCard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MovieCard],
+      providers: [provideHttpClient(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MovieCard);

@@ -5,8 +5,8 @@
   <!-- Metric Overview Cards Grid -->
   <app-metric-cards
     [totalUsersCount]="totalUsersCount()"
-    [activeOrganizersCount]="activeOrganizersCount()"
-    [registeredVenuesCount]="registeredVenuesCount()"
+    [activeOrganizersCount]="totalOrganizersCount()"
+    [registeredVenuesCount]="totalVenuesCount()"
     [totalMoviesCount]="totalMoviesCount()"
   ></app-metric-cards>
 
@@ -15,33 +15,33 @@
     <!-- Controls Row: Tabs & Action Button -->
     <app-admin-tabs
       [activeTab]="activeTab()"
-      [usersCount]="users().length"
-      [organizersCount]="organizers().length"
-      [venuesCount]="venues().length"
-      [moviesCount]="movies().length"
+      [usersCount]="totalUsersCount()"
+      [organizersCount]="totalOrganizersCount()"
+      [venuesCount]="totalVenuesCount()"
+      [moviesCount]="totalMoviesCount()"
       [singularTabLabel]="singularTabLabel()"
       (tabChange)="setActiveTab($event)"
       (addClick)="openAddDrawer()"
     ></app-admin-tabs>
 
-    <!-- Data Table Container & Pagination -->
-    <app-dynamic-table
-      [activeTab]="activeTab()"
-      [users]="paginatedUsers()"
-      [organizers]="paginatedOrganizers()"
-      [venues]="paginatedVenues()"
-      [movies]="paginatedMovies()"
+    <!-- Reusable Data Table Container & Pagination -->
+    <app-data-table
+      [data]="currentTableData()"
+      [columns]="tableColumns()"
+      [actions]="tableActions()"
       [currentUserEmail]="currentUserEmail()"
+      [emptyMessage]="'No ' + activeTab().toLowerCase() + ' items found.'"
       [totalItems]="totalItems()"
       [currentPage]="currentPage()"
       [totalPages]="totalPages()"
       [pagesArray]="pagesArray()"
-      (editItem)="openEditDrawer($event)"
-      (deleteItem)="deleteItem($event)"
-      (roleChange)="updateUserRole($event.user, $event.newRole)"
+      (edit)="openEditDrawer($event)"
+      (delete)="deleteItem($event)"
+      (roleChange)="updateUserRole($event.row, $event.newRole)"
       (pageChange)="goToPage($event)"
-    ></app-dynamic-table>
+    ></app-data-table>
   </section>
+
 
   <!-- Slide-Over Right Drawer Component -->
   <app-slide-over-drawer
