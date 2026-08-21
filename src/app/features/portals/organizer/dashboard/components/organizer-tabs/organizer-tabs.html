@@ -43,10 +43,23 @@
       Completed
       <span class="tab-count">{{ completedCount() }}</span>
     </button>
+
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="activeTab() === 'BOOKINGS'"
+      (click)="onTabSelect('BOOKINGS')"
+    >
+      <span class="material-symbols-outlined tab-icon">confirmation_number</span>
+      Bookings
+      <span class="tab-count">{{ bookingsCount() }}</span>
+    </button>
   </nav>
 
-  <button type="button" mat-flat-button class="btn-primary" (click)="onAdd()">
-    <mat-icon>add</mat-icon>
-    Create Movie
-  </button>
+  @if (activeTab() !== 'BOOKINGS') {
+    <button type="button" mat-flat-button class="btn-primary" (click)="onAdd()">
+      <mat-icon>add</mat-icon>
+      Create Movie
+    </button>
+  }
 </div>

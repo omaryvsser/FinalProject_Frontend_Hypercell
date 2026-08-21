@@ -8,6 +8,7 @@ import { AdminDashboardComponent } from './admin-dashboard';
 import { UserService } from '../../../../core/services/user.service';
 import { VenueService } from '../../../../core/services/venue.service';
 import { EventService } from '../../../../core/services/event.service';
+import { BookingService } from '../../../../core/services/booking.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 describe('AdminDashboardComponent (Signal Logic)', () => {
@@ -16,6 +17,7 @@ describe('AdminDashboardComponent (Signal Logic)', () => {
   let userServiceMock: any;
   let venueServiceMock: any;
   let eventServiceMock: any;
+  let bookingServiceMock: any;
   let authServiceMock: any;
 
   const mockUsersList = [
@@ -95,6 +97,10 @@ describe('AdminDashboardComponent (Signal Logic)', () => {
       deleteEvent: vi.fn().mockReturnValue(of(void 0)),
     };
 
+    bookingServiceMock = {
+      getPaginatedBookings: vi.fn().mockReturnValue(of({ content: [], totalElements: 15, totalPages: 3 })),
+    };
+
     authServiceMock = {
       currentUser: vi.fn().mockReturnValue({ email: 'admin@cinema.eg' }),
     };
@@ -107,6 +113,7 @@ describe('AdminDashboardComponent (Signal Logic)', () => {
         { provide: UserService, useValue: userServiceMock },
         { provide: VenueService, useValue: venueServiceMock },
         { provide: EventService, useValue: eventServiceMock },
+        { provide: BookingService, useValue: bookingServiceMock },
         { provide: AuthService, useValue: authServiceMock },
       ],
     }).compileComponents();
@@ -199,6 +206,25 @@ describe('AdminDashboardComponent (Signal Logic)', () => {
     expect(component.currentPage()).toBe(2);
     expect(eventServiceMock.getOrganizerEvents).toHaveBeenCalledWith(2, 5);
     expect(component.currentTableData().length).toBe(3);
+  });
+
+  it('should configure booking columns with bookingStatusSelect and tableActions with Cancel Booking', () => {
+    component.setActiveTab('BOOKINGS');
+    expect(component.tableColumns().length).toBe(9);
+    const statusCol = component.tableColumns().find((c) => c.key === 'status');
+    expect(statusCol?.type).toBe('bookingStatusSelect');
+
+    expect(component.tableActions().length).toBe(1);
+    expect(component.tableActions()[0].id).toBe('cancel');
+    expect(component.tableActions()[0].label).toBe('Cancel Booking');
+  });
+
+  it('should call bookingService.updateBookingStatus on status update', () => {
+    bookingServiceMock.updateBookingStatus = vi.fn().mockReturnValue(of({ bookingId: 1, status: 'PENDING' }));
+    const booking = { id: 1, bookingId: 1, customerName: 'Test Customer', status: 'CONFIRMED' } as any;
+
+    component.updateBookingStatus(booking, 'PENDING');
+    expect(bookingServiceMock.updateBookingStatus).toHaveBeenCalledWith(1, 'PENDING');
   });
 });
 

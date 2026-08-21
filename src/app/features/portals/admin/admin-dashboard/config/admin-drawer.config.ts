@@ -14,7 +14,7 @@ export interface AdminDrawerItemConfig {
   getInputs: (ctx: any) => Record<string, any>;
 }
 
-export const ADMIN_DRAWER_CONFIG: Record<TabType, AdminDrawerItemConfig> = {
+export const ADMIN_DRAWER_CONFIG: Partial<Record<TabType, AdminDrawerItemConfig>> = {
   USERS: {
     title: (isEdit, label) => (isEdit ? `Edit ${label}` : `Add New ${label}`),
     subtitle: (_, label) => `Configure details for this ${label.toLowerCase()}`,

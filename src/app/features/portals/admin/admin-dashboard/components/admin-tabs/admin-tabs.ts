@@ -16,6 +16,7 @@ export class AdminTabsComponent {
   organizersCount = input<number>(0);
   venuesCount = input<number>(0);
   moviesCount = input<number>(0);
+  bookingsCount = input<number>(0);
   singularTabLabel = input<string>('User');
 
   tabChange = output<TabType>();

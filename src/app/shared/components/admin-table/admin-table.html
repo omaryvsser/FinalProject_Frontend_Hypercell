@@ -14,7 +14,7 @@
             <th>{{ col.header }}</th>
           }
           @if (actions().length > 0) {
-            <th class="text-right">Actions</th>
+            <th class="actions-column-header">Actions</th>
           }
         </tr>
       </thead>
@@ -104,6 +104,21 @@
                     </span>
                   }
 
+                  @case ('bookingStatusSelect') {
+                    <mat-form-field appearance="outline" class="role-select-field" subscriptSizing="dynamic">
+                      <mat-select
+                        [value]="getCellValue(row, col)"
+                        (selectionChange)="onStatusChange(row, $event.value)"
+                        [disabled]="row.status === 'CANCELLED'"
+                        aria-label="Booking status"
+                      >
+                        <mat-option value="CONFIRMED">CONFIRMED</mat-option>
+                        <mat-option value="PENDING">PENDING</mat-option>
+                        <mat-option value="CANCELLED">CANCELLED</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  }
+
                   @default {
                     <span [class.cell-name]="col.key === 'name' || col.key === 'title'" [class.cell-text-muted]="col.key !== 'name' && col.key !== 'title'">
                       {{ getCellValue(row, col) }}
@@ -114,7 +129,7 @@
             }
 
             @if (actions().length > 0) {
-              <td class="text-right">
+              <td class="actions-column-cell">
                 <div class="actions-group">
                   @for (action of actions(); track action.id) {
                     @if (!action.hidden || !action.hidden(row)) {

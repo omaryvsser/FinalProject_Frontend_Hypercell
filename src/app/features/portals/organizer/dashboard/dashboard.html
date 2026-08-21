@@ -19,24 +19,27 @@
       [publishedCount]="publishedMovies()"
       [draftCount]="draftMovies()"
       [completedCount]="completedMovies()"
+      [bookingsCount]="totalBookings()"
       (tabChange)="setActiveTab($event)"
       (addClick)="openAddDrawer()"
     ></app-organizer-tabs>
 
     <!-- Reusable Table Container & Pagination -->
     <app-admin-table
-      [data]="paginatedMovies()"
-      [columns]="tableColumns"
-      [actions]="tableActions"
-      emptyMessage="No organizer movies found."
-      emptyIcon="movie_off"
-      [totalItems]="filteredMovies().length"
+      [data]="currentTableData()"
+      [columns]="currentTableColumns()"
+      [actions]="currentTableActions()"
+      [emptyMessage]="activeTab() === 'BOOKINGS' ? 'No bookings found for your movies.' : 'No organizer movies found.'"
+      [emptyIcon]="activeTab() === 'BOOKINGS' ? 'confirmation_number' : 'movie_off'"
+      [totalItems]="totalItems()"
       [currentPage]="currentPage()"
       [totalPages]="totalPages()"
       [pagesArray]="pagesArray()"
+      [pageSize]="pageSize()"
       (actionClick)="handleTableAction($event)"
       (edit)="openEditDrawer($event)"
       (delete)="deleteMovie($event)"
+      (statusChange)="updateBookingStatus($event.row, $event.newStatus)"
       (pageChange)="goToPage($event)"
     ></app-admin-table>
   </section>

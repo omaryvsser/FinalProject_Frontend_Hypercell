@@ -2,7 +2,7 @@ import { Component, input, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-export type OrganizerTabType = 'ALL' | 'PUBLISHED' | 'DRAFT' | 'COMPLETED';
+export type OrganizerTabType = 'ALL' | 'PUBLISHED' | 'DRAFT' | 'COMPLETED' | 'BOOKINGS';
 
 @Component({
   selector: 'app-organizer-tabs',
@@ -17,6 +17,7 @@ export class OrganizerTabsComponent {
   publishedCount = input<number>(0);
   draftCount = input<number>(0);
   completedCount = input<number>(0);
+  bookingsCount = input<number>(0);
 
   tabChange = output<OrganizerTabType>();
   addClick = output<void>();

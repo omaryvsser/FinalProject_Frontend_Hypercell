@@ -1,8 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BookingCreateRequest, BookingResponse } from '../models/booking.model';
+import { PaginatedResponse } from '../models/pagination.model';
 
 export interface BookingDetails {
   id?: string;
@@ -67,6 +68,96 @@ export class BookingService {
         error: (err: HttpErrorResponse) => {
           this.loadingSignal.set(false);
           const errorMsg = err.error?.message || (typeof err.error === 'string' ? err.error : 'Booking failed. Please try again.');
+          this.errorSignal.set(errorMsg);
+        }
+      })
+    );
+  }
+
+  /**
+   * GET /api/bookings?page={pageNumber}&size={pageSize}
+   * Retrieves all system bookings paginated for Admin view.
+   */
+  getPaginatedBookings(page: number = 1, size: number = 5): Observable<PaginatedResponse<BookingResponse>> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    const pageIndex = Math.max(0, page - 1);
+    const params = new HttpParams()
+      .set('page', pageIndex.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedResponse<BookingResponse>>(`${this.apiUrl}/bookings`, { params }).pipe(
+      tap({
+        next: () => this.loadingSignal.set(false),
+        error: (err: HttpErrorResponse) => {
+          this.loadingSignal.set(false);
+          const errorMsg = err.error?.message || (typeof err.error === 'string' ? err.error : 'Failed to load bookings.');
+          this.errorSignal.set(errorMsg);
+        }
+      })
+    );
+  }
+
+  /**
+   * GET /api/bookings/organizer?page={pageNumber}&size={pageSize}
+   * Retrieves paginated bookings for currently authenticated organizer's events.
+   */
+  getOrganizerBookings(page: number = 1, size: number = 5): Observable<PaginatedResponse<BookingResponse>> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    const pageIndex = Math.max(0, page - 1);
+    const params = new HttpParams()
+      .set('page', pageIndex.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedResponse<BookingResponse>>(`${this.apiUrl}/bookings/organizer`, { params }).pipe(
+      tap({
+        next: () => this.loadingSignal.set(false),
+        error: (err: HttpErrorResponse) => {
+          this.loadingSignal.set(false);
+          const errorMsg = err.error?.message || (typeof err.error === 'string' ? err.error : 'Failed to load organizer bookings.');
+          this.errorSignal.set(errorMsg);
+        }
+      })
+    );
+  }
+
+  /**
+   * PATCH /api/bookings/{id}/cancel
+   * Cancels a booking and restores seat capacity.
+   */
+  cancelBooking(bookingId: number): Observable<string> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    return this.http.patch(`${this.apiUrl}/bookings/${bookingId}/cancel`, {}, { responseType: 'text' }).pipe(
+      tap({
+        next: () => this.loadingSignal.set(false),
+        error: (err: HttpErrorResponse) => {
+          this.loadingSignal.set(false);
+          const errorMsg = err.error?.message || (typeof err.error === 'string' ? err.error : 'Failed to cancel booking.');
+          this.errorSignal.set(errorMsg);
+        }
+      })
+    );
+  }
+
+  /**
+   * PATCH /api/bookings/{id}/status
+   * Updates booking status with role-based validation on server.
+   */
+  updateBookingStatus(bookingId: number, status: 'CONFIRMED' | 'PENDING' | 'CANCELLED'): Observable<BookingResponse> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    return this.http.patch<BookingResponse>(`${this.apiUrl}/bookings/${bookingId}/status`, { status }).pipe(
+      tap({
+        next: () => this.loadingSignal.set(false),
+        error: (err: HttpErrorResponse) => {
+          this.loadingSignal.set(false);
+          const errorMsg = err.error?.message || (typeof err.error === 'string' ? err.error : 'Failed to update booking status.');
           this.errorSignal.set(errorMsg);
         }
       })

@@ -19,6 +19,7 @@
       [organizersCount]="totalOrganizersCount()"
       [venuesCount]="totalVenuesCount()"
       [moviesCount]="totalMoviesCount()"
+      [bookingsCount]="totalBookingsCount()"
       [singularTabLabel]="singularTabLabel()"
       (tabChange)="setActiveTab($event)"
       (addClick)="openAddDrawer()"
@@ -38,7 +39,9 @@
       [pageSize]="pageSize()"
       (edit)="openEditDrawer($event)"
       (delete)="deleteItem($event)"
+      (actionClick)="handleTableAction($event)"
       (roleChange)="updateUserRole($event.row, $event.newRole)"
+      (statusChange)="updateBookingStatus($event.row, $event.newStatus)"
       (pageChange)="goToPage($event)"
     ></app-admin-table>
   </section>

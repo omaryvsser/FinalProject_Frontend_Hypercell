@@ -33,20 +33,21 @@ table.admin-table th {
   background-color: var(--bg-surface-elevated);
   color: var(--text-secondary);
   font-weight: 600;
-  font-size: 0.74rem;
+  font-size: 0.73rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0.95rem 1.25rem;
+  letter-spacing: 0.05em;
+  padding: 0.85rem 0.95rem;
   border-bottom: 1px solid var(--border-medium);
   white-space: nowrap;
 }
 
 table.data-table td,
 table.admin-table td {
-  padding: 1rem 1.25rem;
+  padding: 0.75rem 0.95rem;
   border-bottom: 1px solid var(--border-subtle);
   color: var(--text-main);
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 table.data-table tr,
@@ -68,6 +69,40 @@ tr.highlight-row {
   background-color: var(--badge-bg) !important;
 }
 
+/* ------------------------------------------------------------- */
+/* STICKY ACTIONS COLUMN (ALWAYS VISIBLE WITHOUT HORIZONTAL SWIPE) */
+/* ------------------------------------------------------------- */
+
+th.actions-column-header,
+td.actions-column-cell {
+  position: sticky;
+  right: 0;
+  z-index: 3;
+  text-align: right;
+  min-width: 85px;
+}
+
+th.actions-column-header {
+  background-color: var(--bg-surface-elevated);
+  box-shadow: -5px 0 10px -3px rgba(0, 0, 0, 0.15);
+  border-left: 1px solid var(--border-medium);
+}
+
+td.actions-column-cell {
+  background-color: var(--bg-surface);
+  box-shadow: -5px 0 10px -3px rgba(0, 0, 0, 0.15);
+  border-left: 1px solid var(--border-subtle);
+}
+
+table.data-table tr:hover td.actions-column-cell,
+table.admin-table tr:hover td.actions-column-cell {
+  background-color: var(--bg-card-hover);
+}
+
+tr.highlight-row td.actions-column-cell {
+  background-color: var(--badge-bg) !important;
+}
+
 .cell-name {
   font-weight: 600;
   color: var(--text-primary);
@@ -85,16 +120,17 @@ tr.highlight-row {
 }
 
 .role-select-field {
-  width: 145px;
+  width: 130px;
   --mdc-outlined-text-field-container-shape: 8px;
 }
 
 .role-select-field ::ng-deep .mat-mdc-text-field-wrapper {
   background-color: var(--bg-surface-elevated) !important;
+  padding: 0 8px !important;
 }
 
 .role-select-field ::ng-deep .mat-mdc-select-value {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--primary-accent) !important;
 }

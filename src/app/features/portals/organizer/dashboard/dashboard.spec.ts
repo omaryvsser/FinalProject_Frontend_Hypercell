@@ -7,12 +7,14 @@ import { of } from 'rxjs';
 import { Dashboard } from './dashboard';
 import { EventService } from '../../../../core/services/event.service';
 import { VenueService } from '../../../../core/services/venue.service';
+import { BookingService } from '../../../../core/services/booking.service';
 
 describe('Dashboard (Organizer Portal)', () => {
   let component: Dashboard;
   let fixture: ComponentFixture<Dashboard>;
   let eventServiceMock: any;
   let venueServiceMock: any;
+  let bookingServiceMock: any;
 
   const mockOrganizerMovies = [
     {
@@ -107,6 +109,10 @@ describe('Dashboard (Organizer Portal)', () => {
       getVenues: vi.fn().mockReturnValue(of([{ id: 1, name: 'Grand Cinema' }])),
     };
 
+    bookingServiceMock = {
+      getOrganizerBookings: vi.fn().mockReturnValue(of({ content: [], totalElements: 666, totalPages: 1 })),
+    };
+
     await TestBed.configureTestingModule({
       imports: [Dashboard],
       providers: [
@@ -114,6 +120,7 @@ describe('Dashboard (Organizer Portal)', () => {
         provideRouter([]),
         { provide: EventService, useValue: eventServiceMock },
         { provide: VenueService, useValue: venueServiceMock },
+        { provide: BookingService, useValue: bookingServiceMock },
       ],
     }).compileComponents();
 
@@ -173,6 +180,25 @@ describe('Dashboard (Organizer Portal)', () => {
     expect(component.activeDrawerConfig()?.title).toBe('Add New Movie');
     expect(component.activeDrawerConfig()?.wide).toBe(true);
     expect(component.seatCategories().length).toBe(3);
+  });
+
+  it('should configure organizer booking columns and actions correctly', () => {
+    component.setActiveTab('BOOKINGS');
+    expect(component.currentTableColumns().length).toBe(8);
+    const statusCol = component.currentTableColumns().find((c) => c.key === 'status');
+    expect(statusCol?.type).toBe('bookingStatusSelect');
+
+    expect(component.currentTableActions().length).toBe(1);
+    expect(component.currentTableActions()[0].id).toBe('cancel');
+    expect(component.currentTableActions()[0].label).toBe('Cancel Booking');
+  });
+
+  it('should call bookingService.updateBookingStatus on organizer status update', () => {
+    bookingServiceMock.updateBookingStatus = vi.fn().mockReturnValue(of({ bookingId: 10, status: 'CONFIRMED' }));
+    const booking = { id: 10, bookingId: 10, customerName: 'Sara', status: 'PENDING' };
+
+    component.updateBookingStatus(booking, 'CONFIRMED');
+    expect(bookingServiceMock.updateBookingStatus).toHaveBeenCalledWith(10, 'CONFIRMED');
   });
 });
 

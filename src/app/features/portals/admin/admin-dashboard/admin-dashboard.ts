@@ -12,9 +12,11 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
 import { UserService } from '../../../../core/services/user.service';
 import { VenueService } from '../../../../core/services/venue.service';
 import { EventService } from '../../../../core/services/event.service';
+import { BookingService } from '../../../../core/services/booking.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UserDto, UserRole } from '../../../../core/models/user.model';
 import { EventResponse } from '../../../../core/models/event.model';
+import { BookingResponse } from '../../../../core/models/booking.model';
 import { PaginatedResponse } from '../../../../core/models/pagination.model';
 import { UserFormModel } from './components/forms/user-form/user-form';
 import { OrganizerFormModel } from './components/forms/organizer-form/organizer-form';
@@ -24,7 +26,7 @@ import { MovieFormModel } from './components/forms/movie-form/movie-form';
 /**
  * Union type representing the currently active management tab in the Admin Dashboard.
  */
-export type TabType = 'USERS' | 'ORGANIZERS' | 'VENUES' | 'MOVIES';
+export type TabType = 'USERS' | 'ORGANIZERS' | 'VENUES' | 'MOVIES' | 'BOOKINGS';
 
 /**
  * UI representation of a User entity displayed in the users table.
@@ -71,12 +73,30 @@ export interface MovieItem {
 }
 
 /**
+ * UI representation of a Booking entity displayed in the bookings table.
+ */
+export interface BookingItem {
+  id: string;
+  bookingId: number;
+  customerName: string;
+  customerEmail: string;
+  organizerName: string;
+  eventTitle: string;
+  seatCategoryName: string;
+  quantity: number;
+  totalPrice: number;
+  status: 'CONFIRMED' | 'PENDING' | 'CANCELLED';
+  createdAt: string;
+}
+
+/**
  * AdminDashboardComponent
  *
  * Core component for the Admin Portal. Handles server-side paginated management of:
  * - Users & Organizers
  * - Venues
  * - Movies / Events
+ * - Bookings
  *
  * Provides functionality for adding, editing, updating roles, deleting items with confirmation,
  * dynamic drawer configuration maps, and dynamic dashboard metrics.
@@ -102,12 +122,13 @@ export class AdminDashboardComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly venueService = inject(VenueService);
   private readonly eventService = inject(EventService);
+  private readonly bookingService = inject(BookingService);
   private readonly authService = inject(AuthService);
 
   private readonly dialog = inject(MatDialog);
 
   // --- Core State Signals ---
-  /** Active tab selection ('USERS' | 'ORGANIZERS' | 'VENUES' | 'MOVIES') */
+  /** Active tab selection ('USERS' | 'ORGANIZERS' | 'VENUES' | 'MOVIES' | 'BOOKINGS') */
   activeTab = signal<TabType>('USERS');
   /** Current page index for pagination (1-based) */
   currentPage = signal<number>(1);
@@ -131,12 +152,14 @@ export class AdminDashboardComponent implements OnInit {
   totalOrganizersCount = signal<number>(0);
   totalVenuesCount = signal<number>(0);
   totalMoviesCount = signal<number>(0);
+  totalBookingsCount = signal<number>(0);
 
   // --- Dynamic Backend Data Signals ---
   users = signal<UserItem[]>([]);
   organizers = signal<OrganizerItem[]>([]);
   venues = signal<VenueItem[]>([]);
   movies = signal<MovieItem[]>([]);
+  bookings = signal<BookingItem[]>([]);
   /** Loading indicator state during API transactions */
   isLoading = signal<boolean>(false);
 
@@ -169,17 +192,41 @@ export class AdminDashboardComponent implements OnInit {
     { key: 'releaseDate', header: 'Release Date' },
   ];
 
+  readonly bookingColumns: TableColumn<BookingItem>[] = [
+    { key: 'bookingId', header: 'Booking #', format: (val) => `#${val}` },
+    { key: 'customerName', header: 'Customer / Attendee', type: 'attendee' },
+    { key: 'eventTitle', header: 'Movie Title' },
+    { key: 'organizerName', header: 'Organizer' },
+    { key: 'seatCategoryName', header: 'Seat Tier', type: 'badge' },
+    { key: 'quantity', header: 'Tickets' },
+    { key: 'totalPrice', header: 'Total', type: 'currency' },
+    { key: 'status', header: 'Status', type: 'bookingStatusSelect' },
+    { key: 'createdAt', header: 'Booked Date', type: 'date' },
+  ];
+
   readonly tableColumns = computed<TableColumn[]>(() => {
     switch (this.activeTab()) {
       case 'USERS': return this.userColumns;
       case 'ORGANIZERS': return this.organizerColumns;
       case 'VENUES': return this.venueColumns;
       case 'MOVIES': return this.movieColumns;
+      case 'BOOKINGS': return this.bookingColumns;
     }
   });
 
   readonly tableActions = computed<TableAction[]>(() => {
     const tab = this.activeTab();
+    if (tab === 'BOOKINGS') {
+      return [
+        {
+          id: 'cancel',
+          label: 'Cancel Booking',
+          icon: 'cancel',
+          cssClass: 'delete',
+          disabled: (row: any) => row.status === 'CANCELLED',
+        },
+      ];
+    }
     return [
       {
         id: 'edit',
@@ -203,6 +250,7 @@ export class AdminDashboardComponent implements OnInit {
       case 'ORGANIZERS': return this.organizers();
       case 'VENUES': return this.venues();
       case 'MOVIES': return this.movies();
+      case 'BOOKINGS': return this.bookings();
     }
   });
 
@@ -321,12 +369,19 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: () => {},
     });
+
+    this.bookingService.getPaginatedBookings(1, 1).subscribe({
+      next: (res) => {
+        this.totalBookingsCount.set(res.totalElements || (res.content?.length ?? 0));
+      },
+      error: () => {},
+    });
   }
 
   /**
    * Fetches page-by-page server-side paginated data from REST API Endpoints (page size = 5).
 
-   * Maps backend entities into UI interfaces for Users, Organizers, Venues, or Movies.
+   * Maps backend entities into UI interfaces for Users, Organizers, Venues, Movies, or Bookings.
    */
   loadAdminData(page: number = this.currentPage()): void {
     this.isLoading.set(true);
@@ -423,6 +478,33 @@ export class AdminDashboardComponent implements OnInit {
         },
         error: () => this.isLoading.set(false),
       });
+    } else if (currentTab === 'BOOKINGS') {
+      // Fetch bookings with pagination
+      this.bookingService.getPaginatedBookings(page, this.pageSize()).subscribe({
+        next: (res: PaginatedResponse<BookingResponse>) => {
+          const mappedBookings: BookingItem[] = (res.content || []).map((b) => ({
+            id: String(b.bookingId),
+            bookingId: b.bookingId,
+            customerName: b.customerName || 'Customer',
+            customerEmail: b.customerEmail || 'customer@cinema.eg',
+            organizerName: b.organizerName || 'Organizer',
+            eventTitle: b.eventTitle,
+            seatCategoryName: b.seatCategoryName || 'STANDARD',
+            quantity: b.quantity,
+            totalPrice: b.totalPrice,
+            status: b.status as any,
+            createdAt: b.createdAt,
+          }));
+          this.bookings.set(mappedBookings);
+          this.totalServerPages.set(res.totalPages || 1);
+          this.totalServerElements.set(res.totalElements || mappedBookings.length);
+          if (res.totalElements != null) {
+            this.totalBookingsCount.set(res.totalElements);
+          }
+          this.isLoading.set(false);
+        },
+        error: () => this.isLoading.set(false),
+      });
     }
   }
 
@@ -433,6 +515,7 @@ export class AdminDashboardComponent implements OnInit {
       case 'ORGANIZERS': return this.totalOrganizersCount();
       case 'VENUES': return this.totalVenuesCount();
       case 'MOVIES': return this.totalMoviesCount();
+      case 'BOOKINGS': return this.totalBookingsCount();
     }
   });
 
@@ -450,6 +533,7 @@ export class AdminDashboardComponent implements OnInit {
   paginatedOrganizers = computed(() => this.organizers());
   paginatedVenues = computed(() => this.venues());
   paginatedMovies = computed(() => this.movies());
+  paginatedBookings = computed(() => this.bookings());
 
   /** Generates an array of page numbers [1, 2, ..., totalPages] for UI pagination buttons */
   pagesArray = computed(() => {
@@ -465,6 +549,7 @@ export class AdminDashboardComponent implements OnInit {
       case 'ORGANIZERS': return 'Organizer';
       case 'VENUES': return 'Venue';
       case 'MOVIES': return 'Movie';
+      case 'BOOKINGS': return 'Booking';
     }
   });
 
@@ -881,6 +966,78 @@ export class AdminDashboardComponent implements OnInit {
         message,
         confirmText: 'OK',
         type: 'warning',
+      },
+    });
+  }
+
+  /**
+   * Dispatches action clicks (such as Cancel Booking) from the reusable table.
+   */
+  handleTableAction(event: { action: string; row: any }): void {
+    if (event.action === 'cancel') {
+      this.cancelBooking(event.row);
+    }
+  }
+
+  /**
+   * Prompts confirmation and invokes backend cancellation for a booking.
+   */
+  cancelBooking(booking: BookingItem): void {
+    if (!booking || booking.status === 'CANCELLED') return;
+    const numId = Number(booking.bookingId || booking.id);
+    if (!numId) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Cancel Booking?',
+        message: `Are you sure you want to cancel booking #${booking.bookingId} for ${booking.customerName}? Reserved seat capacity will be restored.`,
+        confirmText: 'Cancel Booking',
+        cancelText: 'Keep Booking',
+        type: 'warning',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.bookingService.cancelBooking(numId).subscribe({
+          next: () => {
+            this.loadAdminData();
+            this.loadAllTotals();
+          },
+          error: (err) => {
+            this.showErrorDialog('Cancellation Failed', err?.error?.message || 'Failed to cancel booking.');
+          },
+        });
+      }
+    });
+  }
+
+  /**
+   * Updates status of a booking with confirmation if transitioning to CANCELLED.
+   */
+  updateBookingStatus(booking: BookingItem, newStatus: string): void {
+    if (!booking || !newStatus || booking.status === newStatus) return;
+
+    if (booking.status === 'CANCELLED') {
+      this.showErrorDialog('Invalid Action', 'Cancelled bookings cannot be reactivated.');
+      return;
+    }
+
+    if (newStatus === 'CANCELLED') {
+      this.cancelBooking(booking);
+      return;
+    }
+
+    const numId = Number(booking.bookingId || booking.id);
+    if (!numId) return;
+
+    this.bookingService.updateBookingStatus(numId, newStatus as any).subscribe({
+      next: () => {
+        this.loadAdminData();
+      },
+      error: (err) => {
+        this.showErrorDialog('Status Update Failed', err?.error?.message || 'Failed to update booking status.');
+        this.loadAdminData();
       },
     });
   }

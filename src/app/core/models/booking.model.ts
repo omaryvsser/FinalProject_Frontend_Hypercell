@@ -15,6 +15,9 @@ export interface BookingCreateRequest {
  */
 export interface BookingResponse {
   bookingId: number;
+  customerName?: string;
+  customerEmail?: string;
+  organizerName?: string;
   eventTitle: string;
   seatCategoryName: string;
   quantity: number;

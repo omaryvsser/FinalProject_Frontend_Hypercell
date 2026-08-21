@@ -16,7 +16,8 @@ export type ColumnType =
   | 'venuePill'
   | 'status'
   | 'attendee'
-  | 'bookingStatus';
+  | 'bookingStatus'
+  | 'bookingStatusSelect';
 
 export interface TableColumn<T = any> {
   key: string;
@@ -68,6 +69,7 @@ export class AdminTableComponent {
   readonly delete = output<any>();
   readonly actionClick = output<{ action: string; row: any }>();
   readonly roleChange = output<{ row: any; newRole: string }>();
+  readonly statusChange = output<{ row: any; newStatus: string }>();
   readonly pageChange = output<number>();
 
   onAction(action: TableAction, row: any): void {
@@ -83,6 +85,10 @@ export class AdminTableComponent {
 
   onRoleUpdate(row: any, newRole: string): void {
     this.roleChange.emit({ row, newRole });
+  }
+
+  onStatusChange(row: any, newStatus: string): void {
+    this.statusChange.emit({ row, newStatus });
   }
 
   onGoToPage(page: number): void {

@@ -14,7 +14,9 @@ import { SeatCategoryInput } from './components/forms/organizer-movie-form/organ
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { EventService, EventPayload } from '../../../../core/services/event.service';
 import { VenueService, Venue } from '../../../../core/services/venue.service';
+import { BookingService } from '../../../../core/services/booking.service';
 import { EventResponse } from '../../../../core/models/event.model';
+import { BookingResponse } from '../../../../core/models/booking.model';
 import { PaginatedResponse } from '../../../../core/models/pagination.model';
 
 export interface OrganizerMovie {
@@ -55,6 +57,7 @@ export class Dashboard implements OnInit {
   private router = inject(Router);
   private eventService = inject(EventService);
   private venueService = inject(VenueService);
+  private bookingService = inject(BookingService);
   private dialog = inject(MatDialog);
 
   // --- Core State Signals ---
@@ -66,6 +69,7 @@ export class Dashboard implements OnInit {
 
   organizerEmail = signal<string>('ciff-organizer@cinema.eg');
   organizerMovies = signal<OrganizerMovie[]>([]);
+  organizerBookings = signal<BookingResponse[]>([]);
 
   // --- Total Catalog Metrics across Full Dataset ---
   totalMoviesCount = signal<number>(0);
@@ -83,11 +87,48 @@ export class Dashboard implements OnInit {
     { key: 'status', header: 'Status', type: 'status' },
   ];
 
+  readonly bookingColumns: TableColumn<BookingResponse>[] = [
+    { key: 'bookingId', header: 'Booking #', format: (val) => `#${val}` },
+    { key: 'customerName', header: 'Customer / Attendee', type: 'attendee' },
+    { key: 'eventTitle', header: 'Movie Title' },
+    { key: 'seatCategoryName', header: 'Seat Tier', type: 'badge' },
+    { key: 'quantity', header: 'Tickets' },
+    { key: 'totalPrice', header: 'Total', type: 'currency' },
+    { key: 'status', header: 'Status', type: 'bookingStatusSelect' },
+    { key: 'createdAt', header: 'Booked Date', type: 'date' },
+  ];
+
   readonly tableActions: TableAction<OrganizerMovie>[] = [
     { id: 'edit', label: 'Edit Movie', icon: 'edit', cssClass: 'edit' },
     { id: 'attendees', label: 'View Bookings / Attendees', icon: 'groups', cssClass: 'attendees' },
     { id: 'delete', label: 'Delete Movie', icon: 'delete', cssClass: 'delete' },
   ];
+
+  readonly currentTableColumns = computed<TableColumn[]>(() => {
+    return this.activeTab() === 'BOOKINGS' ? (this.bookingColumns as TableColumn[]) : (this.tableColumns as TableColumn[]);
+  });
+
+  readonly currentTableActions = computed<TableAction[]>(() => {
+    if (this.activeTab() === 'BOOKINGS') {
+      return [
+        {
+          id: 'cancel',
+          label: 'Cancel Booking',
+          icon: 'cancel',
+          cssClass: 'delete',
+          disabled: (row: any) => row.status === 'CANCELLED',
+        },
+      ];
+    }
+    return this.tableActions as TableAction[];
+  });
+
+  readonly currentTableData = computed<any[]>(() => {
+    if (this.activeTab() === 'BOOKINGS') {
+      return this.organizerBookings();
+    }
+    return this.filteredMovies();
+  });
 
   // --- Drawer State ---
   isDrawerOpen = signal<boolean>(false);
@@ -161,6 +202,15 @@ export class Dashboard implements OnInit {
       },
       error: () => {},
     });
+
+    this.bookingService.getOrganizerBookings(1, 1).subscribe({
+      next: (res) => {
+        if (res?.totalElements != null) {
+          this.totalBookingsCount.set(res.totalElements);
+        }
+      },
+      error: () => {},
+    });
   }
 
   loadVenues(): void {
@@ -207,6 +257,25 @@ export class Dashboard implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load organizer events:', err);
+      }
+    });
+  }
+
+  /**
+   * Fetches page-by-page server-side paginated bookings for authenticated organizer (size = 5)
+   */
+  loadBookingsFromBackend(page: number = this.currentPage()): void {
+    this.bookingService.getOrganizerBookings(page, this.pageSize()).subscribe({
+      next: (res: PaginatedResponse<BookingResponse>) => {
+        this.organizerBookings.set(res.content || []);
+        this.totalServerPages.set(res.totalPages || 1);
+        this.totalServerElements.set(res.totalElements || (res.content?.length ?? 0));
+        if (res.totalElements != null) {
+          this.totalBookingsCount.set(res.totalElements);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load organizer bookings:', err);
       }
     });
   }
@@ -319,6 +388,13 @@ export class Dashboard implements OnInit {
     return this.organizerMovies().filter((m) => m.status === tab);
   });
 
+  totalItems = computed(() => {
+    if (this.activeTab() === 'BOOKINGS') {
+      return this.totalBookingsCount();
+    }
+    return this.filteredMovies().length;
+  });
+
   totalPages = computed(() => Math.max(1, this.totalServerPages()));
 
   // Server-side paginated items
@@ -335,13 +411,21 @@ export class Dashboard implements OnInit {
   setActiveTab(tab: OrganizerTabType): void {
     this.activeTab.set(tab);
     this.currentPage.set(1);
-    this.loadEventsFromBackend(1);
+    if (tab === 'BOOKINGS') {
+      this.loadBookingsFromBackend(1);
+    } else {
+      this.loadEventsFromBackend(1);
+    }
   }
 
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
-      this.loadEventsFromBackend(page);
+      if (this.activeTab() === 'BOOKINGS') {
+        this.loadBookingsFromBackend(page);
+      } else {
+        this.loadEventsFromBackend(page);
+      }
     }
   }
 
@@ -435,10 +519,75 @@ export class Dashboard implements OnInit {
   }
 
 
-  handleTableAction(evt: { action: string; row: OrganizerMovie }): void {
+  handleTableAction(evt: { action: string; row: any }): void {
     if (evt.action === 'attendees') {
       this.viewAttendees(evt.row);
+    } else if (evt.action === 'cancel') {
+      this.cancelBooking(evt.row);
     }
+  }
+
+  /**
+   * Prompts confirmation and invokes backend cancellation for an organizer's booking.
+   */
+  cancelBooking(booking: any): void {
+    if (!booking || booking.status === 'CANCELLED') return;
+    const bookingId = Number(booking.bookingId || booking.id);
+    if (!bookingId) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Cancel Booking?',
+        message: `Are you sure you want to cancel booking #${booking.bookingId} for ${booking.customerName}? Seat capacity will be restored to your movie/event.`,
+        confirmText: 'Cancel Booking',
+        cancelText: 'Keep Booking',
+        type: 'warning',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.bookingService.cancelBooking(bookingId).subscribe({
+          next: () => {
+            this.loadCatalogTotals();
+            this.loadBookingsFromBackend(this.currentPage());
+          },
+          error: (err) => {
+            this.showErrorDialog('Cancellation Failed', err?.error?.message || 'Failed to cancel booking.');
+          }
+        });
+      }
+    });
+  }
+
+  /**
+   * Updates status of an organizer's booking with role validation on server.
+   */
+  updateBookingStatus(booking: any, newStatus: string): void {
+    if (!booking || !newStatus || booking.status === newStatus) return;
+
+    if (booking.status === 'CANCELLED') {
+      this.showErrorDialog('Invalid Action', 'Cancelled bookings cannot be reactivated.');
+      return;
+    }
+
+    if (newStatus === 'CANCELLED') {
+      this.cancelBooking(booking);
+      return;
+    }
+
+    const bookingId = Number(booking.bookingId || booking.id);
+    if (!bookingId) return;
+
+    this.bookingService.updateBookingStatus(bookingId, newStatus as any).subscribe({
+      next: () => {
+        this.loadBookingsFromBackend(this.currentPage());
+      },
+      error: (err) => {
+        this.showErrorDialog('Status Update Failed', err?.error?.message || 'Failed to update booking status.');
+        this.loadBookingsFromBackend(this.currentPage());
+      }
+    });
   }
 
   viewAttendees(movie: OrganizerMovie): void {
