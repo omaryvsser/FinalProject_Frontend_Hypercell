@@ -1,58 +1,61 @@
 :host {
   display: block;
   min-height: 100vh;
-  background-color: var(--bg-dark, #0f172a);
-  color: var(--text-main, #ffffff);
-  font-family: var(--font-family, 'Inter', -apple-system, sans-serif);
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-family);
 }
 
 .movie-editor-page {
   width: 100%;
-  max-width: 900px;
+  max-width: 880px;
   margin: 0 auto;
-  padding: 40px 24px;
+  padding: 2.5rem 1.5rem 4rem;
   box-sizing: border-box;
-  font-family: var(--font-family, 'Inter', -apple-system, sans-serif);
 }
 
 .editor-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid #334155;
-  padding-bottom: 1.5rem;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--border-medium);
+  padding-bottom: 1.25rem;
 }
 
 .editor-label {
-  margin: 0 0 8px;
-  color: #38bdf8;
+  margin: 0 0 6px;
+  color: var(--primary-accent);
   font-weight: 600;
+  font-size: 0.85rem;
 }
 
 .editor-header h1 {
   margin: 0;
-  color: #ffffff;
-  font-size: 1.5rem;
+  color: var(--text-primary);
+  font-size: 1.45rem;
+  font-weight: 700;
 }
 
 .editor-description {
-  margin: 12px 0 0;
-  color: #94a3b8;
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
 .editor-card {
-  background-color: #1e293b !important;
-  border: 1px solid #334155 !important;
+  background-color: var(--bg-surface-elevated) !important;
+  border: 1px solid var(--border-medium) !important;
   border-radius: 16px !important;
-  color: #ffffff !important;
+  box-shadow: var(--shadow-sm) !important;
+  padding: 1.5rem !important;
 }
 
-.movie-form {
+.editor-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 1rem;
 }
 
 .form-row {
@@ -65,8 +68,20 @@
   margin: 0 0 20px;
   padding: 12px;
   border-radius: 8px;
-  background-color: rgba(56, 189, 248, 0.12);
-  color: #38bdf8;
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-weight: 600;
+}
+
+.error-message {
+  margin: 0 0 20px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  font-weight: 600;
 }
 
 .form-actions {

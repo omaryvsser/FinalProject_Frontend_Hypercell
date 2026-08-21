@@ -1,206 +1,242 @@
-<!-- Section 1: Basic Information -->
-<div class="form-section">
-  <h3 class="section-title">
-    <span class="material-symbols-outlined icon">movie</span>
-    Basic Movie Details
-  </h3>
-
-  <div class="form-group">
-    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-      <mat-label>Movie Title *</mat-label>
-      <input
-        matInput
-        id="movie-title"
-        type="text"
-        placeholder="Enter the movie title"
-        [formField]="form().title"
-      />
-      @if (form().title().touched() && form().title().invalid()) {
-        <mat-error>{{ form().title().errors()[0]?.message || 'Movie title is required' }}</mat-error>
-      }
-    </mat-form-field>
-  </div>
-
-  <div class="form-group">
-    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-      <mat-label>Description</mat-label>
-      <textarea
-        matInput
-        id="movie-description"
-        rows="3"
-        placeholder="Enter a short movie description..."
-        [formField]="form().description"
-      ></textarea>
-    </mat-form-field>
-  </div>
-
-  <!-- Poster Image (File Upload + URL Link) -->
-  <div class="form-group">
-    <label class="form-label">Poster Image</label>
-    <input
-      type="file"
-      accept="image/*"
-      class="form-input file-input"
-      (change)="onFileSelected($event)"
-    />
-    <div class="or-divider">── OR Direct Image URL ──</div>
-    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-      <mat-label>Poster Image URL</mat-label>
-      <input
-        matInput
-        id="movie-image"
-        type="url"
-        placeholder="https://image.tmdb.org/t/p/w500/..."
-        [formField]="form().imageUrl"
-      />
-    </mat-form-field>
-    @if (form().imageUrl().value()) {
-      <div class="poster-preview-wrapper">
-        <img [src]="form().imageUrl().value()" alt="Movie Poster Preview" class="poster-preview-img" />
+<div class="movie-form-container">
+  <!-- Section 1: Basic Information -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-icon">
+        <span class="material-symbols-outlined">movie</span>
       </div>
-    }
-  </div>
+      <div>
+        <h4 class="section-title">Movie Overview</h4>
+        <p class="section-subtitle">General movie information, genre, and duration</p>
+      </div>
+    </div>
 
-  <div class="form-row">
-    <div class="col-half">
+    <div class="form-fields">
+      <!-- Title -->
       <div class="form-group">
         <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>Genre / Category *</mat-label>
-          <mat-select
-            id="movie-category"
-            [formField]="form().category"
-          >
-            @for (cat of categories; track cat) {
-              <mat-option [value]="cat">{{ cat }}</mat-option>
+          <mat-label>Movie Title *</mat-label>
+          <input
+            matInput
+            id="movie-title"
+            type="text"
+            placeholder="e.g. Inception"
+            [formField]="form().title"
+          />
+          @if (form().title().touched() && form().title().invalid()) {
+            <mat-error>{{ form().title().errors()[0]?.message || 'Movie title is required' }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+          <mat-label>Description / Synopsis</mat-label>
+          <textarea
+            matInput
+            id="movie-description"
+            rows="3"
+            placeholder="Enter a short synopsis or overview..."
+            [formField]="form().description"
+          ></textarea>
+        </mat-form-field>
+      </div>
+
+      <!-- Genre & Director Row -->
+      <div class="form-row">
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>Genre / Category *</mat-label>
+            <mat-select id="movie-category" [formField]="form().category">
+              @for (cat of categories; track cat) {
+                <mat-option [value]="cat">{{ cat }}</mat-option>
+              }
+            </mat-select>
+            @if (form().category().touched() && form().category().invalid()) {
+              <mat-error>{{ form().category().errors()[0]?.message || 'Category is required' }}</mat-error>
             }
+          </mat-form-field>
+        </div>
+
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>Director</mat-label>
+            <input
+              matInput
+              id="movie-director"
+              type="text"
+              placeholder="e.g. Christopher Nolan"
+              [formField]="form().director"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Duration & Language Row -->
+      <div class="form-row">
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>Duration (Minutes) *</mat-label>
+            <input
+              matInput
+              id="movie-duration"
+              type="number"
+              placeholder="e.g. 148"
+              [formField]="form().durationMinutes"
+            />
+            @if (form().durationMinutes().touched() && form().durationMinutes().invalid()) {
+              <mat-error>{{ form().durationMinutes().errors()[0]?.message || 'Duration must be greater than 0' }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>Language</mat-label>
+            <input
+              matInput
+              id="movie-language"
+              type="text"
+              placeholder="e.g. English, Arabic"
+              [formField]="form().language"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Poster Image Upload + URL -->
+      <div class="media-upload-box">
+        <label class="media-label">
+          <span class="material-symbols-outlined label-icon">image</span>
+          Movie Poster Image
+        </label>
+        
+        <div class="upload-controls">
+          <input
+            type="file"
+            accept="image/*"
+            class="file-input-button"
+            (change)="onFileSelected($event)"
+          />
+          <div class="divider-text">OR PASTE URL</div>
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field url-field">
+            <mat-label>Direct Poster URL</mat-label>
+            <input
+              matInput
+              id="movie-image"
+              type="url"
+              placeholder="https://image.tmdb.org/t/p/w500/..."
+              [formField]="form().imageUrl"
+            />
+          </mat-form-field>
+        </div>
+
+        @if (form().imageUrl().value()) {
+          <div class="poster-preview">
+            <img [src]="form().imageUrl().value()" alt="Movie Poster" class="poster-img" />
+            <div class="poster-info">
+              <span class="material-symbols-outlined check-icon">check_circle</span>
+              <span>Poster link attached</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Showtime & Cinema Venue -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-icon calendar">
+        <span class="material-symbols-outlined">calendar_month</span>
+      </div>
+      <div>
+        <h4 class="section-title">Showtime & Venue</h4>
+        <p class="section-subtitle">Cinema hall selection, date, time, and publishing status</p>
+      </div>
+    </div>
+
+    <div class="form-fields">
+      <!-- Cinema Location -->
+      <div class="form-group">
+        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+          <mat-label>Cinema / Venue Location *</mat-label>
+          <mat-select id="movie-venue" [formField]="form().venueId">
+            @for (v of venues(); track v.id) {
+              <mat-option [value]="+v.id">
+                <span class="venue-option">
+                  <span class="material-symbols-outlined venue-icon">domain</span>
+                  {{ v.name }}
+                </span>
+              </mat-option>
+            }
+          </mat-select>
+          @if (form().venueId().touched() && form().venueId().invalid()) {
+            <mat-error>{{ form().venueId().errors()[0]?.message || 'Cinema is required' }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Start & End Date Time Row -->
+      <div class="form-row">
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>Start Date & Time *</mat-label>
+            <input
+              matInput
+              id="movie-start"
+              type="datetime-local"
+              [formField]="form().startDate"
+            />
+            @if (form().startDate().touched() && form().startDate().invalid()) {
+              <mat-error>{{ form().startDate().errors()[0]?.message || 'Start date & time is required' }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>End Date & Time *</mat-label>
+            <input
+              matInput
+              id="movie-end"
+              type="datetime-local"
+              [formField]="form().endDate"
+            />
+            @if (form().endDate().touched() && form().endDate().invalid()) {
+              <mat-error>{{ form().endDate().errors()[0]?.message || 'End date & time is required' }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Publication Status -->
+      <div class="form-group">
+        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+          <mat-label>Publication Status *</mat-label>
+          <mat-select id="movie-status" [formField]="form().status">
+            <mat-option value="PUBLISHED">
+              <span class="status-option published">
+                <span class="status-dot published"></span>
+                PUBLISHED — Live on website
+              </span>
+            </mat-option>
+            <mat-option value="DRAFT">
+              <span class="status-option draft">
+                <span class="status-dot draft"></span>
+                DRAFT — Hidden / In Progress
+              </span>
+            </mat-option>
+            <mat-option value="COMPLETED">
+              <span class="status-option completed">
+                <span class="status-dot completed"></span>
+                COMPLETED — Archived
+              </span>
+            </mat-option>
           </mat-select>
         </mat-form-field>
       </div>
     </div>
-
-    <div class="col-half">
-      <div class="form-group">
-        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>Director</mat-label>
-          <input
-            matInput
-            id="movie-director"
-            type="text"
-            placeholder="e.g. Christopher Nolan"
-            [formField]="form().director"
-          />
-        </mat-form-field>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-row">
-    <div class="col-half">
-      <div class="form-group">
-        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>Duration (Minutes) *</mat-label>
-          <input
-            matInput
-            id="movie-duration"
-            type="number"
-            placeholder="e.g. 148"
-            [formField]="form().durationMinutes"
-          />
-          @if (form().durationMinutes().touched() && form().durationMinutes().invalid()) {
-            <mat-error>{{ form().durationMinutes().errors()[0]?.message || 'Duration must be greater than 0' }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </div>
-
-    <div class="col-half">
-      <div class="form-group">
-        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>Language</mat-label>
-          <input
-            matInput
-            id="movie-language"
-            type="text"
-            placeholder="e.g. English, Arabic"
-            [formField]="form().language"
-          />
-        </mat-form-field>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Section 2: Showtime & Cinema Venue -->
-<div class="form-section">
-  <h3 class="section-title">
-    <span class="material-symbols-outlined icon">calendar_month</span>
-    Showtime & Venue Configuration
-  </h3>
-
-  <div class="form-row">
-    <div class="col-half">
-      <div class="form-group">
-        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>Start Date & Time *</mat-label>
-          <input
-            matInput
-            id="movie-start"
-            type="datetime-local"
-            [formField]="form().startDate"
-          />
-          @if (form().startDate().touched() && form().startDate().invalid()) {
-            <mat-error>{{ form().startDate().errors()[0]?.message || 'Start date & time is required' }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </div>
-
-    <div class="col-half">
-      <div class="form-group">
-        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>End Date & Time *</mat-label>
-          <input
-            matInput
-            id="movie-end"
-            type="datetime-local"
-            [formField]="form().endDate"
-          />
-          @if (form().endDate().touched() && form().endDate().invalid()) {
-            <mat-error>{{ form().endDate().errors()[0]?.message || 'End date & time is required' }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-      <mat-label>Status *</mat-label>
-      <mat-select
-        id="movie-status"
-        [formField]="form().status"
-      >
-        <mat-option value="DRAFT">DRAFT (Hidden)</mat-option>
-        <mat-option value="PUBLISHED">PUBLISHED (Active on Platform)</mat-option>
-        <mat-option value="COMPLETED">COMPLETED (Archived)</mat-option>
-      </mat-select>
-    </mat-form-field>
-  </div>
-
-  <div class="form-group">
-    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-      <mat-label>Cinema / Venue Location *</mat-label>
-      <mat-select
-        id="movie-venue"
-        [formField]="form().venueId"
-      >
-        @for (v of venues(); track v.id) {
-          <mat-option [value]="+v.id">{{ v.name }}</mat-option>
-        }
-      </mat-select>
-      @if (form().venueId().touched() && form().venueId().invalid()) {
-        <mat-error>{{ form().venueId().errors()[0]?.message || 'Cinema is required' }}</mat-error>
-      }
-    </mat-form-field>
   </div>
 </div>

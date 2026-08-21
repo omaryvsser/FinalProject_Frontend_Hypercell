@@ -1,7 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service'; // Adjust path if needed
+import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 export type UserRole = 'GUEST' | 'CUSTOMER' | 'ORGANIZER' | 'ADMIN';
 
@@ -14,6 +15,7 @@ export type UserRole = 'GUEST' | 'CUSTOMER' | 'ORGANIZER' | 'ADMIN';
 })
 export class Navbar {
   readonly authService = inject(AuthService);
+  readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
 
   // Mobile drawer state signal

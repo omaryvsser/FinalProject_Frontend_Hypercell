@@ -250,10 +250,20 @@
   width: 100% !important;
 }
 
+.mobile-controls {
+  display: none !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
 /* Responsive Media Queries */
 @media (max-width: 768px) {
   .desktop-only {
     display: none !important;
+  }
+
+  .mobile-controls {
+    display: flex !important;
   }
 
   .mobile-toggle-btn {

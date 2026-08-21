@@ -81,19 +81,47 @@
             </button>
           }
         }
+
+        <!-- Universal Theme Toggle Button (Desktop) -->
+        <button
+          type="button"
+          class="theme-toggle-btn"
+          (click)="themeService.toggleTheme()"
+          [attr.aria-label]="themeService.isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+          [title]="themeService.isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+        >
+          <span class="material-symbols-outlined">
+            {{ themeService.isDarkMode() ? 'light_mode' : 'dark_mode' }}
+          </span>
+        </button>
       </nav>
     </div>
 
-    <!-- Mobile Hamburger Menu Button -->
-    <button
-      type="button"
-      class="mobile-toggle-btn"
-      (click)="toggleMobileMenu()"
-      [attr.aria-expanded]="mobileMenuOpen()"
-      aria-label="Toggle navigation menu"
-    >
-      <span class="material-symbols-outlined">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
-    </button>
+    <!-- Mobile Controls Group (Theme Toggle + Hamburger) -->
+    <div class="mobile-controls">
+      <button
+        type="button"
+        class="theme-toggle-btn mobile-theme-btn"
+        (click)="themeService.toggleTheme()"
+        [attr.aria-label]="themeService.isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+        [title]="themeService.isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+      >
+        <span class="material-symbols-outlined">
+          {{ themeService.isDarkMode() ? 'light_mode' : 'dark_mode' }}
+        </span>
+      </button>
+
+      <!-- Mobile Hamburger Menu Button -->
+      <button
+        type="button"
+        class="mobile-toggle-btn"
+        (click)="toggleMobileMenu()"
+        [attr.aria-expanded]="mobileMenuOpen()"
+        aria-label="Toggle navigation menu"
+      >
+        <span class="material-symbols-outlined">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
+      </button>
+    </div>
   </div>
 
   <!-- Mobile Collapsible Menu Drawer -->

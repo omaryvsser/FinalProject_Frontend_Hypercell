@@ -36,20 +36,28 @@
 
   <!-- Filter & Catalog Section -->
   <section class="movies-section" aria-labelledby="movies-heading">
-    <!-- Genre Filter Chips Bar -->
-    <div class="filter-bar">
-      <span class="filter-label">Categories:</span>
-      <mat-chip-listbox class="genre-filter" aria-label="Filter movies by genre">
+    <!-- Modern Category Filter Tabs Bar -->
+    <div class="category-filter-bar">
+      <div class="category-filter-header">
+        <span class="material-symbols-outlined filter-icon">tune</span>
+        <span class="filter-label">Categories</span>
+      </div>
+
+      <div class="category-tabs-scroll" role="tablist" aria-label="Filter movies by genre">
         @for (genre of genres; track genre) {
-          <mat-chip-option
-            [selected]="selectedGenre() === genre"
+          <button
+            type="button"
+            role="tab"
+            class="category-tab-btn"
+            [class.active]="selectedGenre() === genre"
+            [attr.aria-selected]="selectedGenre() === genre"
             (click)="selectGenre(genre)"
-            class="custom-genre-chip"
           >
-            {{ genre }}
-          </mat-chip-option>
+            <span class="material-symbols-outlined tab-icon">{{ getGenreIcon(genre) }}</span>
+            <span class="tab-label">{{ genre }}</span>
+          </button>
         }
-      </mat-chip-listbox>
+      </div>
     </div>
 
     <!-- Catalog Header -->

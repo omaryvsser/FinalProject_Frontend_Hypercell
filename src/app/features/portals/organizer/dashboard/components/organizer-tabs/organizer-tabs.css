@@ -8,26 +8,28 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-  font-family: var(--font-family, 'Inter', -apple-system, sans-serif);
+  font-family: var(--font-family);
 }
 
 .tabs-nav {
   display: flex;
-  background-color: #0f172a;
-  padding: 0.35rem;
-  border-radius: 10px;
-  border: 1px solid #334155;
+  background-color: var(--bg-surface);
+  padding: 0.3rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-medium);
   gap: 0.25rem;
   overflow-x: auto;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .tab-button {
   background: transparent;
   border: none;
-  color: #94a3b8;
-  padding: 0.6rem 1.1rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  color: var(--text-secondary);
+  padding: 0.55rem 1.1rem;
+  border-radius: 9px;
+  font-size: 0.86rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -38,14 +40,14 @@
 }
 
 .tab-button:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  background-color: var(--badge-bg);
 }
 
 .tab-button.active {
-  background-color: #38bdf8;
-  color: #0f172a;
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+  background: var(--primary-accent);
+  color: var(--primary-btn-text);
+  box-shadow: var(--shadow-sm);
 }
 
 .tab-icon {
@@ -55,22 +57,22 @@
 }
 
 .tab-count {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.15);
   color: inherit;
   padding: 0.1rem 0.45rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
 .tab-button.active .tab-count {
-  background-color: rgba(15, 23, 42, 0.25);
-  color: #0f172a;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: var(--primary-btn-text);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #38bdf8, #0284c7);
-  color: #0f172a;
+  background: var(--primary-gradient);
+  color: var(--primary-btn-text);
   border: none;
   padding: 0.65rem 1.25rem;
   border-radius: 10px;
@@ -81,13 +83,13 @@
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+  background: var(--primary-gradient-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+  box-shadow: var(--shadow-glow);
 }
 
 .btn-icon {

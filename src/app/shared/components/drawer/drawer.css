@@ -19,8 +19,8 @@
 .drawer-backdrop {
   position: absolute;
   inset: 0;
-  background-color: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(6px);
+  background-color: var(--bg-overlay);
+  backdrop-filter: blur(8px);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -35,18 +35,18 @@
   right: 0;
   bottom: 0;
   width: 100%;
-  max-width: 460px;
-  background-color: #1e293b;
-  border-left: 1px solid rgba(56, 189, 248, 0.2);
-  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.65);
+  max-width: 480px;
+  background-color: var(--bg-surface-elevated);
+  border-left: 1px solid var(--border-medium);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease;
 }
 
 .drawer-panel.wide-panel {
-  max-width: 600px;
+  max-width: 620px;
 }
 
 .drawer-wrapper.open .drawer-panel {
@@ -54,13 +54,13 @@
 }
 
 .drawer-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #334155;
+  padding: 1.35rem 1.5rem;
+  border-bottom: 1px solid var(--border-medium);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: linear-gradient(180deg, #1e293b 0%, #172033 100%);
-  border-top: 3px solid #38bdf8;
+  background: var(--bg-surface);
+  border-top: 3px solid var(--primary-accent);
   flex-shrink: 0;
 }
 
@@ -73,25 +73,25 @@
 .drawer-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.01em;
 }
 
 .drawer-subtitle {
-  font-size: 0.85rem;
-  color: #94a3b8;
+  font-size: 0.84rem;
+  color: var(--text-muted);
   margin: 0;
   line-height: 1.4;
 }
 
 .btn-close-drawer {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -101,9 +101,9 @@
 }
 
 .btn-close-drawer:hover {
-  background-color: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.4);
-  color: #f87171;
+  background-color: rgba(239, 68, 68, 0.12);
+  border-color: #ef4444;
+  color: #ef4444;
   transform: rotate(90deg);
 }
 

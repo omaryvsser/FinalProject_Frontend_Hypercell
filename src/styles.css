@@ -1,18 +1,153 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
-:root {
+/* ============================================================= */
+/* 1. CENTRALIZED THEME TOKENS & CSS VARIABLES                   */
+/* ============================================================= */
+
+:root,
+[data-theme='dark'],
+html.dark {
+  /* Backgrounds */
   --bg-dark: #08090d;
+  --bg-base: #08090d;
+  --bg-surface: #0f172a;
+  --bg-surface-elevated: #1e293b;
   --bg-card: rgba(18, 21, 30, 0.85);
   --bg-card-hover: rgba(24, 28, 40, 0.92);
+  --bg-overlay: rgba(15, 23, 42, 0.85);
+  --bg-input: #12151e;
+  --bg-input-focus: #181d2a;
+
+  /* Primary & Brand Accents */
   --primary-accent: #38bdf8;
   --primary-glow: rgba(56, 189, 248, 0.35);
   --primary-hover: #7dd3fc;
+  --primary-dark: #0284c7;
+  --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  --primary-gradient-hover: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
+  --primary-btn-text: #08090d;
+
+  /* Typography */
   --text-main: #f8fafc;
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
   --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+  --text-inverse: #0f172a;
+
+  /* Borders & Dividers */
   --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-light: #1e293b;
+  --border-medium: #334155;
   --border-active: rgba(56, 189, 248, 0.6);
+  --border-card: #334155;
+
+  /* Badges & Status */
+  --badge-bg: rgba(56, 189, 248, 0.12);
+  --badge-border: rgba(56, 189, 248, 0.3);
+  --badge-color: #38bdf8;
+
+  /* Glows & Gradients */
+  --bg-radial-1: rgba(56, 189, 248, 0.1);
+  --bg-radial-2: rgba(14, 165, 233, 0.08);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(56, 189, 248, 0.25);
+
+  /* Material Form & Overlays */
+  --input-text-color: #ffffff;
+  --input-label-color: #38bdf8;
+  --input-placeholder-color: rgba(255, 255, 255, 0.75);
+  --input-outline-color: rgba(255, 255, 255, 0.18);
+  --select-panel-bg: #1e293b;
+  --select-panel-border: #334155;
+  --select-option-hover: rgba(56, 189, 248, 0.15);
+  --select-option-selected: rgba(56, 189, 248, 0.2);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --scrollbar-track: #08090d;
+
   --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  color-scheme: dark;
 }
+
+[data-theme='light'],
+html.light,
+body.light-theme {
+  /* Backgrounds - Clean, Modern Light Mode */
+  --bg-dark: #f8fafc;
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-overlay: rgba(255, 255, 255, 0.92);
+  --bg-input: #ffffff;
+  --bg-input-focus: #f8fafc;
+
+  /* Primary & Brand Accents - Vibrant Blue Identity */
+  --primary-accent: #2563eb;
+  --primary-glow: rgba(37, 99, 235, 0.25);
+  --primary-hover: #1d4ed8;
+  --primary-dark: #1e40af;
+  --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  --primary-gradient-hover: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  --primary-btn-text: #ffffff;
+
+  /* Typography - Crisp, Readable High-Contrast */
+  --text-main: #0f172a;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-subtle: #94a3b8;
+  --text-inverse: #ffffff;
+
+  /* Borders & Dividers - Clean Crisp Lines */
+  --border-subtle: #e2e8f0;
+  --border-light: #e2e8f0;
+  --border-medium: #cbd5e1;
+  --border-active: #2563eb;
+  --border-card: #e2e8f0;
+
+  /* Badges & Status */
+  --badge-bg: rgba(37, 99, 235, 0.1);
+  --badge-border: rgba(37, 99, 235, 0.25);
+  --badge-color: #2563eb;
+
+  /* Glows & Gradients */
+  --bg-radial-1: rgba(37, 99, 235, 0.05);
+  --bg-radial-2: rgba(2, 132, 199, 0.04);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.18);
+
+  /* Material Form & Overlays */
+  --input-text-color: #0f172a;
+  --input-label-color: #2563eb;
+  --input-placeholder-color: #94a3b8;
+  --input-outline-color: #cbd5e1;
+  --select-panel-bg: #ffffff;
+  --select-panel-border: #e2e8f0;
+  --select-option-hover: rgba(37, 99, 235, 0.08);
+  --select-option-selected: rgba(37, 99, 235, 0.12);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(0, 0, 0, 0.18);
+  --scrollbar-track: #f1f5f9;
+
+  color-scheme: light;
+}
+
+/* ============================================================= */
+/* 2. BASE GLOBAL STYLES                                         */
+/* ============================================================= */
 
 * {
   box-sizing: border-box;
@@ -26,92 +161,83 @@ html, body {
   background-color: var(--bg-dark);
   color: var(--text-main);
   background-image: 
-    radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.1) 0%, transparent 45%),
-    radial-gradient(circle at 85% 85%, rgba(14, 165, 233, 0.08) 0%, transparent 45%);
+    radial-gradient(circle at 15% 15%, var(--bg-radial-1) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, var(--bg-radial-2) 0%, transparent 45%);
   background-attachment: fixed;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* ------------------------------------------------------------- */
-/* GLOBAL ANGULAR MATERIAL FORM FIELD & FLOATING LABEL FIX       */
-/* ------------------------------------------------------------- */
+/* ============================================================= */
+/* 3. ANGULAR MATERIAL FORM FIELDS & FLOATING LABELS             */
+/* ============================================================= */
 
-/* Enforce pure white typed text for all input elements */
 .mat-mdc-form-field .mat-mdc-input-element,
 input.mat-mdc-input-element,
 textarea.mat-mdc-input-element {
-  color: #ffffff !important;
+  color: var(--input-text-color) !important;
   caret-color: var(--primary-accent) !important;
 }
 
-/* Floating label elevated styling */
 .mat-mdc-form-field .mat-mdc-floating-label,
 .mat-mdc-form-field mat-label {
-  color: #38bdf8 !important;
+  color: var(--input-label-color) !important;
   font-weight: 600 !important;
   font-family: var(--font-family);
 }
 
-/* Placeholder Styling - White Placeholders */
 ::placeholder,
 input::placeholder,
 textarea::placeholder,
 .mat-mdc-select-placeholder {
-  color: rgba(255, 255, 255, 0.75) !important;
+  color: var(--input-placeholder-color) !important;
   opacity: 1 !important;
 }
 
-/* Autofill white text background fix */
+/* Autofill styling */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-text-fill-color: #ffffff !important;
-  -webkit-box-shadow: 0 0 0px 1000px #12151e inset !important;
+  -webkit-text-fill-color: var(--input-text-color) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-input) inset !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
 .mat-mdc-form-field {
   width: 100%;
   --mdc-outlined-text-field-container-shape: 10px;
-  --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.18);
+  --mdc-outlined-text-field-outline-color: var(--input-outline-color);
   --mdc-outlined-text-field-focus-outline-color: var(--primary-accent);
-  --mdc-outlined-text-field-label-text-color: #38bdf8;
+  --mdc-outlined-text-field-label-text-color: var(--input-label-color);
   --mdc-outlined-text-field-focus-label-text-color: var(--primary-accent);
-  --mdc-outlined-text-field-input-text-color: #ffffff;
+  --mdc-outlined-text-field-input-text-color: var(--input-text-color);
 }
 
-input[type="datetime-local"].mat-mdc-input-element {
-  color-scheme: dark;
-}
+/* ============================================================= */
+/* 4. ANGULAR MATERIAL DROPDOWN (MAT-SELECT) THEME OVERRIDES     */
+/* ============================================================= */
 
-/* ------------------------------------------------------------- */
-/* ANGULAR MATERIAL DROPDOWN (MAT-SELECT) STYLING OVERRIDES      */
-/* ------------------------------------------------------------- */
-
-/* Select Trigger Value & Placeholder in White */
 .mat-mdc-select-value,
 .mat-mdc-select-placeholder,
 .mat-mdc-select-trigger,
 .mat-mdc-select-min-line {
-  color: #ffffff !important;
+  color: var(--input-text-color) !important;
 }
 
 .mat-mdc-select-arrow {
-  color: #38bdf8 !important;
+  color: var(--primary-accent) !important;
 }
 
-/* Select Dropdown Overlay Panel */
 .cdk-overlay-pane .mat-mdc-select-panel {
-  background-color: #1e293b !important;
-  border: 1px solid #334155 !important;
+  background-color: var(--select-panel-bg) !important;
+  border: 1px solid var(--select-panel-border) !important;
   border-radius: 12px !important;
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: var(--shadow-lg) !important;
   padding: 6px 0 !important;
 }
 
-/* Select Options */
 .cdk-overlay-pane .mat-mdc-option {
-  color: #ffffff !important;
+  color: var(--input-text-color) !important;
   font-family: var(--font-family);
   font-size: 0.95rem;
 }
@@ -119,30 +245,511 @@ input[type="datetime-local"].mat-mdc-input-element {
 .cdk-overlay-pane .mat-mdc-option:hover,
 .cdk-overlay-pane .mat-mdc-option.cdk-program-focused,
 .cdk-overlay-pane .mat-mdc-option.mdc-list-item--activated {
-  background-color: rgba(56, 189, 248, 0.15) !important;
+  background-color: var(--select-option-hover) !important;
 }
 
 .cdk-overlay-pane .mat-mdc-option.mdc-list-item--selected {
-  color: #38bdf8 !important;
+  color: var(--primary-accent) !important;
   font-weight: 700;
-  background-color: rgba(56, 189, 248, 0.2) !important;
+  background-color: var(--select-option-selected) !important;
 }
 
 .cdk-overlay-pane .mat-mdc-option .mdc-list-item__primary-text {
   color: inherit !important;
 }
 
-/* Custom Scrollbar */
+/* ============================================================= */
+/* 5. GLOBAL LIGHT MODE ADAPTATION OVERRIDES                     */
+/* ============================================================= */
+
+[data-theme='light'] .navbar-header {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme='light'] .brand-text {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .brand-icon,
+[data-theme='light'] .brand-accent {
+  color: #2563eb !important;
+}
+
+[data-theme='light'] .nav-link {
+  color: #475569 !important;
+}
+
+[data-theme='light'] .nav-link:hover,
+[data-theme='light'] .nav-link.active {
+  color: #2563eb !important;
+  background: rgba(37, 99, 235, 0.08) !important;
+}
+
+[data-theme='light'] .btn-guest-login {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .btn-guest-login:hover {
+  background: #e2e8f0 !important;
+  border-color: #2563eb !important;
+  color: #2563eb !important;
+}
+
+[data-theme='light'] .btn-guest-register {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+[data-theme='light'] .btn-guest-register:hover {
+  background: #1d4ed8 !important;
+}
+
+[data-theme='light'] .mobile-nav-drawer {
+  background: #ffffff !important;
+  border-top: 1px solid #e2e8f0 !important;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme='light'] .mobile-nav-link {
+  color: #475569 !important;
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .mobile-nav-link:hover,
+[data-theme='light'] .mobile-nav-link.active {
+  color: #2563eb !important;
+  background: rgba(37, 99, 235, 0.08) !important;
+  border-color: #2563eb !important;
+}
+
+[data-theme='light'] .user-greeting {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .mobile-toggle-btn {
+  border-color: #cbd5e1 !important;
+  color: #2563eb !important;
+}
+
+/* Light Mode Footer */
+[data-theme='light'] .site-footer {
+  background-color: #ffffff !important;
+  border-top: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+}
+
+[data-theme='light'] .footer-brand {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .col-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .footer-bottom {
+  background-color: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+[data-theme='light'] .copyright-text {
+  color: #94a3b8 !important;
+}
+
+/* Light Mode Admin & Organizer Workspace */
+[data-theme='light'] .admin-dashboard,
+[data-theme='light'] .organizer-dashboard {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .workspace-panel,
+[data-theme='light'] .dashboard-panel {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme='light'] .dashboard-header {
+  border-bottom-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .dashboard-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .dashboard-subtitle {
+  color: #64748b !important;
+}
+
+[data-theme='light'] .admin-profile,
+[data-theme='light'] .organizer-profile {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .profile-name {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .profile-email {
+  color: #2563eb !important;
+}
+
+/* Light Mode Admin Table */
+[data-theme='light'] .table-container {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme='light'] table.data-table,
+[data-theme='light'] table.admin-table {
+  background-color: #ffffff !important;
+}
+
+[data-theme='light'] table.data-table th,
+[data-theme='light'] table.admin-table th {
+  background-color: #f8fafc !important;
+  color: #475569 !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] table.data-table td,
+[data-theme='light'] table.admin-table td {
+  border-bottom-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] table.data-table tr:hover,
+[data-theme='light'] table.admin-table tr:hover {
+  background-color: rgba(37, 99, 235, 0.04) !important;
+}
+
+[data-theme='light'] .cell-name {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .cell-text-muted {
+  color: #64748b !important;
+}
+
+[data-theme='light'] .btn-page {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+[data-theme='light'] .btn-page:hover:not(:disabled):not(.active) {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme='light'] .btn-page.active {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+}
+
+[data-theme='light'] .pagination-info {
+  color: #64748b !important;
+}
+
+[data-theme='light'] .pagination-info .highlight {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .company-tag {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .btn-icon-action {
+  border-color: #e2e8f0 !important;
+  background-color: #f8fafc !important;
+}
+
+[data-theme='light'] .btn-cancel {
+  border-color: #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+[data-theme='light'] .btn-cancel:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Light Mode Discover Page */
+[data-theme='light'] .hero-section {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme='light'] .hero-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .hero-subtitle {
+  color: #475569 !important;
+}
+
+[data-theme='light'] .custom-genre-chip {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+[data-theme='light'] .custom-genre-chip:hover {
+  border-color: #2563eb !important;
+  color: #2563eb !important;
+}
+
+[data-theme='light'] .grid-title-group h2 {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .grid-header {
+  border-bottom-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .card-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .movie-card-placeholder {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme='light'] .card-details-btn {
+  color: #475569 !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme='light'] .card-details-btn:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Light Mode Booking Page */
+[data-theme='light'] .booking-container {
+  background-color: #f8fafc !important;
+}
+
+[data-theme='light'] .booking-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme='light'] .booking-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .section-label {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .category-card {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .category-name {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .category-price {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .counter-label {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .counter-number {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .summary-banner {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .info-label {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .info-value {
+  color: #0f172a !important;
+}
+
+/* Light Mode My Tickets Page */
+[data-theme='light'] .tickets-header h1 {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .tickets-section-label {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .booking-master-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme='light'] .ticket-poster-box {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+}
+
+[data-theme='light'] .ticket-movie-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .detail-tile {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .tile-val {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .ticket-stub-side {
+  background: #f8fafc !important;
+}
+
+[data-theme='light'] .stub-notch {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .pass-modal-card {
+  background: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme='light'] .modal-header {
+  background: #f8fafc !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .modal-header h3 {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .modal-stepper-bar {
+  background: #ffffff !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .seat-badge-large {
+  background: rgba(37, 99, 235, 0.1) !important;
+  border-color: rgba(37, 99, 235, 0.3) !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .thumb-pill {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+/* Light Mode Drawer Overlay */
+[data-theme='light'] .app-drawer {
+  background: #ffffff !important;
+  border-left-color: #e2e8f0 !important;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme='light'] .drawer-header {
+  border-bottom-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .drawer-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .drawer-footer {
+  border-top-color: #e2e8f0 !important;
+}
+
+/* Light Mode Auth Forms */
+[data-theme='light'] .auth-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme='light'] .auth-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .auth-subtitle {
+  color: #64748b !important;
+}
+
+/* ============================================================= */
+/* 6. UNIVERSAL THEME TOGGLE BUTTON STYLING                      */
+/* ============================================================= */
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  background-color: var(--bg-surface-elevated);
+  color: var(--primary-accent);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--badge-bg);
+  border-color: var(--primary-accent);
+  color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow);
+}
+
+.theme-toggle-btn .material-symbols-outlined {
+  font-size: 20px;
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle-btn:active .material-symbols-outlined {
+  transform: rotate(45deg);
+}
+
+/* ============================================================= */
+/* 7. CUSTOM SCROLLBAR                                           */
+/* ============================================================= */
+
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-dark);
+  background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 

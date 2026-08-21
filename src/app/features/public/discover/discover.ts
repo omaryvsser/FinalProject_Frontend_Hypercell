@@ -131,6 +131,25 @@ export class Discover implements OnInit {
     'Horror',
   ];
 
+  getGenreIcon(genre: string): string {
+    switch (genre) {
+      case 'All':
+        return 'local_movies';
+      case 'Science Fiction':
+        return 'rocket_launch';
+      case 'Action':
+        return 'bolt';
+      case 'Comedy':
+        return 'sentiment_very_satisfied';
+      case 'Drama':
+        return 'theater_comedy';
+      case 'Horror':
+        return 'psychology_alt';
+      default:
+        return 'category';
+    }
+  }
+
   readonly filteredMovies = computed(() => {
     const genre = this.selectedGenre();
     const query = this.searchModel().query.toLowerCase().trim();

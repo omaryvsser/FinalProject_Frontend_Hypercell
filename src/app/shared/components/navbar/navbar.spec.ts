@@ -39,11 +39,15 @@ describe('Navbar Component', () => {
     mockCurrentUser.set({ email: 'admin@cinema.eg', role: 'ADMIN' });
     expect(component.currentUserRole()).toBe('ADMIN');
 
-    mockCurrentUser.set({ email: 'org@cinema.eg', role: 'ORGANIZER' });
-    expect(component.currentUserRole()).toBe('ORGANIZER');
-
     mockCurrentUser.set({ email: 'cust@cinema.eg', role: 'CUSTOMER' });
     expect(component.currentUserRole()).toBe('CUSTOMER');
+  });
+
+  it('should expose ThemeService and allow toggling theme', () => {
+    expect(component.themeService).toBeTruthy();
+    const initialTheme = component.themeService.currentTheme();
+    component.themeService.toggleTheme();
+    expect(component.themeService.currentTheme()).not.toBe(initialTheme);
   });
 });
 

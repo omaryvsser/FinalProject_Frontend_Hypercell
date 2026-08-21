@@ -1,290 +1,326 @@
-<!-- Section 1: Basic Information -->
-<div class="form-section">
-  <h3 class="section-title">
-    <span class="material-symbols-outlined icon">movie</span>
-    Basic Movie Details
-  </h3>
-
-  <div class="form-group">
-    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-      <mat-label>Movie Title *</mat-label>
-      <input
-        matInput
-        id="org-movie-title"
-        type="text"
-        placeholder="e.g. Dune: Part Two"
-        [formField]="form().title"
-      />
-      @if (form().title().touched() && form().title().invalid()) {
-        <mat-error>{{ form().title().errors()[0]?.message || 'Movie title is required' }}</mat-error>
-      }
-    </mat-form-field>
-  </div>
-
-  <div class="form-group">
-    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-      <mat-label>Description</mat-label>
-      <textarea
-        matInput
-        id="org-movie-description"
-        rows="3"
-        placeholder="Enter an engaging synopsis..."
-        [formField]="form().description"
-      ></textarea>
-    </mat-form-field>
-  </div>
-
-  <!-- Poster Image Upload + Live Preview -->
-  <div class="form-group">
-    <label class="form-label">Movie Poster</label>
-    <div class="image-upload-wrapper">
-      <input
-        type="file"
-        id="org-poster-file"
-        accept="image/*"
-        class="form-input file-input"
-        (change)="onFileSelected($event)"
-      />
-      <div class="or-divider">── OR Direct Image URL ──</div>
-      <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-        <mat-label>Poster Image URL</mat-label>
-        <input
-          matInput
-          id="org-movie-image-url"
-          type="url"
-          placeholder="https://image.tmdb.org/t/p/w500/..."
-          [formField]="form().imageUrl"
-        />
-      </mat-form-field>
+<div class="movie-form-container">
+  <!-- Section 1: Basic Information -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-icon">
+        <span class="material-symbols-outlined">movie</span>
+      </div>
+      <div>
+        <h4 class="section-title">Movie Details</h4>
+        <p class="section-subtitle">Core information, genre, and duration</p>
+      </div>
     </div>
 
-    @if (form().imageUrl().value()) {
-      <div class="poster-preview-wrapper">
-        <img [src]="form().imageUrl().value()" alt="Movie Poster Preview" class="poster-preview-img" />
-      </div>
-    }
-  </div>
-
-  <div class="form-row">
-    <div class="col-half">
+    <div class="form-fields">
+      <!-- Title -->
       <div class="form-group">
         <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>Genre / Category *</mat-label>
-          <mat-select
-            id="org-movie-category"
-            [formField]="form().category"
-          >
-            @for (cat of categories; track cat) {
-              <mat-option [value]="cat">{{ cat }}</mat-option>
+          <mat-label>Movie Title *</mat-label>
+          <input
+            matInput
+            id="org-movie-title"
+            type="text"
+            placeholder="e.g. Dune: Part Two"
+            [formField]="form().title"
+          />
+          @if (form().title().touched() && form().title().invalid()) {
+            <mat-error>{{ form().title().errors()[0]?.message || 'Movie title is required' }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+          <mat-label>Description / Synopsis</mat-label>
+          <textarea
+            matInput
+            id="org-movie-description"
+            rows="3"
+            placeholder="Enter an engaging synopsis..."
+            [formField]="form().description"
+          ></textarea>
+        </mat-form-field>
+      </div>
+
+      <!-- Genre & Director Row -->
+      <div class="form-row">
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>Genre / Category *</mat-label>
+            <mat-select id="org-movie-category" [formField]="form().category">
+              @for (cat of categories; track cat) {
+                <mat-option [value]="cat">{{ cat }}</mat-option>
+              }
+            </mat-select>
+            @if (form().category().touched() && form().category().invalid()) {
+              <mat-error>{{ form().category().errors()[0]?.message || 'Category is required' }}</mat-error>
             }
+          </mat-form-field>
+        </div>
+
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>Director</mat-label>
+            <input
+              matInput
+              id="org-movie-director"
+              type="text"
+              placeholder="e.g. Denis Villeneuve"
+              [formField]="form().director"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Duration & Language Row -->
+      <div class="form-row">
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>Duration (Minutes) *</mat-label>
+            <input
+              matInput
+              id="org-movie-duration"
+              type="number"
+              placeholder="e.g. 166"
+              [formField]="form().durationMinutes"
+            />
+            @if (form().durationMinutes().touched() && form().durationMinutes().invalid()) {
+              <mat-error>{{ form().durationMinutes().errors()[0]?.message || 'Duration must be greater than 0' }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>Language</mat-label>
+            <input
+              matInput
+              id="org-movie-language"
+              type="text"
+              placeholder="e.g. English, Arabic"
+              [formField]="form().language"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Poster Image Upload + URL -->
+      <div class="media-upload-box">
+        <label class="media-label">
+          <span class="material-symbols-outlined label-icon">image</span>
+          Movie Poster Image
+        </label>
+        
+        <div class="upload-controls">
+          <input
+            type="file"
+            id="org-poster-file"
+            accept="image/*"
+            class="file-input-button"
+            (change)="onFileSelected($event)"
+          />
+          <div class="divider-text">OR PASTE URL</div>
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field url-field">
+            <mat-label>Poster Image URL</mat-label>
+            <input
+              matInput
+              id="org-movie-image-url"
+              type="url"
+              placeholder="https://image.tmdb.org/t/p/w500/..."
+              [formField]="form().imageUrl"
+            />
+          </mat-form-field>
+        </div>
+
+        @if (form().imageUrl().value()) {
+          <div class="poster-preview">
+            <img [src]="form().imageUrl().value()" alt="Movie Poster" class="poster-img" />
+            <div class="poster-info">
+              <span class="material-symbols-outlined check-icon">check_circle</span>
+              <span>Poster link attached</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Showtime & Cinema Venue -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-icon calendar">
+        <span class="material-symbols-outlined">calendar_month</span>
+      </div>
+      <div>
+        <h4 class="section-title">Showtime & Venue</h4>
+        <p class="section-subtitle">Cinema hall selection and showtime dates</p>
+      </div>
+    </div>
+
+    <div class="form-fields">
+      <!-- Cinema Location -->
+      <div class="form-group">
+        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+          <mat-label>Cinema / Venue Location *</mat-label>
+          <mat-select id="org-movie-venue" [formField]="form().venueId">
+            @for (v of venues(); track v.id) {
+              <mat-option [value]="v.id">
+                <span class="venue-option">
+                  <span class="material-symbols-outlined venue-icon">domain</span>
+                  {{ v.name }}
+                </span>
+              </mat-option>
+            }
+          </mat-select>
+          @if (form().venueId().touched() && form().venueId().invalid()) {
+            <mat-error>{{ form().venueId().errors()[0]?.message || 'Cinema is required' }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Start & End Date Time Row -->
+      <div class="form-row">
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>Start Date & Time *</mat-label>
+            <input
+              matInput
+              id="org-movie-start"
+              type="datetime-local"
+              [formField]="form().startDate"
+            />
+            @if (form().startDate().touched() && form().startDate().invalid()) {
+              <mat-error>{{ form().startDate().errors()[0]?.message || 'Start date is required' }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="col-half">
+          <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+            <mat-label>End Date & Time *</mat-label>
+            <input
+              matInput
+              id="org-movie-end"
+              type="datetime-local"
+              [formField]="form().endDate"
+            />
+            @if (form().endDate().touched() && form().endDate().invalid()) {
+              <mat-error>{{ form().endDate().errors()[0]?.message || 'End date is required' }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Publication Status -->
+      <div class="form-group">
+        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+          <mat-label>Publication Status *</mat-label>
+          <mat-select id="org-movie-status" [formField]="form().status">
+            <mat-option value="PUBLISHED">
+              <span class="status-option published">
+                <span class="status-dot published"></span>
+                PUBLISHED — Live on website
+              </span>
+            </mat-option>
+            <mat-option value="DRAFT">
+              <span class="status-option draft">
+                <span class="status-dot draft"></span>
+                DRAFT — Hidden / In Progress
+              </span>
+            </mat-option>
+            <mat-option value="COMPLETED">
+              <span class="status-option completed">
+                <span class="status-dot completed"></span>
+                COMPLETED — Archived
+              </span>
+            </mat-option>
           </mat-select>
         </mat-form-field>
       </div>
     </div>
-
-    <div class="col-half">
-      <div class="form-group">
-        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>Director</mat-label>
-          <input
-            matInput
-            id="org-movie-director"
-            type="text"
-            placeholder="e.g. Denis Villeneuve"
-            [formField]="form().director"
-          />
-        </mat-form-field>
-      </div>
-    </div>
   </div>
 
-  <div class="form-row">
-    <div class="col-half">
-      <div class="form-group">
-        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>Duration (Minutes) *</mat-label>
-          <input
-            matInput
-            id="org-movie-duration"
-            type="number"
-            placeholder="e.g. 166"
-            [formField]="form().durationMinutes"
-          />
-          @if (form().durationMinutes().touched() && form().durationMinutes().invalid()) {
-            <mat-error>{{ form().durationMinutes().errors()[0]?.message || 'Duration must be greater than 0' }}</mat-error>
-          }
-        </mat-form-field>
+  <!-- Section 3: Pricing & Dynamic Seat Tiers -->
+  <div class="form-section">
+    <div class="section-header tier-header">
+      <div class="section-icon purple">
+        <span class="material-symbols-outlined">confirmation_number</span>
       </div>
-    </div>
-
-    <div class="col-half">
-      <div class="form-group">
-        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>Language</mat-label>
-          <input
-            matInput
-            id="org-movie-language"
-            type="text"
-            placeholder="e.g. English, Arabic"
-            [formField]="form().language"
-          />
-        </mat-form-field>
+      <div>
+        <h4 class="section-title">Seat Categories & Pricing</h4>
+        <p class="section-subtitle">Define pricing tiers and available capacity</p>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- Section 2: Showtime & Cinema Venue -->
-<div class="form-section">
-  <h3 class="section-title">
-    <span class="material-symbols-outlined icon">calendar_month</span>
-    Showtime & Venue Configuration
-  </h3>
-
-  <div class="form-row">
-    <div class="col-half">
-      <div class="form-group">
-        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>Start Date & Time *</mat-label>
-          <input
-            matInput
-            id="org-movie-start"
-            type="datetime-local"
-            [formField]="form().startDate"
-          />
-          @if (form().startDate().touched() && form().startDate().invalid()) {
-            <mat-error>{{ form().startDate().errors()[0]?.message || 'Start date is required' }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </div>
-
-    <div class="col-half">
-      <div class="form-group">
-        <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-          <mat-label>End Date & Time *</mat-label>
-          <input
-            matInput
-            id="org-movie-end"
-            type="datetime-local"
-            [formField]="form().endDate"
-          />
-          @if (form().endDate().touched() && form().endDate().invalid()) {
-            <mat-error>{{ form().endDate().errors()[0]?.message || 'End date is required' }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-      <mat-label>Cinema / Venue Location *</mat-label>
-      <mat-select
-        id="org-movie-venue"
-        [formField]="form().venueId"
+      <button
+        type="button"
+        class="btn-add-category"
+        (click)="addSeatCategory()"
       >
-        @for (v of venues(); track v.id) {
-          <mat-option [value]="v.id">{{ v.name }}</mat-option>
-        }
-      </mat-select>
-      @if (form().venueId().touched() && form().venueId().invalid()) {
-        <mat-error>{{ form().venueId().errors()[0]?.message || 'Cinema is required' }}</mat-error>
-      }
-    </mat-form-field>
-  </div>
+        <span class="material-symbols-outlined icon">add</span>
+        Add Tier
+      </button>
+    </div>
 
-  <div class="form-group">
-    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-      <mat-label>Publication Status *</mat-label>
-      <mat-select
-        id="org-movie-status"
-        [formField]="form().status"
-      >
-        <mat-option value="DRAFT">DRAFT (Hidden)</mat-option>
-        <mat-option value="PUBLISHED">PUBLISHED (Active)</mat-option>
-        <mat-option value="COMPLETED">COMPLETED (Archived)</mat-option>
-      </mat-select>
-    </mat-form-field>
-  </div>
-</div>
-
-<!-- Section 3: Pricing & Dynamic Seat Tiers -->
-<div class="form-section">
-  <div class="section-header-row">
-    <h3 class="section-title">
-      <span class="material-symbols-outlined icon">confirmation_number</span>
-      Seat Categories & Pricing Tiers
-    </h3>
-    <button
-      type="button"
-      class="btn-add-category"
-      (click)="addSeatCategory()"
-    >
-      <span class="material-symbols-outlined icon">add</span>
-      Add Tier
-    </button>
-  </div>
-
-  <div class="seat-categories-container">
-    @for (cat of seatCategories()(); track $index; let i = $index) {
-      <div class="seat-category-row">
-        <div class="seat-cat-header">
-          <span class="seat-cat-badge">Tier {{ i + 1 }}</span>
-          @if (seatCategories()().length > 1) {
-            <button
-              type="button"
-              class="btn-remove-category"
-              (click)="removeSeatCategory(i)"
-              aria-label="Remove tier"
-            >
-              <span class="material-symbols-outlined">delete</span>
-            </button>
-          }
-        </div>
-
-        <div class="seat-cat-fields">
-          <div class="cat-col-type">
-            <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-              <mat-label>Category</mat-label>
-              <mat-select
-                [value]="cat.name"
-                (selectionChange)="cat.name = $event.value"
+    <div class="seat-categories-container">
+      @for (cat of seatCategories()(); track $index; let i = $index) {
+        <div class="seat-category-row">
+          <div class="seat-cat-header">
+            <span class="seat-cat-badge">Tier {{ i + 1 }}</span>
+            @if (seatCategories()().length > 1) {
+              <button
+                type="button"
+                class="btn-remove-category"
+                (click)="removeSeatCategory(i)"
+                aria-label="Remove tier"
               >
-                @for (opt of categoryOptions; track opt) {
-                  <mat-option [value]="opt">{{ opt }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            }
           </div>
 
-          <div class="cat-col-price">
-            <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-              <mat-label>Price (EGP)</mat-label>
-              <input
-                matInput
-                type="number"
-                min="0"
-                [value]="cat.price"
-                (input)="cat.price = +$any($event.target).value"
-              />
-            </mat-form-field>
-          </div>
+          <div class="seat-cat-fields">
+            <div class="cat-col-type">
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>Category</mat-label>
+                <mat-select
+                  [value]="cat.name"
+                  (selectionChange)="cat.name = $event.value"
+                >
+                  @for (opt of categoryOptions; track opt) {
+                    <mat-option [value]="opt">{{ opt }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
 
-          <div class="cat-col-seats">
-            <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
-              <mat-label>Seats</mat-label>
-              <input
-                matInput
-                type="number"
-                min="1"
-                [value]="cat.totalSeats"
-                (input)="cat.totalSeats = +$any($event.target).value"
-              />
-            </mat-form-field>
+            <div class="cat-col-price">
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>Price (EGP)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="0"
+                  [value]="cat.price"
+                  (input)="cat.price = +$any($event.target).value"
+                />
+              </mat-form-field>
+            </div>
+
+            <div class="cat-col-seats">
+              <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                <mat-label>Seats</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="1"
+                  [value]="cat.totalSeats"
+                  (input)="cat.totalSeats = +$any($event.target).value"
+                />
+              </mat-form-field>
+            </div>
           </div>
         </div>
-      </div>
-    }
+      }
+    </div>
   </div>
 </div>

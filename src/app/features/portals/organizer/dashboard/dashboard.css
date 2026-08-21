@@ -1,9 +1,9 @@
 :host {
   display: block;
   min-height: 100vh;
-  background-color: var(--bg-dark, #0f172a);
-  color: var(--text-main, #ffffff);
-  font-family: var(--font-family, 'Inter', -apple-system, sans-serif);
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-family);
   box-sizing: border-box;
 }
 
@@ -12,33 +12,34 @@
 }
 
 .organizer-dashboard {
-  max-width: 1440px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 3rem 1.5rem;
+  padding: 2rem 1.5rem 3.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  font-family: var(--font-family, 'Inter', -apple-system, sans-serif);
+  gap: 1.75rem;
 }
 
 .workspace-panel {
-  background-color: var(--bg-card, #1e293b);
-  border: 1px solid var(--border-subtle, #334155);
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
   border-radius: 16px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .organizer-dashboard {
-    padding: 1rem 0.85rem 2rem 0.85rem;
+    padding: 1.25rem 1rem 2.5rem 1rem;
     gap: 1.25rem;
   }
   .workspace-panel {
     padding: 1rem;
-    border-radius: 12px;
+    border-radius: 14px;
   }
 }
 
@@ -50,7 +51,7 @@
 
 .drawer-footer {
   padding: 1.25rem 0 0 0;
-  border-top: 1px solid #334155;
+  border-top: 1px solid var(--border-medium);
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -60,8 +61,8 @@
 
 .btn-cancel {
   background-color: transparent;
-  border: 1px solid #334155;
-  color: #94a3b8;
+  border: 1px solid var(--border-medium);
+  color: var(--text-secondary);
   padding: 0.65rem 1.35rem;
   border-radius: 10px;
   font-size: 0.875rem;
@@ -71,9 +72,9 @@
 }
 
 .btn-cancel:hover {
-  background-color: rgba(255, 255, 255, 0.06);
-  color: #ffffff;
-  border-color: #475569;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-active);
 }
 
 .btn-save-icon {
@@ -83,16 +84,16 @@
 }
 
 .btn-save {
-  background: linear-gradient(135deg, #38bdf8, #0284c7);
+  background: var(--primary-gradient);
   border: none;
-  color: #0f172a;
+  color: var(--primary-btn-text);
   padding: 0.65rem 1.5rem;
   border-radius: 10px;
   font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+  box-shadow: var(--shadow-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -100,9 +101,9 @@
 }
 
 .btn-save:hover {
-  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+  background: var(--primary-gradient-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(56, 189, 248, 0.4);
+  box-shadow: var(--shadow-glow);
 }
 
 .btn-save:active {

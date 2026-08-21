@@ -7,5 +7,5 @@ import { Component, input } from '@angular/core';
   styleUrl: './organizer-header.css'
 })
 export class OrganizerHeaderComponent {
-  organizerEmail = input<string>('organizer@cinema.eg');
+  organizerEmail = input<string>('');
 }
