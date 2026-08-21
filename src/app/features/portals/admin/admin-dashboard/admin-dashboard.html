@@ -24,8 +24,8 @@
       (addClick)="openAddDrawer()"
     ></app-admin-tabs>
 
-    <!-- Reusable Data Table Container & Pagination -->
-    <app-data-table
+    <!-- Reusable Admin Table Container & Pagination -->
+    <app-admin-table
       [data]="currentTableData()"
       [columns]="tableColumns()"
       [actions]="tableActions()"
@@ -35,29 +35,41 @@
       [currentPage]="currentPage()"
       [totalPages]="totalPages()"
       [pagesArray]="pagesArray()"
+      [pageSize]="pageSize()"
       (edit)="openEditDrawer($event)"
       (delete)="deleteItem($event)"
       (roleChange)="updateUserRole($event.row, $event.newRole)"
       (pageChange)="goToPage($event)"
-    ></app-data-table>
+    ></app-admin-table>
   </section>
 
 
-  <!-- Slide-Over Right Drawer Component -->
-  <app-slide-over-drawer
+  <!-- Dynamic Shared Drawer Component with Configuration Map -->
+  <app-drawer
     [isOpen]="isDrawerOpen()"
-    [activeTab]="activeTab()"
-    [selectedItem]="selectedItem()"
-    [singularTabLabel]="singularTabLabel()"
-    [currentUserEmail]="currentUserEmail()"
-    [venues]="venues()"
-    [userForm]="userForm"
-    [organizerForm]="organizerForm"
-    [venueForm]="venueForm"
-    [movieForm]="movieForm"
-    [movieModel]="movieModel"
-    (closeDrawer)="closeDrawer()"
-    (saveItem)="saveDrawerItem()"
-  ></app-slide-over-drawer>
+    [title]="activeDrawerConfig()?.title || ''"
+    [subtitle]="activeDrawerConfig()?.subtitle || ''"
+    [wide]="activeDrawerConfig()?.wide || false"
+    (close)="closeDrawer()"
+  >
+    @if (isDrawerOpen() && activeDrawerConfig(); as config) {
+      <form class="drawer-form" (submit)="$event.preventDefault(); saveDrawerItem()">
+        <ng-container
+          *ngComponentOutlet="config.component; inputs: config.inputs"
+        ></ng-container>
+
+        <footer class="drawer-footer">
+          <button type="button" class="btn-cancel" (click)="closeDrawer()">
+            Cancel
+          </button>
+          <button type="button" class="btn-save" (click)="saveDrawerItem()">
+            <span class="material-symbols-outlined btn-save-icon">save</span>
+            {{ config.submitLabel }}
+          </button>
+        </footer>
+      </form>
+    }
+  </app-drawer>
 </div>
+
 

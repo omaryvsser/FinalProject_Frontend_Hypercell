@@ -23,8 +23,8 @@
       (addClick)="openAddDrawer()"
     ></app-organizer-tabs>
 
-    <!-- Reusable Data Table Container & Pagination -->
-    <app-data-table
+    <!-- Reusable Table Container & Pagination -->
+    <app-admin-table
       [data]="paginatedMovies()"
       [columns]="tableColumns"
       [actions]="tableActions"
@@ -38,20 +38,35 @@
       (edit)="openEditDrawer($event)"
       (delete)="deleteMovie($event)"
       (pageChange)="goToPage($event)"
-    ></app-data-table>
-
+    ></app-admin-table>
   </section>
 
-  <!-- Slide-Over Right Drawer Component -->
-  <app-organizer-slide-over-drawer
-    #drawerComponent
+  <!-- Dynamic Shared Drawer Component with Configuration Map -->
+  <app-drawer
     [isOpen]="isDrawerOpen()"
-    [selectedMovie]="selectedMovie()"
-    [venues]="venues()"
-    [movieForm]="movieForm"
-    [movieModel]="movieModel"
-    (closeDrawer)="closeDrawer()"
-    (saveMovie)="saveDrawerMovie()">
-  </app-organizer-slide-over-drawer>
+    [title]="activeDrawerConfig()?.title || ''"
+    [subtitle]="activeDrawerConfig()?.subtitle || ''"
+    [wide]="activeDrawerConfig()?.wide || true"
+    (close)="closeDrawer()"
+  >
+    @if (activeDrawerConfig(); as config) {
+      <form class="drawer-form" (submit)="$event.preventDefault(); saveDrawerMovie()">
+        <ng-container
+          *ngComponentOutlet="config.component; inputs: config.inputs"
+        ></ng-container>
+
+        <footer class="drawer-footer">
+          <button type="button" class="btn-cancel" (click)="closeDrawer()">
+            Cancel
+          </button>
+          <button type="button" class="btn-save" (click)="saveDrawerMovie()">
+            <span class="material-symbols-outlined btn-save-icon">save</span>
+            {{ config.submitLabel }}
+          </button>
+        </footer>
+      </form>
+    }
+  </app-drawer>
 </div>
+
 

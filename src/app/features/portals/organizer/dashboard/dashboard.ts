@@ -1,5 +1,5 @@
-import { Component, signal, computed, inject, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { form, required, min } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -7,8 +7,10 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { OrganizerHeaderComponent } from './components/organizer-header/organizer-header';
 import { OrganizerMetricCardsComponent } from './components/organizer-metric-cards/organizer-metric-cards';
 import { OrganizerTabsComponent, OrganizerTabType } from './components/organizer-tabs/organizer-tabs';
-import { DataTableComponent, TableColumn, TableAction } from '../../../../shared/components/data-table/data-table';
-import { OrganizerSlideOverDrawerComponent } from './components/organizer-slide-over-drawer/organizer-slide-over-drawer';
+import { AdminTableComponent, TableColumn, TableAction } from '../../../../shared/components/admin-table/admin-table';
+import { DrawerComponent } from '../../../../shared/components/drawer/drawer';
+import { ORGANIZER_DRAWER_CONFIG } from './config/organizer-drawer.config';
+import { SeatCategoryInput } from './components/forms/organizer-movie-form/organizer-movie-form';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { EventService, EventPayload } from '../../../../core/services/event.service';
 import { VenueService, Venue } from '../../../../core/services/venue.service';
@@ -36,17 +38,19 @@ export interface OrganizerMovie {
   standalone: true,
   imports: [
     CommonModule,
+    NgComponentOutlet,
     MatDialogModule,
     OrganizerHeaderComponent,
     OrganizerMetricCardsComponent,
     OrganizerTabsComponent,
-    DataTableComponent,
-    OrganizerSlideOverDrawerComponent
+    AdminTableComponent,
+    DrawerComponent,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard implements OnInit {
+
 
   private router = inject(Router);
   private eventService = inject(EventService);
@@ -91,6 +95,28 @@ export class Dashboard implements OnInit {
 
   // --- Venue Signals ---
   venues = signal<Venue[]>([]);
+
+  // --- Seat Categories State ---
+  readonly seatCategories = signal<SeatCategoryInput[]>([
+    { name: 'STANDARD', price: 100, totalSeats: 50 },
+    { name: 'VIP', price: 150, totalSeats: 20 },
+    { name: 'IMAX', price: 200, totalSeats: 20 },
+  ]);
+
+  readonly activeDrawerConfig = computed(() => {
+    const config = ORGANIZER_DRAWER_CONFIG['MOVIE'];
+    if (!config) return null;
+    const isEdit = !!this.selectedMovie();
+    return {
+      component: config.component,
+      wide: config.wide,
+      title: config.title(isEdit),
+      subtitle: config.subtitle,
+      submitLabel: config.submitLabel(isEdit),
+      inputs: config.getInputs(this),
+    };
+  });
+
 
   // --- Signal Form Model & Schema ---
   readonly movieModel = signal({
@@ -219,8 +245,8 @@ export class Dashboard implements OnInit {
       finalImageUrl = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba';
     }
 
-    // 🟢 Extract configured seat categories from the drawer component
-    const seatCategoriesPayload = this.drawerComponent?.seatCategories()
+    // 🟢 Extract configured seat categories
+    const seatCategoriesPayload = this.seatCategories()
       .filter(cat => cat.name && cat.price && cat.totalSeats)
       .map(cat => ({
         name: cat.name,
@@ -341,8 +367,8 @@ export class Dashboard implements OnInit {
               totalSeats: Number(cat.totalSeats)
             }));
 
-            // Set the existing categories on the drawer component signal
-            this.drawerComponent?.seatCategories.set(mappedCategories);
+            // Set the existing categories on the signal
+            this.seatCategories.set(mappedCategories);
           } else {
             this.setDefaultDrawerCategories();
           }
@@ -363,7 +389,7 @@ export class Dashboard implements OnInit {
   }
 
   private setDefaultDrawerCategories(): void {
-    this.drawerComponent?.seatCategories.set([
+    this.seatCategories.set([
       { name: 'STANDARD', price: 100, totalSeats: 50 },
       { name: 'VIP', price: 150, totalSeats: 20 },
       { name: 'IMAX', price: 200, totalSeats: 20 }
@@ -461,6 +487,4 @@ export class Dashboard implements OnInit {
       },
     });
   }
-  @ViewChild(OrganizerSlideOverDrawerComponent)
-  drawerComponent!: OrganizerSlideOverDrawerComponent;
 }

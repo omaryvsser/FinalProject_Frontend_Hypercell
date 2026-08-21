@@ -1,0 +1,54 @@
+<div class="form-section">
+  <h3 class="section-title">
+    <span class="material-symbols-outlined icon">corporate_fare</span>
+    Organization Profile
+  </h3>
+
+  <div class="form-group">
+    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+      <mat-label>Organizer Contact Name *</mat-label>
+      <input
+        matInput
+        id="org-name"
+        type="text"
+        placeholder="e.g. Mohamed Hassan"
+        [formField]="form().name"
+      />
+      @if (form().name().touched() && form().name().invalid()) {
+        <mat-error>{{ form().name().errors()[0]?.message || 'Organizer contact name is required' }}</mat-error>
+      }
+    </mat-form-field>
+  </div>
+
+  <div class="form-group">
+    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+      <mat-label>Contact Email *</mat-label>
+      <input
+        matInput
+        id="org-email"
+        type="email"
+        placeholder="e.g. contact@ciff.eg"
+        [formField]="form().email"
+      />
+      @if (form().email().touched() && form().email().invalid()) {
+        <mat-error>{{ form().email().errors()[0]?.message || 'Contact email is required' }}</mat-error>
+      }
+    </mat-form-field>
+  </div>
+
+  <div class="form-group">
+    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+      <mat-label>Company / Organization *</mat-label>
+      <input
+        matInput
+        id="org-company"
+        type="text"
+        placeholder="e.g. CIFF Foundation"
+        [formField]="form().company"
+      />
+      @if (form().company().touched() && form().company().invalid()) {
+        <mat-error>{{ form().company().errors()[0]?.message || 'Company name is required' }}</mat-error>
+      }
+    </mat-form-field>
+  </div>
+</div>

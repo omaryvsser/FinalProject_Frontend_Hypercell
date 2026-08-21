@@ -1,0 +1,33 @@
+<div class="drawer-wrapper" [class.open]="isOpen()">
+  <div class="drawer-backdrop" (click)="onBackdropClick()"></div>
+
+  <aside
+    class="drawer-panel"
+    [class.wide-panel]="wide()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="title()"
+  >
+    <header class="drawer-header">
+      <div class="drawer-title-group">
+        <h2 class="drawer-title">{{ title() }}</h2>
+        @if (subtitle()) {
+          <p class="drawer-subtitle">{{ subtitle() }}</p>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="btn-close-drawer"
+        (click)="onClose()"
+        aria-label="Close drawer"
+      >
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      <ng-content></ng-content>
+    </div>
+  </aside>
+</div>

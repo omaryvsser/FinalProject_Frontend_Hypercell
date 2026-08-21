@@ -178,4 +178,28 @@ describe('AdminDashboardComponent (Signal Logic)', () => {
     expect(component.tableColumns().length).toBe(4);
     expect(component.tableActions().length).toBe(2);
   });
+
+  it('should resolve activeDrawerConfig dynamically based on activeTab', () => {
+    expect(component.activeDrawerConfig()?.title).toBe('Add New User');
+
+    component.setActiveTab('VENUES');
+    expect(component.activeDrawerConfig()?.title).toBe('Add New Venue');
+  });
+
+  it('should load movies data and pagination when switching to MOVIES tab', () => {
+    component.setActiveTab('MOVIES');
+    expect(component.activeTab()).toBe('MOVIES');
+    expect(component.currentPage()).toBe(1);
+    expect(component.currentTableData().length).toBe(5);
+    expect(component.totalItems()).toBe(8);
+    expect(component.totalPages()).toBe(2);
+    expect(component.pagesArray()).toEqual([1, 2]);
+
+    component.goToPage(2);
+    expect(component.currentPage()).toBe(2);
+    expect(eventServiceMock.getOrganizerEvents).toHaveBeenCalledWith(2, 5);
+    expect(component.currentTableData().length).toBe(3);
+  });
 });
+
+

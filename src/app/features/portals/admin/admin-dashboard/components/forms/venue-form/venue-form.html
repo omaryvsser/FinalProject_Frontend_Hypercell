@@ -1,0 +1,54 @@
+<div class="form-section">
+  <h3 class="section-title">
+    <span class="material-symbols-outlined icon">location_on</span>
+    Venue Details & Capacity
+  </h3>
+
+  <div class="form-group">
+    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+      <mat-label>Venue Name *</mat-label>
+      <input
+        matInput
+        id="venue-name"
+        type="text"
+        placeholder="e.g. Vox Cinema Mall of Egypt"
+        [formField]="form().name"
+      />
+      @if (form().name().touched() && form().name().invalid()) {
+        <mat-error>{{ form().name().errors()[0]?.message || 'Venue name is required' }}</mat-error>
+      }
+    </mat-form-field>
+  </div>
+
+  <div class="form-group">
+    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+      <mat-label>Street Address *</mat-label>
+      <input
+        matInput
+        id="venue-address"
+        type="text"
+        placeholder="e.g. Wahhat Rd, 6th of October City, Giza"
+        [formField]="form().address"
+      />
+      @if (form().address().touched() && form().address().invalid()) {
+        <mat-error>{{ form().address().errors()[0]?.message || 'Address is required' }}</mat-error>
+      }
+    </mat-form-field>
+  </div>
+
+  <div class="form-group">
+    <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+      <mat-label>Total Seat Capacity *</mat-label>
+      <input
+        matInput
+        id="venue-capacity"
+        type="number"
+        placeholder="e.g. 450"
+        [formField]="form().capacity"
+      />
+      @if (form().capacity().touched() && form().capacity().invalid()) {
+        <mat-error>{{ form().capacity().errors()[0]?.message || 'Capacity must be at least 10' }}</mat-error>
+      }
+    </mat-form-field>
+  </div>
+</div>

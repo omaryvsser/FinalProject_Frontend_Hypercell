@@ -1,12 +1,13 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { form, required, email, min } from '@angular/forms/signals';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AdminHeaderComponent } from './components/admin-header/admin-header';
 import { MetricCardsComponent } from './components/metric-cards/metric-cards';
 import { AdminTabsComponent } from './components/admin-tabs/admin-tabs';
-import { DataTableComponent, TableColumn, TableAction } from '../../../../shared/components/data-table/data-table';
-import { SlideOverDrawerComponent } from './components/slide-over-drawer/slide-over-drawer';
+import { AdminTableComponent, TableColumn, TableAction } from '../../../../shared/components/admin-table/admin-table';
+import { DrawerComponent } from '../../../../shared/components/drawer/drawer';
+import { ADMIN_DRAWER_CONFIG } from './config/admin-drawer.config';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 import { UserService } from '../../../../core/services/user.service';
 import { VenueService } from '../../../../core/services/venue.service';
@@ -15,7 +16,10 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { UserDto, UserRole } from '../../../../core/models/user.model';
 import { EventResponse } from '../../../../core/models/event.model';
 import { PaginatedResponse } from '../../../../core/models/pagination.model';
-
+import { UserFormModel } from './components/forms/user-form/user-form';
+import { OrganizerFormModel } from './components/forms/organizer-form/organizer-form';
+import { VenueFormModel } from './components/forms/venue-form/venue-form';
+import { MovieFormModel } from './components/forms/movie-form/movie-form';
 
 /**
  * Union type representing the currently active management tab in the Admin Dashboard.
@@ -75,19 +79,20 @@ export interface MovieItem {
  * - Movies / Events
  *
  * Provides functionality for adding, editing, updating roles, deleting items with confirmation,
- * slide-over drawer forms, and dynamic dashboard metrics.
+ * dynamic drawer configuration maps, and dynamic dashboard metrics.
  */
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [
     CommonModule,
+    NgComponentOutlet,
     MatDialogModule,
     AdminHeaderComponent,
     MetricCardsComponent,
     AdminTabsComponent,
-    DataTableComponent,
-    SlideOverDrawerComponent
+    AdminTableComponent,
+    DrawerComponent,
   ],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
@@ -98,6 +103,7 @@ export class AdminDashboardComponent implements OnInit {
   private readonly venueService = inject(VenueService);
   private readonly eventService = inject(EventService);
   private readonly authService = inject(AuthService);
+
   private readonly dialog = inject(MatDialog);
 
   // --- Core State Signals ---
@@ -240,12 +246,12 @@ export class AdminDashboardComponent implements OnInit {
   });
 
   // 4. Movie Signal Form
-  readonly movieModel = signal({
+  readonly movieModel = signal<MovieFormModel>({
     title: '',
     description: '',
     imageUrl: '',
-    genre: 'Action',
-    status: 'PUBLISHED' as 'DRAFT' | 'PUBLISHED',
+    category: 'Action',
+    status: 'PUBLISHED',
     director: '',
     durationMinutes: 120,
     language: 'English',
@@ -255,7 +261,7 @@ export class AdminDashboardComponent implements OnInit {
   });
   readonly movieForm = form(this.movieModel, (schema) => {
     required(schema.title, { message: 'Movie title is required' });
-    required(schema.genre, { message: 'Genre is required' });
+    required(schema.category, { message: 'Genre is required' });
     required(schema.startDate, { message: 'Start time is required' });
     required(schema.endDate, { message: 'End time is required' });
     required(schema.venueId, { message: 'Cinema is required' });
@@ -295,6 +301,20 @@ export class AdminDashboardComponent implements OnInit {
       error: () => {},
     });
 
+    this.venueService.getVenues().subscribe({
+      next: (venueList) => {
+        if (this.venues().length === 0 && venueList?.length) {
+          this.venues.set(venueList.map(v => ({
+            id: String(v.id),
+            name: v.name,
+            address: v.address || 'Cairo, Egypt',
+            capacity: v.capacity || 500,
+          })));
+        }
+      },
+      error: () => {},
+    });
+
     this.eventService.getOrganizerEvents(1, 1).subscribe({
       next: (res) => {
         this.totalMoviesCount.set(res.totalElements || (res.content?.length ?? 0));
@@ -305,6 +325,7 @@ export class AdminDashboardComponent implements OnInit {
 
   /**
    * Fetches page-by-page server-side paginated data from REST API Endpoints (page size = 5).
+
    * Maps backend entities into UI interfaces for Users, Organizers, Venues, or Movies.
    */
   loadAdminData(page: number = this.currentPage()): void {
@@ -313,7 +334,7 @@ export class AdminDashboardComponent implements OnInit {
 
     if (currentTab === 'USERS' || currentTab === 'ORGANIZERS') {
       // Fetch users with pagination
-      this.userService.getPaginatedUsers(page, 5).subscribe({
+      this.userService.getPaginatedUsers(page, this.pageSize()).subscribe({
         next: (res: PaginatedResponse<UserDto>) => {
           // Map users DTO array to UI UserItem format
           const mappedUsers: UserItem[] = (res.content || []).map((u) => ({
@@ -349,7 +370,7 @@ export class AdminDashboardComponent implements OnInit {
       });
     } else if (currentTab === 'VENUES') {
       // Fetch venues with pagination
-      this.venueService.getPaginatedVenues(page, 5).subscribe({
+      this.venueService.getPaginatedVenues(page, this.pageSize()).subscribe({
         next: (res) => {
           const mappedVenues: VenueItem[] = (res.content || []).map((v) => ({
             id: String(v.id),
@@ -369,20 +390,32 @@ export class AdminDashboardComponent implements OnInit {
       });
     } else if (currentTab === 'MOVIES') {
       // Fetch movies/events with pagination
-      this.eventService.getOrganizerEvents(page, 5).subscribe({
-        next: (res) => {
+      this.eventService.getOrganizerEvents(page, this.pageSize()).subscribe({
+        next: (res: PaginatedResponse<EventResponse>) => {
           const eventList: EventResponse[] = res.content || [];
-          const mappedMovies: MovieItem[] = eventList.map((e) => ({
+          const mappedMovies: MovieItem[] = eventList.map((e: any) => ({
+            ...e,
             id: String(e.id),
             title: e.title,
             genre: e.category || 'General',
-            duration: '120 min',
+            category: e.category || 'General',
+            duration: e.durationMinutes ? `${e.durationMinutes} min` : '120 min',
+            durationMinutes: e.durationMinutes || 120,
             rating: 'PG-13',
             releaseDate: e.startDate ? e.startDate.split('T')[0] : '2026-08-01',
+            startDate: e.startDate || '',
+            endDate: e.endDate || e.startDate || '',
+            description: e.description || '',
+            imageUrl: e.imageUrl || '',
+            director: e.director || '',
+            language: e.language || 'English',
+            venueName: e.venueName || '',
+            venueId: e.venueId || e.venue?.id,
+            status: e.status || 'PUBLISHED',
           }));
           this.movies.set(mappedMovies);
           this.totalServerPages.set(res.totalPages || 1);
-          this.totalServerElements.set(res.totalElements || mappedMovies.length);
+          this.totalServerElements.set(res.totalElements ?? mappedMovies.length);
           if (res.totalElements != null) {
             this.totalMoviesCount.set(res.totalElements);
           }
@@ -393,10 +426,24 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
-  /** Total elements count returned by server or fallback to local active list length */
-  totalItems = computed(() => this.totalServerElements() || this.currentTableData().length);
+  /** Total elements count returned by server or fallback to tab totals */
+  totalItems = computed(() => {
+    switch (this.activeTab()) {
+      case 'USERS': return this.totalUsersCount();
+      case 'ORGANIZERS': return this.totalOrganizersCount();
+      case 'VENUES': return this.totalVenuesCount();
+      case 'MOVIES': return this.totalMoviesCount();
+    }
+  });
+
   /** Total pagination pages count guaranteed to be at least 1 */
-  totalPages = computed(() => Math.max(1, this.totalServerPages()));
+  totalPages = computed(() => {
+    if (this.totalServerPages() > 0) {
+      return this.totalServerPages();
+    }
+    const total = this.totalItems();
+    return Math.max(1, Math.ceil(total / this.pageSize()));
+  });
 
   // Server-side paginated content accessors
   paginatedUsers = computed(() => this.users());
@@ -410,8 +457,9 @@ export class AdminDashboardComponent implements OnInit {
     return Array.from({ length: total }, (_, i) => i + 1);
   });
 
+
   /** Returns singular entity label for display in UI drawer titles */
-  singularTabLabel = computed(() => {
+  readonly singularTabLabel = computed(() => {
     switch (this.activeTab()) {
       case 'USERS': return 'User';
       case 'ORGANIZERS': return 'Organizer';
@@ -419,6 +467,24 @@ export class AdminDashboardComponent implements OnInit {
       case 'MOVIES': return 'Movie';
     }
   });
+
+
+  readonly activeDrawerConfig = computed(() => {
+    const tab = this.activeTab();
+    const config = ADMIN_DRAWER_CONFIG[tab];
+    if (!config) return null;
+    const isEdit = !!this.selectedItem();
+    const label = this.singularTabLabel();
+    return {
+      component: config.component,
+      wide: config.wide ?? false,
+      title: config.title(isEdit, label),
+      subtitle: config.subtitle(isEdit, label),
+      submitLabel: config.submitLabel(isEdit, label),
+      inputs: config.getInputs(this),
+    };
+  });
+
 
 
   // --- User Interface Actions & Handlers ---
@@ -497,7 +563,7 @@ export class AdminDashboardComponent implements OnInit {
       title: '',
       description: '',
       imageUrl: '',
-      genre: 'Action',
+      category: 'Action',
       status: 'PUBLISHED',
       director: '',
       durationMinutes: 120,
@@ -540,7 +606,7 @@ export class AdminDashboardComponent implements OnInit {
           title: item.title || '',
           description: item.description || '',
           imageUrl: item.imageUrl || '',
-          genre: item.genre || 'Action',
+          category: item.category || item.genre || 'Action',
           status: item.status || 'PUBLISHED',
           director: item.director || '',
           durationMinutes: Number(item.durationMinutes || item.duration || 120),
@@ -640,7 +706,7 @@ export class AdminDashboardComponent implements OnInit {
       const payload = {
         title: val.title.trim(),
         description: val.description ? val.description.trim() : '',
-        category: val.genre || 'Action',
+        category: val.category || 'Action',
         startDate: sDate ? (sDate.length === 16 ? `${sDate}:00` : sDate) : '2026-08-25T20:00:00',
         endDate: eDate ? (eDate.length === 16 ? `${eDate}:00` : eDate) : '2026-08-25T22:00:00',
         status: val.status || 'PUBLISHED',

@@ -168,4 +168,11 @@ describe('Dashboard (Organizer Portal)', () => {
     expect(component.tableColumns.length).toBe(4);
     expect(component.tableActions.length).toBe(3);
   });
+
+  it('should resolve activeDrawerConfig dynamically for organizer movie form', () => {
+    expect(component.activeDrawerConfig()?.title).toBe('Add New Movie');
+    expect(component.activeDrawerConfig()?.wide).toBe(true);
+    expect(component.seatCategories().length).toBe(3);
+  });
 });
+

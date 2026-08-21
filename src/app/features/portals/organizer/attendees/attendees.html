@@ -49,15 +49,16 @@
     </mat-card-header>
 
     <mat-card-content>
-      <app-data-table
+      <app-admin-table
         [data]="bookings()"
         [columns]="tableColumns"
         [totalItems]="bookings().length"
         [showPagination]="false"
         emptyMessage="No bookings yet. This movie has not received any bookings."
         emptyIcon="confirmation_number"
-      ></app-data-table>
+      ></app-admin-table>
     </mat-card-content>
+
   </mat-card>
 </section>
 

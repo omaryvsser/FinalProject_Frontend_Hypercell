@@ -1,0 +1,187 @@
+<div class="table-container">
+  @if (data().length === 0) {
+    <div class="empty-state">
+      <div class="empty-box">
+        <span class="material-symbols-outlined empty-icon">{{ emptyIcon() || 'remove_circle_outline' }}</span>
+        <p class="empty-text">{{ emptyMessage() }}</p>
+      </div>
+    </div>
+  } @else {
+    <table class="data-table">
+      <thead>
+        <tr>
+          @for (col of columns(); track col.key) {
+            <th>{{ col.header }}</th>
+          }
+          @if (actions().length > 0) {
+            <th class="text-right">Actions</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of data(); track row.id || $index) {
+          <tr [class.highlight-row]="isCurrentUser(row.email)">
+            @for (col of columns(); track col.key) {
+              <td>
+                @switch (col.type) {
+                  @case ('user') {
+                    <div class="cell-name">
+                      {{ getCellValue(row, col) }}
+                      @if (isCurrentUser(row.email)) {
+                        <span class="badge-you">(You)</span>
+                      }
+                    </div>
+                  }
+
+                  @case ('roleSelect') {
+                    <mat-form-field appearance="outline" class="role-select-field" subscriptSizing="dynamic">
+                      <mat-select
+                        [value]="getCellValue(row, col)"
+                        (selectionChange)="onRoleUpdate(row, $event.value)"
+                        [disabled]="isCurrentUser(row.email)"
+                        aria-label="User role"
+                      >
+                        <mat-option value="ADMIN">ADMIN</mat-option>
+                        <mat-option value="ORGANIZER">ORGANIZER</mat-option>
+                        <mat-option value="CUSTOMER">CUSTOMER</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  }
+
+                  @case ('badge') {
+                    <span class="company-tag" [ngClass]="col.badgeClass ? col.badgeClass : ''">
+                      {{ getCellValue(row, col) }}
+                    </span>
+                  }
+
+                  @case ('capacity') {
+                    <span class="capacity-badge">
+                      {{ getCellValue(row, col) }} Seats
+                    </span>
+                  }
+
+                  @case ('rating') {
+                    <span class="capacity-badge blue">{{ getCellValue(row, col) }}</span>
+                  }
+
+                  @case ('date') {
+                    <span class="cell-text-muted">{{ getCellValue(row, col) | date: 'medium' }}</span>
+                  }
+
+                  @case ('currency') {
+                    <span class="cell-text-muted">{{ getCellValue(row, col) | currency: 'EGP':'code':'1.0-2' }}</span>
+                  }
+
+                  @case ('movieTitle') {
+                    <div class="cell-name">
+                      {{ getCellValue(row, col) }}
+                      @if (row.category || row.genre) {
+                        <span class="company-tag">{{ row.category || row.genre }}</span>
+                      }
+                    </div>
+                  }
+
+                  @case ('venuePill') {
+                    <span class="venue-pill">{{ getCellValue(row, col) }}</span>
+                  }
+
+                  @case ('status') {
+                    <span class="status-badge" [attr.data-status]="getCellValue(row, col)">
+                      {{ getCellValue(row, col) }}
+                    </span>
+                  }
+
+                  @case ('attendee') {
+                    <div class="cell-name">
+                      {{ row.customerName }}
+                      <span class="cell-text-muted">{{ row.customerEmail }}</span>
+                    </div>
+                  }
+
+                  @case ('bookingStatus') {
+                    <span class="booking-status" [attr.data-status]="getCellValue(row, col)">
+                      {{ getCellValue(row, col) }}
+                    </span>
+                  }
+
+                  @default {
+                    <span [class.cell-name]="col.key === 'name' || col.key === 'title'" [class.cell-text-muted]="col.key !== 'name' && col.key !== 'title'">
+                      {{ getCellValue(row, col) }}
+                    </span>
+                  }
+                }
+              </td>
+            }
+
+            @if (actions().length > 0) {
+              <td class="text-right">
+                <div class="actions-group">
+                  @for (action of actions(); track action.id) {
+                    @if (!action.hidden || !action.hidden(row)) {
+                      <button
+                        type="button"
+                        class="btn-icon-action"
+                        [class]="action.class || action.cssClass || action.id"
+                        [class.disabled-btn]="action.disabled ? action.disabled(row) : false"
+                        [disabled]="action.disabled ? action.disabled(row) : false"
+                        [title]="action.label"
+                        (click)="onAction(action, row)"
+                      >
+                        <span class="material-symbols-outlined action-icon">{{ action.icon }}</span>
+                      </button>
+                    }
+                  }
+                </div>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+
+@if (showPagination() && totalItems() > 0) {
+  <div class="pagination-bar">
+    <div class="pagination-info">
+      Showing <span class="highlight">{{ (currentPage() - 1) * pageSize() + 1 }}</span> to
+      <span class="highlight">{{ getEndItemIndex() }}</span> of
+      <span class="highlight">{{ totalItems() }}</span> entries
+    </div>
+
+    <div class="pagination-controls">
+      <button
+        type="button"
+        class="btn-page nav"
+        [disabled]="currentPage() <= 1"
+        (click)="onGoToPage(currentPage() - 1)"
+      >
+        <span class="material-symbols-outlined page-icon">chevron_left</span>
+        Previous
+      </button>
+
+      <div class="page-pills">
+        @for (page of pagesArray(); track page) {
+          <button
+            type="button"
+            class="btn-page pill"
+            [class.active]="currentPage() === page"
+            (click)="onGoToPage(page)"
+          >
+            {{ page }}
+          </button>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="btn-page nav"
+        [disabled]="currentPage() >= totalPages() || totalPages() === 0"
+        (click)="onGoToPage(currentPage() + 1)"
+      >
+        Next
+        <span class="material-symbols-outlined page-icon">chevron_right</span>
+      </button>
+    </div>
+  </div>
+}

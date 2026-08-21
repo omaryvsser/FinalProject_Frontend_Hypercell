@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table';
+import { AdminTableComponent, TableColumn } from '../../../../shared/components/admin-table/admin-table';
 
 type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED';
 
@@ -65,11 +65,12 @@ const TEMPORARY_BOOKINGS: Record<number, MovieBookingData> = {
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    DataTableComponent,
+    AdminTableComponent,
   ],
   templateUrl: './attendees.html',
   styleUrl: './attendees.css',
 })
+
 export class Attendees implements OnInit {
   private route: ActivatedRoute | null = null;
 

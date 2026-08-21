@@ -1,6 +1,5 @@
 import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
@@ -23,58 +22,53 @@ export interface TableColumn<T = any> {
   key: string;
   header: string;
   type?: ColumnType;
-  align?: 'left' | 'center' | 'right';
+  badgeClass?: string | ((row: T) => string);
   format?: (value: any, row: T) => string;
-  badgeClass?: (value: any, row: T) => string;
 }
 
 export interface TableAction<T = any> {
   id: string;
-  label?: string;
+  label: string;
   icon: string;
+  class?: string;
   cssClass?: string;
   disabled?: (row: T) => boolean;
   hidden?: (row: T) => boolean;
 }
 
 @Component({
-  selector: 'app-data-table',
+  selector: 'app-admin-table',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatSelectModule, MatFormFieldModule],
-  templateUrl: './data-table.html',
-  styleUrl: './data-table.css',
+  imports: [
+    CommonModule,
+    MatSelectModule,
+    MatFormFieldModule,
+  ],
+  templateUrl: './admin-table.html',
+  styleUrl: './admin-table.css',
 })
-export class DataTableComponent {
-  // Data & Column Configuration Inputs
+export class AdminTableComponent {
   readonly data = input<any[]>([]);
-  readonly columns = input<TableColumn<any>[]>([]);
-  readonly actions = input<TableAction<any>[]>([]);
+  readonly columns = input<TableColumn[]>([]);
+  readonly actions = input<TableAction[]>([]);
   readonly emptyMessage = input<string>('No records found.');
-  readonly emptyIcon = input<string>('remove_circle_outline');
+  readonly emptyIcon = input<string>('inbox');
   readonly currentUserEmail = input<string>('');
 
-  // Pagination Inputs
+  // Pagination inputs
   readonly totalItems = input<number>(0);
   readonly currentPage = input<number>(1);
   readonly totalPages = input<number>(1);
-  readonly pagesArray = input<number[]>([]);
+  readonly pageSize = input<number>(5);
+  readonly pagesArray = input<number[]>([1]);
   readonly showPagination = input<boolean>(true);
 
-  // Events / Outputs
-  readonly actionClick = output<{ action: string; row: any }>();
+  // Outputs
   readonly edit = output<any>();
   readonly delete = output<any>();
+  readonly actionClick = output<{ action: string; row: any }>();
   readonly roleChange = output<{ row: any; newRole: string }>();
   readonly pageChange = output<number>();
-
-  // Computed displayed columns including optional actions column
-  readonly displayedColumnKeys = computed<string[]>(() => {
-    const keys = this.columns().map((c) => c.key);
-    if (this.actions().length > 0) {
-      keys.push('actions');
-    }
-    return keys;
-  });
 
   onAction(action: TableAction, row: any): void {
     if (action.disabled && action.disabled(row)) return;
@@ -102,10 +96,15 @@ export class DataTableComponent {
   }
 
   getCellValue(row: any, col: TableColumn): any {
-    const val = row ? row[col.key] : undefined;
+    if (!row) return '';
+    const val = row[col.key];
     if (col.format) {
       return col.format(val, row);
     }
-    return val;
+    return val ?? '';
+  }
+
+  getEndItemIndex(): number {
+    return Math.min(this.currentPage() * this.pageSize(), this.totalItems());
   }
 }
