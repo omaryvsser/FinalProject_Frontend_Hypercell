@@ -90,4 +90,40 @@ describe('BookingPage', () => {
       quantity: 1,
     });
   });
+
+  it('should prevent incrementing beyond 8 tickets even if more seats are available', () => {
+    // Available seats is 50 in mock, but max allowed is 8
+    for (let i = 0; i < 15; i++) {
+      component.incrementQuantity();
+    }
+    expect(component.quantity()).toBe(8);
+  });
+
+  it('should allow booking exactly 8 tickets', () => {
+    component.customerModel.update((m) => ({ ...m, phone: '01012345678' }));
+    for (let i = 0; i < 7; i++) {
+      component.incrementQuantity();
+    }
+    expect(component.quantity()).toBe(8);
+    expect(component.isFormValid()).toBe(true);
+
+    component.confirmBooking();
+    expect(bookingServiceMock.createBooking).toHaveBeenCalledWith({
+      eventId: 1,
+      userId: 99,
+      seatCategoryId: 10,
+      quantity: 8,
+    });
+  });
+
+  it('should invalidate form and reject submit if quantity exceeds 8', () => {
+    component.customerModel.update((m) => ({ ...m, phone: '01012345678' }));
+    // Force quantity to 9 (e.g. if manipulated)
+    component.quantity.set(9);
+    expect(component.isFormValid()).toBe(false);
+
+    component.onSubmitBooking();
+    expect(bookingServiceMock.createBooking).not.toHaveBeenCalled();
+    expect(component.bookingError()).toContain('Maximum 8 tickets');
+  });
 });

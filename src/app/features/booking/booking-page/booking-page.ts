@@ -15,6 +15,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+export const MAX_TICKETS_PER_BOOKING = 8;
+
 const DEFAULT_CATEGORIES: SeatCategoryResponse[] = [
   { id: 1, categoryName: 'STANDARD', price: 120, availableSeats: 50 },
   { id: 2, categoryName: 'VIP', price: 200, availableSeats: 25 },
@@ -91,7 +93,8 @@ export class BookingPage implements OnInit {
     return (
       this.selectedCategory() !== null &&
       this.customerForm().valid() &&
-      this.quantity() > 0
+      this.quantity() >= 1 &&
+      this.quantity() <= MAX_TICKETS_PER_BOOKING
     );
   });
 
@@ -148,14 +151,16 @@ export class BookingPage implements OnInit {
 
   selectCategory(category: SeatCategoryResponse): void {
     this.selectedCategory.set(category);
-    if (this.quantity() > category.availableSeats) {
-      this.quantity.set(Math.max(1, category.availableSeats));
+    const maxAllowed = Math.min(MAX_TICKETS_PER_BOOKING, category.availableSeats);
+    if (this.quantity() > maxAllowed) {
+      this.quantity.set(Math.max(1, maxAllowed));
     }
   }
 
   incrementQuantity(): void {
-    const maxAvailable = this.selectedCategory()?.availableSeats ?? 10;
-    if (this.quantity() < maxAvailable) {
+    const maxAvailable = this.selectedCategory()?.availableSeats ?? MAX_TICKETS_PER_BOOKING;
+    const maxAllowed = Math.min(MAX_TICKETS_PER_BOOKING, maxAvailable);
+    if (this.quantity() < maxAllowed) {
       this.quantity.update((count) => count + 1);
     }
   }
@@ -174,6 +179,16 @@ export class BookingPage implements OnInit {
     if (this.isSubmitting()) return;
 
     this.customerForm().markAsTouched();
+
+    if (this.quantity() > MAX_TICKETS_PER_BOOKING) {
+      this.bookingError.set(`Maximum ${MAX_TICKETS_PER_BOOKING} tickets allowed per single booking.`);
+      return;
+    }
+
+    if (this.quantity() < 1) {
+      this.bookingError.set('Please select at least 1 ticket.');
+      return;
+    }
 
     if (!this.isFormValid()) {
       return;
@@ -229,7 +244,10 @@ export class BookingPage implements OnInit {
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        const msg = err?.error?.message || (typeof err?.error === 'string' ? err.error : 'Booking failed. Please try again.');
+        const msg =
+          err?.error?.errors?.quantity ||
+          err?.error?.message ||
+          (typeof err?.error === 'string' ? err.error : 'Booking failed. Please try again.');
         this.bookingError.set(msg);
       }
     });

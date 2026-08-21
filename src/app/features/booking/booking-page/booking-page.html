@@ -49,7 +49,7 @@
         <div class="counter-label-group">
           <span class="counter-label">Quantity:</span>
           @if (selectedCategory()) {
-            <span class="counter-sublabel">(Max {{ selectedCategory()?.availableSeats }} seats)</span>
+            <span class="counter-sublabel">(Max 8 tickets per booking &bull; {{ selectedCategory()?.availableSeats }} available)</span>
           }
         </div>
         <div class="counter-actions">
@@ -68,7 +68,7 @@
             type="button"
             class="counter-btn"
             (click)="incrementQuantity()"
-            [disabled]="!selectedCategory() || quantity() >= (selectedCategory()?.availableSeats || 10) || isSubmitting()"
+            [disabled]="!selectedCategory() || quantity() >= 8 || quantity() >= (selectedCategory()?.availableSeats || 8) || isSubmitting()"
           >
             <mat-icon>add</mat-icon>
           </button>
