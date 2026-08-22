@@ -113,4 +113,32 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .drawer-panel.wide-panel {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 540px) {
+  .drawer-panel,
+  .drawer-panel.wide-panel {
+    max-width: 100% !important;
+    width: 100% !important;
+    border-left: none;
+  }
+
+  .drawer-header {
+    padding: 1.1rem 1.25rem;
+  }
+
+  .drawer-title {
+    font-size: 1.15rem;
+  }
+
+  .drawer-body {
+    padding: 1.25rem 1rem;
+  }
 }

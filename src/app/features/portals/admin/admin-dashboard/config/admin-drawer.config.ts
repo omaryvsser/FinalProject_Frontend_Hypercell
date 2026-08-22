@@ -59,7 +59,9 @@ export const ADMIN_DRAWER_CONFIG: Partial<Record<TabType, AdminDrawerItemConfig>
       form: ctx.movieForm,
       model: ctx.movieModel,
       venues: ctx.venues(),
+      seatCategories: ctx.seatCategories,
       isEdit: !!ctx.selectedItem(),
     }),
   },
 };
+

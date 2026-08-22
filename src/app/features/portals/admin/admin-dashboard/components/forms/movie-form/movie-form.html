@@ -163,15 +163,21 @@
         <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
           <mat-label>Cinema / Venue Location *</mat-label>
           <mat-select id="movie-venue" [formField]="form().venueId">
+            <mat-select-trigger>
+              @if (getSelectedVenueName()) {
+                <span class="venue-selected-text">{{ getSelectedVenueName() }}</span>
+              }
+            </mat-select-trigger>
             @for (v of venues(); track v.id) {
               <mat-option [value]="+v.id">
                 <span class="venue-option">
                   <span class="material-symbols-outlined venue-icon">domain</span>
-                  {{ v.name }}
+                  <span>{{ v.name }}</span>
                 </span>
               </mat-option>
             }
           </mat-select>
+
           @if (form().venueId().touched() && form().venueId().invalid()) {
             <mat-error>{{ form().venueId().errors()[0]?.message || 'Cinema is required' }}</mat-error>
           }
@@ -239,4 +245,94 @@
       </div>
     </div>
   </div>
+
+  <!-- Section 3: Pricing & Seat Tiers -->
+  @if (seatCategories()) {
+    <div class="form-section">
+      <div class="section-header tier-header">
+        <div class="section-icon purple">
+          <span class="material-symbols-outlined">confirmation_number</span>
+        </div>
+        <div>
+          <h4 class="section-title">Seat Categories & Pricing</h4>
+          <p class="section-subtitle">Configure price per ticket and seat allocation for each cinema tier</p>
+        </div>
+      </div>
+
+      <div class="seat-categories-container">
+        @for (cat of seatCategories()!(); track $index; let i = $index) {
+          <div
+            class="seat-tier-card"
+            [class.tier-standard]="cat.name === 'STANDARD'"
+            [class.tier-vip]="cat.name === 'VIP'"
+            [class.tier-imax]="cat.name === 'IMAX'"
+          >
+            <div class="tier-card-header">
+              <div class="tier-identity">
+                <span
+                  class="tier-pill-badge"
+                  [class.badge-standard]="cat.name === 'STANDARD'"
+                  [class.badge-vip]="cat.name === 'VIP'"
+                  [class.badge-imax]="cat.name === 'IMAX'"
+                >
+                  <span class="material-symbols-outlined tier-icon">
+                    {{ cat.name === 'VIP' ? 'stars' : (cat.name === 'IMAX' ? 'smart_display' : 'event_seat') }}
+                  </span>
+                  {{ cat.name }} TIER
+                </span>
+                <span class="tier-desc">
+                  {{ cat.name === 'VIP' ? 'Premium Recliners' : (cat.name === 'IMAX' ? 'Immersive Giant Screen' : 'Standard Cinema Hall') }}
+                </span>
+              </div>
+              
+              <div class="tier-category-select-wrapper">
+                <mat-form-field appearance="outline" floatLabel="always" class="tier-select-field">
+                  <mat-label>Category Tier</mat-label>
+                  <mat-select
+                    [value]="cat.name"
+                    (selectionChange)="cat.name = $event.value"
+                  >
+                    @for (opt of categoryOptions; track opt) {
+                      <mat-option [value]="opt">{{ opt }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="tier-inputs-row">
+              <div class="tier-input-col">
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Price (EGP) *</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 100"
+                    [value]="cat.price"
+                    (input)="cat.price = +$any($event.target).value"
+                  />
+                </mat-form-field>
+              </div>
+
+              <div class="tier-input-col">
+                <mat-form-field appearance="outline" floatLabel="always" class="drawer-field">
+                  <mat-label>Total Seats *</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 50"
+                    [value]="cat.totalSeats"
+                    (input)="cat.totalSeats = +$any($event.target).value"
+                  />
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
 </div>
+

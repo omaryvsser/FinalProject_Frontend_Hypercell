@@ -251,99 +251,129 @@
   background-color: #ef4444;
 }
 
-/* Seat Categories Styling */
-.btn-add-category {
-  background-color: var(--badge-bg);
-  border: 1px solid var(--badge-border);
-  color: var(--primary-accent);
-  padding: 0.4rem 0.85rem;
-  border-radius: 8px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.btn-add-category:hover {
-  background-color: var(--primary-accent);
-  color: var(--primary-btn-text);
-}
-
-.btn-add-category .icon {
-  font-size: 1rem;
-}
-
+/* Seat Categories & Tiers Styling */
 .seat-categories-container {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-.seat-category-row {
+.seat-tier-card {
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-medium);
-  border-radius: 10px;
-  padding: 0.85rem;
+  border-radius: 14px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
 }
 
-.seat-cat-header {
+.seat-tier-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.seat-tier-card.tier-standard {
+  border-left: 4px solid var(--primary-accent, #38bdf8);
+}
+
+.seat-tier-card.tier-vip {
+  border-left: 4px solid #f59e0b;
+}
+
+.seat-tier-card.tier-imax {
+  border-left: 4px solid #a855f7;
+}
+
+.tier-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
 }
 
-.seat-cat-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.btn-remove-category {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 2px;
-  border-radius: 4px;
+.tier-identity {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tier-pill-badge {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  transition: color 0.2s ease;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+  width: fit-content;
 }
 
-.btn-remove-category:hover {
-  color: #ef4444;
+.tier-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
 }
 
-.btn-remove-category .material-symbols-outlined {
-  font-size: 1.1rem;
+.tier-pill-badge.badge-standard {
+  background: var(--badge-bg, rgba(56, 189, 248, 0.12));
+  border: 1px solid var(--badge-border, rgba(56, 189, 248, 0.35));
+  color: var(--primary-accent, #38bdf8);
 }
 
-.seat-cat-fields {
-  display: flex;
-  gap: 0.5rem;
+.tier-pill-badge.badge-vip {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #d97706;
+}
+
+[data-theme='dark'] .tier-pill-badge.badge-vip {
+  color: #fbbf24;
+}
+
+.tier-pill-badge.badge-imax {
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #9333ea;
+}
+
+[data-theme='dark'] .tier-pill-badge.badge-imax {
+  color: #c084fc;
+}
+
+.tier-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.tier-category-select-wrapper {
+  width: 140px;
+}
+
+.tier-select-field {
   width: 100%;
 }
 
-.cat-col-type {
-  flex: 1.2;
+.tier-inputs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
 }
 
-.cat-col-price {
-  flex: 1;
+.tier-input-col {
+  min-width: 0;
+  width: 100%;
 }
 
-.cat-col-seats {
-  flex: 1;
+.venue-selected-text {
+  color: var(--input-text-color);
+  font-weight: 500;
 }
 
 @media (max-width: 600px) {
@@ -351,8 +381,17 @@
     flex-direction: column;
     gap: 0.5rem;
   }
-  .seat-cat-fields {
+  .tier-card-header {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .tier-category-select-wrapper {
+    width: 100%;
+  }
+  .tier-inputs-row {
+    grid-template-columns: 1fr;
     gap: 0.5rem;
   }
 }
+

@@ -1,157 +1,315 @@
-<div class="booking-container">
-  <mat-card class="booking-card" appearance="outlined">
-    <mat-card-header class="booking-card-header">
-      <mat-card-title class="booking-title">Book Tickets</mat-card-title>
-      <mat-card-subtitle class="booking-subtitle">
-        {{ movieTitle() }} &bull; {{ cinemaName() }}
-      </mat-card-subtitle>
-    </mat-card-header>
+<div class="booking-page-root">
+  <!-- Top Navigation & Header Bar -->
+  <header class="booking-header">
+    <div class="header-content">
+      <a [routerLink]="['/movie-details', eventId()]" class="back-link">
+        <mat-icon class="back-icon">arrow_back</mat-icon>
+        <span>Back to Movie</span>
+      </a>
 
-    <mat-card-content class="booking-card-content">
-      @if (bookingError()) {
-        <div class="error-banner">
-          <mat-icon class="error-icon">error</mat-icon>
-          <span>{{ bookingError() }}</span>
+      <div class="movie-header-meta">
+        <h1 class="header-movie-title">{{ movieTitle() }}</h1>
+        <div class="header-badges-row">
+          <span class="meta-pill cinema-pill">
+            <mat-icon class="meta-icon">location_on</mat-icon>
+            {{ cinemaName() }}
+          </span>
+          <span class="meta-pill time-pill">
+            <mat-icon class="meta-icon">schedule</mat-icon>
+            {{ showtime() }}
+          </span>
+          <span class="meta-pill genre-pill">{{ movieCategory() }}</span>
+          @if (runtime()) {
+            <span class="meta-pill runtime-pill">{{ runtime() }}</span>
+          }
         </div>
-      }
+      </div>
+    </div>
+  </header>
 
-      <!-- 1. Seat Category Cards Selection -->
-      <div class="section-container">
-        <label class="section-label">Select Seat Category</label>
-        <div class="categories-grid">
-          @for (cat of seatCategories(); track cat.id) {
-            <div
-              class="category-card"
-              [class.selected]="selectedCategory()?.id === cat.id"
-              (click)="selectCategory(cat)"
-            >
-              <div class="card-header-row">
-                <span class="category-name">{{ cat.categoryName }}</span>
-                <span class="selection-indicator">
-                  <mat-icon class="indicator-icon">
-                    {{ selectedCategory()?.id === cat.id ? 'check_circle' : 'radio_button_unchecked' }}
-                  </mat-icon>
-                </span>
-              </div>
-              <div class="card-body-row">
-                <div class="category-price">{{ cat.price }} EGP</div>
-                <div class="available-badge" [class.low-stock]="cat.availableSeats < 10">
-                  {{ cat.availableSeats }} available
+  <!-- Main Booking Content: 2-Column Responsive Layout -->
+  <main class="booking-main-layout">
+    <!-- Left Column: Cinema Seat Map -->
+    <section class="seat-map-section" aria-label="Cinema Seat Selection">
+      <div class="seat-map-card">
+        <!-- Cinema Screen Area -->
+        <div class="screen-container">
+          <div class="screen-curve">
+            <div class="screen-glow"></div>
+            <div class="screen-bar"></div>
+          </div>
+          <span class="screen-label">CINEMA SCREEN</span>
+        </div>
+
+        <!-- Seat Map Body State Handling -->
+        @if (isLoadingSeats()) {
+          <div class="seat-map-state loading-state">
+            <mat-spinner diameter="48" class="theme-spinner"></mat-spinner>
+            <p>Loading cinema seating layout...</p>
+          </div>
+        } @else if (seatFetchError()) {
+          <div class="seat-map-state error-state">
+            <mat-icon class="state-icon error-icon">error_outline</mat-icon>
+            <p>{{ seatFetchError() }}</p>
+            <button mat-stroked-button color="primary" type="button" (click)="loadSeats(eventId())">
+              <mat-icon>refresh</mat-icon>
+              Retry
+            </button>
+          </div>
+        } @else if (seats().length === 0) {
+          <div class="seat-map-state empty-state">
+            <mat-icon class="state-icon">event_seat</mat-icon>
+            <p>No seats configured for this venue.</p>
+          </div>
+        } @else {
+          <!-- Interactive Cinema Seat Grid -->
+          <div class="cinema-hall-scroll-wrapper">
+            <div class="cinema-hall-grid" role="region" aria-label="Interactive Seat Grid">
+              @for (rowName of rows(); track rowName) {
+                <div class="seat-row" [attr.aria-label]="'Row ' + rowName">
+                  <!-- Left Row Label -->
+                  <div class="row-letter left" aria-hidden="true">{{ rowName }}</div>
+
+                  <!-- Row Seats -->
+                  <div class="seats-group">
+                    @for (seat of seatsByRow()[rowName]; track seat.id) {
+                      <button
+                        type="button"
+                        class="seat-btn"
+                        [id]="'seat-' + seat.seatCode"
+                        [class.seat-vip]="seat.category === 'VIP'"
+                        [class.seat-imax]="seat.category === 'IMAX'"
+                        [class.seat-standard]="seat.category === 'STANDARD' || !seat.category"
+                        [class.seat-selected]="isSeatSelected(seat.id)"
+                        [class.seat-booked]="seat.status === 'BOOKED'"
+                        [disabled]="seat.status === 'BOOKED' || isSubmitting()"
+                        [attr.aria-label]="'Seat ' + seat.seatCode + ', ' + seat.category + ' category, ' + seat.price + ' EGP, ' + (isSeatSelected(seat.id) ? 'selected' : (seat.status === 'BOOKED' ? 'booked' : 'available'))"
+                        [matTooltip]="seat.seatCode + ' • ' + seat.category + ' (' + seat.price + ' EGP)' + (seat.status === 'BOOKED' ? ' [BOOKED]' : '')"
+                        matTooltipPosition="above"
+                        (click)="toggleSeat(seat)"
+                      >
+                        <span class="seat-icon-container">
+                          @if (isSeatSelected(seat.id)) {
+                            <mat-icon class="seat-state-icon">check</mat-icon>
+                          } @else if (seat.status === 'BOOKED') {
+                            <mat-icon class="seat-state-icon">block</mat-icon>
+                          } @else {
+                            <span class="seat-label">{{ seat.seatCode }}</span>
+                          }
+                        </span>
+                      </button>
+                    }
+                  </div>
+
+                  <!-- Right Row Label -->
+                  <div class="row-letter right" aria-hidden="true">{{ rowName }}</div>
                 </div>
-              </div>
+              }
+            </div>
+          </div>
+
+          <!-- Seat Map Legend -->
+          <div class="seat-legend-bar">
+            <div class="legend-item">
+              <span class="legend-badge seat-standard-sample"></span>
+              <span class="legend-text">Standard</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-badge seat-imax-sample"></span>
+              <span class="legend-text">IMAX</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-badge seat-vip-sample"></span>
+              <span class="legend-text">VIP</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-badge seat-selected-sample"></span>
+              <span class="legend-text">Selected</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-badge seat-booked-sample"></span>
+              <span class="legend-text">Booked / Taken</span>
+            </div>
+          </div>
+
+          <!-- Seating Availability Live Stats -->
+          <div class="seating-stats-bar">
+            <span class="stat-item">
+              <strong>{{ availableCount() }}</strong> Seats Available
+            </span>
+            <span class="stat-divider">&bull;</span>
+            <span class="stat-item">
+              <strong>{{ bookedCount() }}</strong> Seats Booked
+            </span>
+            <span class="stat-divider">&bull;</span>
+            <span class="stat-item">
+              <strong>{{ selectedSeats().length }}</strong> Selected (Max {{ 8 }})
+            </span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Right Column: Booking Summary & Checkout Sidebar -->
+    <aside class="booking-sidebar" aria-label="Booking Summary">
+      <mat-card class="sidebar-card" appearance="outlined">
+        <mat-card-header class="sidebar-header">
+          <mat-card-title class="sidebar-title">Booking Summary</mat-card-title>
+          <mat-card-subtitle class="sidebar-subtitle">Review seats & confirm reservation</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="sidebar-content">
+          <!-- Alert / Warning Messages -->
+          @if (bookingError()) {
+            <div class="alert-box error-alert" role="alert">
+              <mat-icon class="alert-icon">error</mat-icon>
+              <div class="alert-msg">{{ bookingError() }}</div>
             </div>
           }
-        </div>
-      </div>
 
-      <!-- 2. Ticket Quantity Counter -->
-      <div class="ticket-counter-box">
-        <div class="counter-label-group">
-          <span class="counter-label">Quantity:</span>
-          @if (selectedCategory()) {
-            <span class="counter-sublabel">(Max 8 tickets per booking &bull; {{ selectedCategory()?.availableSeats }} available)</span>
+          @if (seatLimitWarning()) {
+            <div class="alert-box warning-alert" role="alert">
+              <mat-icon class="alert-icon">warning</mat-icon>
+              <div class="alert-msg">{{ seatLimitWarning() }}</div>
+            </div>
           }
-        </div>
-        <div class="counter-actions">
-          <button
-            mat-icon-button
-            type="button"
-            class="counter-btn"
-            (click)="decrementQuantity()"
-            [disabled]="quantity() <= 1 || isSubmitting()"
-          >
-            <mat-icon>remove</mat-icon>
-          </button>
-          <span class="counter-number">{{ quantity() }}</span>
-          <button
-            mat-icon-button
-            type="button"
-            class="counter-btn"
-            (click)="incrementQuantity()"
-            [disabled]="!selectedCategory() || quantity() >= 8 || quantity() >= (selectedCategory()?.availableSeats || 8) || isSubmitting()"
-          >
-            <mat-icon>add</mat-icon>
-          </button>
-        </div>
-      </div>
 
-      <!-- 3. Customer Input Form -->
-      <form class="booking-form" [formRoot]="customerForm" (submit)="$event.preventDefault(); onSubmitBooking()" novalidate>
-        <mat-form-field appearance="outline" floatLabel="always" class="full-width">
-          <mat-label>Full Name</mat-label>
-          <input
-            matInput
-            type="text"
-            id="booking-name"
-            [formField]="customerForm.name"
-            placeholder="Your Full Name"
-          >
-          <mat-icon matPrefix class="input-icon">person</mat-icon>
-          @if (customerForm.name().touched() && customerForm.name().invalid()) {
-            <mat-error>{{ customerForm.name().errors()[0]?.message || 'Name is required' }}</mat-error>
-          }
-        </mat-form-field>
+          <!-- Selected Seats Section -->
+          <div class="selected-seats-panel">
+            <div class="panel-header-row">
+              <span class="panel-title">Selected Seats ({{ quantity() }}/8)</span>
+              @if (selectedSeats().length > 0) {
+                <button type="button" class="btn-clear-selection" (click)="clearSelection()">
+                  Clear all
+                </button>
+              }
+            </div>
 
-        <mat-form-field appearance="outline" floatLabel="always" class="full-width">
-          <mat-label>Email Address</mat-label>
-          <input
-            matInput
-            type="email"
-            id="booking-email"
-            [formField]="customerForm.email"
-            placeholder="name@example.com"
-          >
-          <mat-icon matPrefix class="input-icon">email</mat-icon>
-          @if (customerForm.email().touched() && customerForm.email().invalid()) {
-            <mat-error>{{ customerForm.email().errors()[0]?.message || 'Please enter a valid email' }}</mat-error>
-          }
-        </mat-form-field>
+            @if (selectedSeats().length === 0) {
+              <div class="empty-seats-notice">
+                <mat-icon class="empty-icon">touch_app</mat-icon>
+                <span>Click on available seats on the cinema map to select your tickets.</span>
+              </div>
+            } @else {
+              <!-- Selected Seat Chips -->
+              <div class="chips-container">
+                @for (seat of selectedSeats(); track seat.id) {
+                  <div class="seat-chip" [class.chip-vip]="seat.category === 'VIP'" [class.chip-imax]="seat.category === 'IMAX'">
+                    <div class="chip-main">
+                      <span class="chip-code">{{ seat.seatCode }}</span>
+                      <span class="chip-category">{{ seat.category }}</span>
+                    </div>
+                    <span class="chip-price">{{ seat.price }} EGP</span>
+                    <button
+                      type="button"
+                      class="chip-remove-btn"
+                      [attr.aria-label]="'Remove seat ' + seat.seatCode"
+                      (click)="removeSeat(seat)"
+                    >
+                      <mat-icon class="chip-remove-icon">close</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
 
-        <mat-form-field appearance="outline" floatLabel="always" class="full-width">
-          <mat-label>Phone Number</mat-label>
-          <input
-            matInput
-            type="tel"
-            id="booking-phone"
-            [formField]="customerForm.phone"
-            placeholder="01xxxxxxxxx"
-          >
-          <mat-icon matPrefix class="input-icon">phone</mat-icon>
-          @if (customerForm.phone().touched() && customerForm.phone().invalid()) {
-            <mat-error>{{ customerForm.phone().errors()[0]?.message || 'Enter a valid phone number' }}</mat-error>
-          }
-        </mat-form-field>
-
-        <!-- 4. Summary Banner -->
-        <div class="summary-banner">
-          <div class="summary-breakdown">
-            <span class="info-label">Category: {{ selectedCategory()?.categoryName || 'None' }}</span>
-            <span class="info-label-sub">{{ quantity() }} ticket(s) &times; {{ selectedCategory()?.price || 0 }} EGP</span>
+              <!-- Price Breakdown List -->
+              <div class="price-breakdown">
+                <div class="breakdown-row">
+                  <span class="breakdown-label">Tickets Count:</span>
+                  <span class="breakdown-value">{{ quantity() }} seat(s)</span>
+                </div>
+                <div class="breakdown-row total-row">
+                  <span class="breakdown-label">Total Amount:</span>
+                  <span class="breakdown-value price-highlight">{{ totalPrice() }} EGP</span>
+                </div>
+              </div>
+            }
           </div>
-          <div class="price-info highlight">
-            <span class="info-label">Total Price</span>
-            <span class="info-value price-total">{{ totalPrice() }} EGP</span>
+
+          <!-- Customer Contact Form -->
+          <div class="customer-info-section">
+            <h2 class="customer-info-title">Attendee Details</h2>
+            <form
+              class="customer-form-layout"
+              [formRoot]="customerForm"
+              (submit)="$event.preventDefault(); onSubmitBooking()"
+              novalidate
+            >
+              <!-- Full Name Field -->
+              <mat-form-field appearance="outline" floatLabel="always" class="form-input-full">
+                <mat-label>Full Name</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  id="booking-name"
+                  [formField]="customerForm.name"
+                  placeholder="Your Full Name"
+                  autocomplete="name"
+                />
+                <mat-icon matPrefix class="input-icon">person</mat-icon>
+                @if (customerForm.name().touched() && customerForm.name().invalid()) {
+                  <mat-error>{{ customerForm.name().errors()[0]?.message || 'Name is required' }}</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Email Address Field -->
+              <mat-form-field appearance="outline" floatLabel="always" class="form-input-full">
+                <mat-label>Email Address</mat-label>
+                <input
+                  matInput
+                  type="email"
+                  id="booking-email"
+                  [formField]="customerForm.email"
+                  placeholder="name@example.com"
+                  autocomplete="email"
+                />
+                <mat-icon matPrefix class="input-icon">email</mat-icon>
+                @if (customerForm.email().touched() && customerForm.email().invalid()) {
+                  <mat-error>{{ customerForm.email().errors()[0]?.message || 'Please enter a valid email' }}</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Phone Number Field -->
+              <mat-form-field appearance="outline" floatLabel="always" class="form-input-full">
+                <mat-label>Phone Number</mat-label>
+                <input
+                  matInput
+                  type="tel"
+                  id="booking-phone"
+                  [formField]="customerForm.phone"
+                  placeholder="01xxxxxxxxx"
+                  autocomplete="tel"
+                />
+                <mat-icon matPrefix class="input-icon">phone</mat-icon>
+                @if (customerForm.phone().touched() && customerForm.phone().invalid()) {
+                  <mat-error>{{ customerForm.phone().errors()[0]?.message || 'Enter a valid phone number' }}</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Booking Submit CTA Button -->
+              <button
+                mat-raised-button
+                id="btn-confirm-booking"
+                class="confirm-booking-btn"
+                type="submit"
+                [disabled]="selectedSeats().length === 0 || !isFormValid() || isSubmitting()"
+              >
+                @if (isSubmitting()) {
+                  <span class="btn-content-wrap">
+                    <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+                    <span>Reserving Seats...</span>
+                  </span>
+                } @else {
+                  <span class="btn-content-wrap">
+                    <mat-icon class="btn-icon">confirmation_number</mat-icon>
+                    <span>Confirm Booking ({{ totalPrice() }} EGP)</span>
+                  </span>
+                }
+              </button>
+            </form>
           </div>
-        </div>
-
-        <!-- Submit Button -->
-        <button
-          mat-raised-button
-          class="submit-booking-btn"
-          type="submit"
-          (click)="confirmBooking()"
-          [disabled]="!selectedCategory() || !isFormValid() || isSubmitting()"
-        >
-          @if (isSubmitting()) {
-            <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
-            <span>Processing...</span>
-          } @else {
-            <span>Confirm Booking ({{ totalPrice() }} EGP)</span>
-          }
-        </button>
-      </form>
-
-
-    </mat-card-content>
-  </mat-card>
+        </mat-card-content>
+      </mat-card>
+    </aside>
+  </main>
 </div>

@@ -742,6 +742,7 @@ input:-webkit-autofill:active {
 
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -755,4 +756,47 @@ input:-webkit-autofill:active {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary-accent);
+}
+
+/* ============================================================= */
+/* 8. MATERIAL OVERLAYS, DIALOGS & TOOLTIPS THEME                */
+/* ============================================================= */
+
+.cdk-overlay-backdrop {
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+
+.cdk-overlay-dark-backdrop {
+  background: rgba(8, 9, 13, 0.75) !important;
+}
+
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: var(--bg-surface-elevated) !important;
+  color: var(--text-main) !important;
+  border-radius: 20px !important;
+  border: 1px solid var(--border-medium) !important;
+  box-shadow: var(--shadow-lg) !important;
+  overflow: hidden !important;
+}
+
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: var(--bg-surface-elevated) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-medium) !important;
+  font-family: var(--font-family) !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-md) !important;
+  padding: 6px 10px !important;
+}
+
+/* Material buttons global font fix */
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-stroked-button {
+  font-family: var(--font-family) !important;
+  letter-spacing: 0.2px !important;
 }

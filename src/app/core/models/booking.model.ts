@@ -7,6 +7,7 @@ export interface BookingCreateRequest {
   userId: number;
   seatCategoryId: number;
   quantity: number;
+  seatIds?: number[];
 }
 
 /**
@@ -24,6 +25,7 @@ export interface BookingResponse {
   totalPrice: number;
   status: BookingStatus;
   createdAt: string;   // ISO datetime string
+  seatCodes?: string[];
 }
 
 export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';

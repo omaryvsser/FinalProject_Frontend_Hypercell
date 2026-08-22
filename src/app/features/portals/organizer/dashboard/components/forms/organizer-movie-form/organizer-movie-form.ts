@@ -65,6 +65,12 @@ export class OrganizerMovieFormComponent {
     'Animation',
   ];
 
+  getSelectedVenueName(): string {
+    const currentId = this.form().venueId().value();
+    const venue = this.venues().find((v) => +v.id === +currentId);
+    return venue ? venue.name : '';
+  }
+
   addSeatCategory(): void {
     this.seatCategories().update((cats) => [
       ...cats,
@@ -93,3 +99,4 @@ export class OrganizerMovieFormComponent {
     }
   }
 }
+

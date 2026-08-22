@@ -371,3 +371,28 @@ tr.highlight-row td.actions-column-cell {
   width: 18px;
   height: 18px;
 }
+
+@media (max-width: 640px) {
+  .pagination-bar {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .pagination-info {
+    text-align: center;
+    font-size: 0.8rem;
+  }
+
+  .pagination-controls {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .btn-page {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.8rem;
+  }
+}

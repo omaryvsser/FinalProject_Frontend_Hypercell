@@ -21,7 +21,7 @@ import { PaginatedResponse } from '../../../../core/models/pagination.model';
 import { UserFormModel } from './components/forms/user-form/user-form';
 import { OrganizerFormModel } from './components/forms/organizer-form/organizer-form';
 import { VenueFormModel } from './components/forms/venue-form/venue-form';
-import { MovieFormModel } from './components/forms/movie-form/movie-form';
+import { MovieFormModel, SeatCategoryInput } from './components/forms/movie-form/movie-form';
 
 /**
  * Union type representing the currently active management tab in the Admin Dashboard.
@@ -315,6 +315,13 @@ export class AdminDashboardComponent implements OnInit {
     required(schema.venueId, { message: 'Cinema is required' });
     min(schema.durationMinutes, 1, { message: 'Duration must be at least 1 minute' });
   });
+
+  readonly seatCategories = signal<SeatCategoryInput[]>([
+    { name: 'STANDARD', price: 100, totalSeats: 50 },
+    { name: 'VIP', price: 150, totalSeats: 20 },
+    { name: 'IMAX', price: 200, totalSeats: 20 },
+  ]);
+
 
   /**
    * Component Lifecycle Initialization
@@ -657,6 +664,11 @@ export class AdminDashboardComponent implements OnInit {
       endDate: '',
       venueId: firstVenue,
     });
+    this.seatCategories.set([
+      { name: 'STANDARD', price: 100, totalSeats: 50 },
+      { name: 'VIP', price: 150, totalSeats: 20 },
+      { name: 'IMAX', price: 200, totalSeats: 20 },
+    ]);
   }
 
   /**
@@ -700,6 +712,40 @@ export class AdminDashboardComponent implements OnInit {
           endDate: item.endDate || '',
           venueId: item.venueId ? Number(item.venueId) : (this.venues().length > 0 ? Number(this.venues()[0].id) : 1),
         });
+
+        if (item.id) {
+          this.eventService.getSeatCategories(Number(item.id)).subscribe({
+            next: (cats) => {
+              if (cats && cats.length > 0) {
+                const mappedCategories: SeatCategoryInput[] = cats.map((c) => ({
+                  name: c.name as any,
+                  price: c.price,
+                  totalSeats: c.totalSeats,
+                }));
+                this.seatCategories.set(mappedCategories);
+              } else {
+                this.seatCategories.set([
+                  { name: 'STANDARD', price: 100, totalSeats: 50 },
+                  { name: 'VIP', price: 150, totalSeats: 20 },
+                  { name: 'IMAX', price: 200, totalSeats: 20 },
+                ]);
+              }
+            },
+            error: () => {
+              this.seatCategories.set([
+                { name: 'STANDARD', price: 100, totalSeats: 50 },
+                { name: 'VIP', price: 150, totalSeats: 20 },
+                { name: 'IMAX', price: 200, totalSeats: 20 },
+              ]);
+            },
+          });
+        } else {
+          this.seatCategories.set([
+            { name: 'STANDARD', price: 100, totalSeats: 50 },
+            { name: 'VIP', price: 150, totalSeats: 20 },
+            { name: 'IMAX', price: 200, totalSeats: 20 },
+          ]);
+        }
         break;
     }
   }
@@ -788,6 +834,14 @@ export class AdminDashboardComponent implements OnInit {
         imgUrl = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba';
       }
 
+      const seatCategoriesPayload = this.seatCategories()
+        .filter((cat) => cat.name && cat.price !== null && cat.totalSeats !== null)
+        .map((cat) => ({
+          name: cat.name,
+          price: Number(cat.price),
+          totalSeats: Number(cat.totalSeats),
+        }));
+
       const payload = {
         title: val.title.trim(),
         description: val.description ? val.description.trim() : '',
@@ -799,7 +853,8 @@ export class AdminDashboardComponent implements OnInit {
         director: val.director ? val.director.trim() : undefined,
         durationMinutes: Number(val.durationMinutes) || 120,
         language: val.language ? val.language.trim() : undefined,
-        imageUrl: imgUrl
+        imageUrl: imgUrl,
+        seatCategories: seatCategoriesPayload.length > 0 ? seatCategoriesPayload : undefined,
       };
 
       if (selected && selected.id) {
@@ -836,6 +891,7 @@ export class AdminDashboardComponent implements OnInit {
       this.closeDrawer();
     }
   }
+
 
   /**
    * Directly updates a specific user's role (ADMIN, ORGANIZER, CUSTOMER).

@@ -1,12 +1,12 @@
 .confirm-dialog-container {
   padding: 24px;
-  background: #121216;
-  border-radius: 16px;
-  color: #f4f4f5;
+  background: var(--bg-surface-elevated, #1e293b);
+  border-radius: 18px;
+  color: var(--text-main, #f8fafc);
   min-width: 320px;
   max-width: 440px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.1));
+  box-shadow: var(--shadow-lg, 0 25px 50px -12px rgba(0, 0, 0, 0.6));
 }
 
 .dialog-header {
@@ -46,7 +46,7 @@
   padding: 0 !important;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary, #ffffff);
 }
 
 .dialog-content {
@@ -55,7 +55,7 @@
 }
 
 .dialog-message {
-  color: #a1a1aa;
+  color: var(--text-secondary, #94a3b8);
   font-size: 0.95rem;
   line-height: 1.5;
   margin: 0;
@@ -68,18 +68,18 @@
   gap: 12px;
   padding: 12px 0 0 0 !important;
   margin: 0 !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-medium, rgba(255, 255, 255, 0.08));
 }
 
 .btn-cancel {
-  color: #a1a1aa !important;
+  color: var(--text-secondary, #94a3b8) !important;
   border-radius: 8px !important;
   font-weight: 600 !important;
 }
 
 .btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: #ffffff !important;
+  background: var(--bg-surface, rgba(255, 255, 255, 0.05)) !important;
+  color: var(--text-primary, #ffffff) !important;
 }
 
 .btn-confirm {
@@ -102,3 +102,11 @@
   background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
   color: #ffffff !important;
 }
+
+@media (max-width: 480px) {
+  .confirm-dialog-container {
+    min-width: 280px;
+    padding: 18px 16px;
+  }
+}
+

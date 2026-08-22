@@ -7,6 +7,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { VenueItem } from '../../../admin-dashboard';
 
+export type SeatCategoryName = 'STANDARD' | 'VIP' | 'IMAX';
+
+export interface SeatCategoryInput {
+  name: SeatCategoryName;
+  price: number | null;
+  totalSeats: number | null;
+}
+
 export interface MovieFormModel {
   title: string;
   description: string;
@@ -39,7 +47,10 @@ export class MovieFormComponent {
   readonly form = input.required<any>();
   readonly model = input.required<WritableSignal<MovieFormModel>>();
   readonly venues = input<VenueItem[]>([]);
+  readonly seatCategories = input<WritableSignal<SeatCategoryInput[]>>();
   readonly isEdit = input<boolean>(false);
+
+  readonly categoryOptions: SeatCategoryName[] = ['STANDARD', 'VIP', 'IMAX'];
 
   readonly categories = [
     'Action',
@@ -50,6 +61,12 @@ export class MovieFormComponent {
     'Science Fiction',
     'Animation',
   ];
+
+  getSelectedVenueName(): string {
+    const currentId = this.form().venueId().value();
+    const venue = this.venues().find((v) => +v.id === +currentId);
+    return venue ? venue.name : '';
+  }
 
   onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -62,3 +79,5 @@ export class MovieFormComponent {
     }
   }
 }
+
+

@@ -237,9 +237,147 @@
   background-color: #ef4444;
 }
 
+.venue-selected-text {
+  color: var(--input-text-color);
+  font-weight: 500;
+}
+
+/* Seat Categories & Tiers Styling */
+.seat-categories-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.seat-tier-card {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+}
+
+.seat-tier-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.seat-tier-card.tier-standard {
+  border-left: 4px solid var(--primary-accent, #38bdf8);
+}
+
+.seat-tier-card.tier-vip {
+  border-left: 4px solid #f59e0b;
+}
+
+.seat-tier-card.tier-imax {
+  border-left: 4px solid #a855f7;
+}
+
+.tier-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.tier-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tier-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+  width: fit-content;
+}
+
+.tier-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.tier-pill-badge.badge-standard {
+  background: var(--badge-bg, rgba(56, 189, 248, 0.12));
+  border: 1px solid var(--badge-border, rgba(56, 189, 248, 0.35));
+  color: var(--primary-accent, #38bdf8);
+}
+
+.tier-pill-badge.badge-vip {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #d97706;
+}
+
+[data-theme='dark'] .tier-pill-badge.badge-vip {
+  color: #fbbf24;
+}
+
+.tier-pill-badge.badge-imax {
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #9333ea;
+}
+
+[data-theme='dark'] .tier-pill-badge.badge-imax {
+  color: #c084fc;
+}
+
+.tier-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.tier-category-select-wrapper {
+  width: 140px;
+}
+
+.tier-select-field {
+  width: 100%;
+}
+
+.tier-inputs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.tier-input-col {
+  min-width: 0;
+  width: 100%;
+}
+
 @media (max-width: 600px) {
   .form-row {
     flex-direction: column;
     gap: 0.5rem;
   }
+  .tier-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .tier-category-select-wrapper {
+    width: 100%;
+  }
+  .tier-inputs-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
 }
+

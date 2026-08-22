@@ -81,11 +81,11 @@
   width: 100%;
 }
 
-/* Specific CSS target to ensure input text is pure white */
+/* Specific CSS target to ensure input text uses theme token */
 ::ng-deep .auth-card .mat-mdc-input-element,
 .auth-card input.mat-mdc-input-element {
-  color: #ffffff !important;
-  caret-color: #38bdf8 !important;
+  color: var(--input-text-color) !important;
+  caret-color: var(--primary-accent) !important;
 }
 
 .input-icon {
@@ -97,19 +97,19 @@
 .auth-submit-btn {
   height: 48px !important;
   border-radius: 12px !important;
-  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%) !important;
-  color: #08090d !important;
+  background: var(--primary-gradient, linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)) !important;
+  color: var(--primary-btn-text, #08090d) !important;
   font-size: 1rem !important;
   font-weight: 700 !important;
   letter-spacing: 0.3px;
-  box-shadow: 0 8px 24px var(--primary-glow) !important;
+  box-shadow: var(--shadow-sm), 0 8px 24px var(--primary-glow) !important;
   transition: all 0.25s ease !important;
   margin-top: 8px;
 }
 
 .auth-submit-btn:hover:not([disabled]) {
-  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%) !important;
-  box-shadow: 0 12px 30px rgba(56, 189, 248, 0.5) !important;
+  background: var(--primary-gradient-hover, linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%)) !important;
+  box-shadow: 0 12px 30px var(--primary-glow) !important;
   transform: translateY(-1px);
 }
 
@@ -121,7 +121,7 @@
   text-align: center;
   margin-top: 16px;
   font-size: 0.92rem;
-  color: var(--text-muted);
+  color: var(--text-secondary, var(--text-muted));
 }
 
 .auth-link {
@@ -133,10 +133,11 @@
 }
 
 .auth-link:hover {
-  color: #7dd3fc;
+  color: var(--primary-hover, #7dd3fc);
   text-decoration: underline;
   text-shadow: 0 0 10px var(--primary-glow);
 }
+
 
 .success-alert {
   background: rgba(56, 189, 248, 0.12);
